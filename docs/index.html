@@ -170,12 +170,6 @@
       var gasUrl = (params.get('gas') || configuredUrl).trim();
       var shell = document.getElementById('appShell');
 
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function () {
-          navigator.serviceWorker.register('./sw.js').catch(function () {});
-        });
-      }
-
       if (!gasUrl) {
         shell.innerHTML =
           '<section class="setup">' +
@@ -190,6 +184,16 @@
 
       var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
       var forceOpen = params.get('open') === '1';
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations()
+          .then(function (registrations) {
+            return Promise.all(registrations.map(function (registration) {
+              return registration.unregister();
+            }));
+          })
+          .catch(function () {});
+      }
 
       if (forceOpen || isStandalone) {
         window.location.replace(gasUrl);
