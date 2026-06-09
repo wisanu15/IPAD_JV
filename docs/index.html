@@ -132,6 +132,11 @@
       font-weight: 800;
       text-decoration: none;
     }
+    .launch-button.secondary {
+      margin-top: 10px;
+      background: #e8eefc;
+      color: #27468f;
+    }
     .launch-note {
       margin-top: 14px;
       font-size: 13px;
@@ -182,7 +187,6 @@
         return;
       }
 
-      var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
       var forceOpen = params.get('open') === '1';
 
       if ('serviceWorker' in navigator) {
@@ -195,18 +199,25 @@
           .catch(function () {});
       }
 
-      if (forceOpen || isStandalone) {
+      if (forceOpen) {
         window.location.replace(gasUrl);
         return;
       }
+
+      var chromeIntentUrl = 'intent://' +
+        gasUrl.replace(/^https?:\/\//, '') +
+        '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' +
+        encodeURIComponent(gasUrl) +
+        ';end';
 
       shell.innerHTML =
         '<section class="launch-card">' +
           '<img class="launch-icon" src="./icons/icon-192.png" alt="">' +
           '<h1>iPad JV</h1>' +
-          '<p>เปิดระบบบริหารจัดการไอแพดแบบเต็มหน้า เพื่อให้ทำงานบน Android ได้เสถียรกว่า iframe</p>' +
-          '<a class="launch-button" href="' + gasUrl.replace(/"/g, '&quot;') + '">เปิดระบบ</a>' +
-          '<div class="launch-note">ติดตั้งแอปจากเมนู Chrome แล้วเปิดจากไอคอนหน้า Home ได้เลย</div>' +
+          '<p>เปิดระบบบริหารจัดการไอแพดด้วย Chrome ปกติ เพื่อเลี่ยงปัญหา Google Drive error ของ Apps Script ใน Custom Tab</p>' +
+          '<a class="launch-button" href="' + chromeIntentUrl.replace(/"/g, '&quot;') + '">เปิดด้วย Chrome</a>' +
+          '<a class="launch-button secondary" target="_blank" rel="noopener" href="' + gasUrl.replace(/"/g, '&quot;') + '">เปิดลิงก์สำรอง</a>' +
+          '<div class="launch-note">ถ้ายังขึ้น Google Drive ให้คัดลอก URL แล้ววางในแถบที่อยู่ของ Chrome โดยตรง</div>' +
         '</section>';
     }());
   </script>
