@@ -22,11 +22,15 @@
       overflow: hidden;
     }
     .app-shell {
+      display: grid;
+      place-items: center;
       width: 100vw;
       height: 100dvh;
       min-height: 100vh;
-      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-      background: #f0f4ff;
+      padding: calc(24px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
+      background:
+        radial-gradient(circle at 50% 0%, rgba(79, 126, 247, .16), transparent 34%),
+        #f0f4ff;
     }
     iframe {
       display: block;
@@ -88,6 +92,51 @@
       background: #fff;
       box-shadow: 0 12px 32px rgba(15, 23, 42, .12);
     }
+    .launch-card {
+      width: min(460px, 100%);
+      padding: 26px 22px;
+      border: 1px solid #dbe4ff;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, .12);
+      text-align: center;
+    }
+    .launch-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 16px;
+      border-radius: 16px;
+      box-shadow: 0 10px 22px rgba(79, 126, 247, .24);
+    }
+    .launch-card h1 {
+      margin: 0 0 8px;
+      font-size: 23px;
+      line-height: 1.25;
+    }
+    .launch-card p {
+      margin: 0 auto 18px;
+      color: #475569;
+      line-height: 1.55;
+    }
+    .launch-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 48px;
+      padding: 0 18px;
+      border-radius: 8px;
+      background: #4F7EF7;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .launch-note {
+      margin-top: 14px;
+      font-size: 13px;
+      color: #64748b;
+    }
     .setup-panel h1 {
       margin: 0 0 8px;
       font-size: 22px;
@@ -140,27 +189,21 @@
       }
 
       var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-      var forceEmbed = params.get('embed') === '1';
       var forceOpen = params.get('open') === '1';
 
-      if (forceOpen || (isStandalone && !forceEmbed)) {
+      if (forceOpen || isStandalone) {
         window.location.replace(gasUrl);
         return;
       }
 
-      var iframe = document.createElement('iframe');
-      iframe.title = 'ระบบบริหารจัดการไอแพด';
-      iframe.src = gasUrl;
-      iframe.referrerPolicy = 'no-referrer-when-downgrade';
-      iframe.allow = 'clipboard-read; clipboard-write; fullscreen';
-      shell.appendChild(iframe);
-
-      var fallback = document.createElement('div');
-      fallback.className = 'fallback-bar';
-      fallback.innerHTML =
-        '<span>ถ้าหน้านี้ขึ้น Google Drive error ให้เปิดระบบแบบเต็มหน้า</span>' +
-        '<a href="' + gasUrl.replace(/"/g, '&quot;') + '">เปิดระบบ</a>';
-      document.body.appendChild(fallback);
+      shell.innerHTML =
+        '<section class="launch-card">' +
+          '<img class="launch-icon" src="./icons/icon-192.png" alt="">' +
+          '<h1>iPad JV</h1>' +
+          '<p>เปิดระบบบริหารจัดการไอแพดแบบเต็มหน้า เพื่อให้ทำงานบน Android ได้เสถียรกว่า iframe</p>' +
+          '<a class="launch-button" href="' + gasUrl.replace(/"/g, '&quot;') + '">เปิดระบบ</a>' +
+          '<div class="launch-note">ติดตั้งแอปจากเมนู Chrome แล้วเปิดจากไอคอนหน้า Home ได้เลย</div>' +
+        '</section>';
     }());
   </script>
 </body>
