@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -1718,6 +1718,10 @@ body.mode-register .modal-overlay .modal-header{border-radius:18px 18px 0 0}
             <label class="form-label">Password *</label>
             <input id="admin-login-pass" class="form-ctrl" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')adminPasswordLogin()">
           </div>
+          <label style="display:flex;align-items:center;gap:8px;margin:4px 0 12px;font-size:13px;color:var(--muted);cursor:pointer">
+            <input id="admin-remember-device" type="checkbox" checked>
+            <span>จำเครื่องนี้ไว้ ไม่ต้องกรอกรหัสครั้งหน้า</span>
+          </label>
           <button class="btn btn-primary" style="width:100%;justify-content:center" id="btn-admin-login" onclick="adminPasswordLogin()">🔧 เข้าสู่ระบบผู้ดูแล</button>
         </div>
 
@@ -2747,6 +2751,7 @@ body.mode-register .modal-overlay .modal-header{border-radius:18px 18px 0 0}
 // ── State ──────────────────────────────────────────────────────────────
 var CU = null;        // currentUser
 var _authTok = '';    // session token for non-Google admin logins
+var ADMIN_REMEMBER_KEY = 'ipad_jv_admin_remember_token';
 var allIPads = [];
 var selStatus = '';
 var searchTimer = null;
@@ -2814,6 +2819,51 @@ function closePwaBanner() {
   localStorage.setItem('pwa_banner_dismissed', '1');
 }
 
+function getRememberedAdminToken() {
+  try { return localStorage.getItem(ADMIN_REMEMBER_KEY) || ''; } catch(e) { return ''; }
+}
+
+function saveRememberedAdminToken(token) {
+  try {
+    if (token) localStorage.setItem(ADMIN_REMEMBER_KEY, token);
+  } catch(e) {}
+}
+
+function clearRememberedAdminToken() {
+  var tok = getRememberedAdminToken();
+  try { localStorage.removeItem(ADMIN_REMEMBER_KEY); } catch(e) {}
+  if (tok) {
+    gsr.withFailureHandler(function(){}).forgetRememberToken(tok);
+  }
+}
+
+function saveAdminRememberIfRequested() {
+  var cb = document.getElementById('admin-remember-device');
+  if (!cb || !cb.checked || !_authTok) return;
+  gsr
+    .withSuccessHandler(function(r) {
+      if (r && r.success && r.rememberToken) saveRememberedAdminToken(r.rememberToken);
+    })
+    .withFailureHandler(function(){})
+    .createRememberForCurrentSession();
+}
+
+function tryRememberedAdminLogin() {
+  var tok = getRememberedAdminToken();
+  if (!tok) return;
+  gsr
+    .withSuccessHandler(function(r) {
+      if (!r || !r.success) {
+        clearRememberedAdminToken();
+        return;
+      }
+      initAdminWithUser(r);
+      showToast('เข้าสู่ระบบผู้ดูแลอัตโนมัติ','success');
+    })
+    .withFailureHandler(function(){ clearRememberedAdminToken(); })
+    .consumeRememberToken(tok);
+}
+
 var PAGE_TITLES = {
   dashboard:'แดชบอร์ด', ipads:'รายการไอแพด',
   overview:'ภาพรวมห้องเรียน', students:'รายชื่อนักเรียน',
@@ -2829,6 +2879,7 @@ window.onload = function() {
   document.body.classList.add('mode-register');
   initThemeAndLang();
   loadRegisterData();
+  tryRememberedAdminLogin();
 };
 
 // ── Registration (หน้าแรก) ─────────────────────────────────────────────
@@ -6021,6 +6072,7 @@ function adminPasswordLogin() {
       closeModal('modal-login');
       showToast('เข้าสู่ระบบผู้ดูแลสำเร็จ','success');
       initAdminWithUser(r);
+      saveAdminRememberIfRequested();
     })
     .withFailureHandler(function(e) {
       btn.disabled = false;
@@ -6029,7 +6081,6 @@ function adminPasswordLogin() {
     })
     .adminLogin(user, pass);
 }
-
 function sendOTP(resend) {
   var email = (resend ? document.getElementById('otp-sent-email').textContent : document.getElementById('otp-email').value).trim();
   if (!email) { showToast('กรุณากรอก email','error'); return; }
@@ -6087,6 +6138,7 @@ function verifyOTPLogin() {
       } else {
         showToast('เข้าสู่ระบบสำเร็จ','success');
         initAdminWithUser(r);
+        saveAdminRememberIfRequested();
       }
     })
     .withFailureHandler(function(e){ showToast(''+e,'error'); })
@@ -6525,6 +6577,7 @@ function initThemeAndLang() {
 // ── Logout ────────────────────────────────────────────────────────────────
 function confirmLogout() {
   if (!confirm('ออกจากระบบ?')) return;
+  clearRememberedAdminToken();
   document.body.classList.add('mode-register');
   CU = null;
   _authTok = '';
@@ -6714,3 +6767,5 @@ function staStuPhotoHtml(s) {
 
 </body>
 </html>
+
+

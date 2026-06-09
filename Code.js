@@ -116,6 +116,48 @@ function createSession_(user) {
   return tok;
 }
 
+function createRememberToken_(user) {
+  const tok = Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '');
+  const expires = Date.now() + (30 * 24 * 60 * 60 * 1000);
+  PropertiesService.getScriptProperties().setProperty('_remember_' + tok, JSON.stringify({
+    user: user,
+    expires: expires
+  }));
+  return tok;
+}
+
+function consumeRememberToken(token) {
+  if (!token) return err('No remembered login');
+  try {
+    const key = '_remember_' + String(token).trim();
+    const raw = PropertiesService.getScriptProperties().getProperty(key);
+    if (!raw) return err('Remembered login expired');
+    const data = JSON.parse(raw);
+    if (!data || !data.user || !data.expires || Date.now() > Number(data.expires)) {
+      PropertiesService.getScriptProperties().deleteProperty(key);
+      return err('Remembered login expired');
+    }
+    if (data.user.role === CONFIG.ROLES.USER) return err('Invalid remembered login');
+    const fresh = createSession_(data.user);
+    return ok('Remembered login restored', Object.assign({}, data.user, { token: fresh, rememberToken: token }));
+  } catch(e) {
+    return err('Remembered login failed: ' + e.message);
+  }
+}
+
+function forgetRememberToken(token) {
+  if (token) {
+    try { PropertiesService.getScriptProperties().deleteProperty('_remember_' + String(token).trim()); } catch(e) {}
+  }
+  return ok('Remembered login removed');
+}
+
+function createRememberForCurrentSession(tok) {
+  const user = getCurrentUser(tok);
+  if (!user || user.role === CONFIG.ROLES.USER) return err('Admin session required');
+  return ok('Remembered login saved', { rememberToken: createRememberToken_(user) });
+}
+
 // ── iPad CRUD ─────────────────────────────────────────────────────────────────
 
 function getAllIPads() {
@@ -467,7 +509,7 @@ function notifyAdmins_(subject, body) {
 
 // ── Admin Auth ────────────────────────────────────────────────────────────────
 
-function adminLogin(user, pass) {
+function adminLogin(user, pass, remember) {
   ensureDefaultAdminAccount_();
   const sheet = sh(CONFIG.SHEETS.ADMIN);
   if (!sheet) return err('ไม่พบ Sheet Admin');
@@ -481,6 +523,7 @@ function adminLogin(user, pass) {
       const role = String(data[i][2] || CONFIG.ROLES.SUPER).trim();
       const current = upsertAdminUserByEmail_(email, user, role);
       const tok = createSession_(current);
+      const rememberTok = remember ? createRememberToken_(current) : '';
       log_(email, 'Admin Password Login', user);
       return ok('เข้าสู่ระบบสำเร็จ', Object.assign({}, current, { token: tok }));
     }
