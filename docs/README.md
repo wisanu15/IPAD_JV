@@ -28,9 +28,10 @@ Android:
 
 iPhone/iPad:
 
-1. Open the GitHub Pages URL in Safari.
-2. Tap Share.
-3. Choose Add to Home Screen.
-4. Open iPad JV and tap Open in Safari.
+1. Remove the old iPad JV Home Screen icon if one already exists.
+2. Open the GitHub Pages URL in Safari.
+3. Tap Share.
+4. Choose Add to Home Screen.
+5. Open iPad JV from the Home Screen. It should open fullscreen and load the app inside the launcher.
 
 If Apps Script shows a Google Drive error inside an in-app browser, copy the Apps Script `/exec` URL and paste it into Safari or Chrome directly.

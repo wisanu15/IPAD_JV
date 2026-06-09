@@ -2,13 +2,19 @@
   "name": "ระบบบริหารจัดการไอแพด",
   "short_name": "iPad JV",
   "description": "โรงเรียนจักราชวิทยา - ระบบบริหารจัดการไอแพด",
-  "start_url": "./index.html?v=ios-ipad-1",
+  "start_url": "./index.html?v=ios-fullscreen-1",
   "scope": "./",
-  "display": "browser",
+  "display": "standalone",
   "orientation": "any",
   "background_color": "#F0F4FF",
   "theme_color": "#4F7EF7",
   "icons": [
+    {
+      "src": "./icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "./icons/icon-192.png",
       "sizes": "192x192",
