@@ -1,0 +1,268 @@
+{
+  "success": true,
+  "message": "ตรวจสอบข้อมูลสำเร็จ",
+  "expectedRecords": 1295,
+  "ipadRows": 1179,
+  "databaseRows": 2598,
+  "ipadMatched": 1176,
+  "databaseMatched": 1295,
+  "ipadMissingCount": 119,
+  "ipadIdMismatchCount": 0,
+  "ipadAssetMismatchCount": 0,
+  "databaseMissingCount": 0,
+  "databaseIdMismatchCount": 0,
+  "databaseAssetMismatchCount": 0,
+  "ipadExtraCount": 3,
+  "databaseExtraCount": 1303,
+  "samples": {
+    "ipadMissing": [
+      {
+        "serial": "M0XL19H6MR",
+        "id": "SC659",
+        "assetNumber": "จว.13.1.2/784/68"
+      },
+      {
+        "serial": "JY2G5QL734",
+        "id": "SC689",
+        "assetNumber": "จว.13.1.2/814/68"
+      },
+      {
+        "serial": "FY6N0LKVP7",
+        "id": "SC690",
+        "assetNumber": "จว.13.1.2/815/68"
+      },
+      {
+        "serial": "H66FH20YGG",
+        "id": "SC691",
+        "assetNumber": "จว.13.1.2/816/68"
+      },
+      {
+        "serial": "G335255491",
+        "id": "SC692",
+        "assetNumber": "จว.13.1.2/817/68"
+      },
+      {
+        "serial": "F3PK92YH53",
+        "id": "SC693",
+        "assetNumber": "จว.13.1.2/818/68"
+      },
+      {
+        "serial": "D9HQVF14D2",
+        "id": "SC694",
+        "assetNumber": "จว.13.1.2/819/68"
+      },
+      {
+        "serial": "F0CFDWYYDF",
+        "id": "SC695",
+        "assetNumber": "จว.13.1.2/820/68"
+      },
+      {
+        "serial": "KW4G0QDGJP",
+        "id": "SC696",
+        "assetNumber": "จว.13.1.2/821/68"
+      },
+      {
+        "serial": "HKQRKJ64WC",
+        "id": "SC697",
+        "assetNumber": "จว.13.1.2/822/68"
+      },
+      {
+        "serial": "DY2HPDQXG7",
+        "id": "SC698",
+        "assetNumber": "จว.13.1.2/823/68"
+      },
+      {
+        "serial": "J59NVM524G",
+        "id": "SC699",
+        "assetNumber": "จว.13.1.2/824/68"
+      },
+      {
+        "serial": "KFHNYX0J6T",
+        "id": "SC700",
+        "assetNumber": "จว.13.1.2/825/68"
+      },
+      {
+        "serial": "C2YC9VMP4X",
+        "id": "SC701",
+        "assetNumber": "จว.13.1.2/826/68"
+      },
+      {
+        "serial": "C9X2XLQY9F",
+        "id": "SC702",
+        "assetNumber": "จว.13.1.2/827/68"
+      },
+      {
+        "serial": "FJFVRWW0XJ",
+        "id": "SC703",
+        "assetNumber": "จว.13.1.2/828/68"
+      },
+      {
+        "serial": "GFYP9W4X29",
+        "id": "SC704",
+        "assetNumber": "จว.13.1.2/829/68"
+      },
+      {
+        "serial": "MXJLQGW1H6",
+        "id": "SC705",
+        "assetNumber": "จว.13.1.2/830/68"
+      },
+      {
+        "serial": "L794GJG9VW",
+        "id": "SC706",
+        "assetNumber": "จว.13.1.2/831/68"
+      },
+      {
+        "serial": "GVH321M9V7",
+        "id": "SC707",
+        "assetNumber": "จว.13.1.2/832/68"
+      }
+    ],
+    "ipadIdMismatch": [],
+    "ipadAssetMismatch": [],
+    "databaseMissing": [],
+    "databaseIdMismatch": [],
+    "databaseAssetMismatch": [],
+    "ipadExtra": [
+      {
+        "serial": "KHWTWQJKK2",
+        "row": 18,
+        "id": "17",
+        "assetCode": "จว. 13.1.2/17/68"
+      },
+      {
+        "serial": "D6JJMVT94N",
+        "row": 38,
+        "id": "TC38",
+        "assetCode": "38"
+      },
+      {
+        "serial": "L26GNPH68R",
+        "row": 39,
+        "id": "38",
+        "assetCode": "จว. 13.1.2/39/68"
+      }
+    ],
+    "databaseExtra": [
+      {
+        "serial": "1",
+        "row": 1301,
+        "id": "GY42L0YVPK",
+        "assetNumber": "จว. 13.1.2/1/68"
+      },
+      {
+        "serial": "2",
+        "row": 1302,
+        "id": "MNQVV2LRP2",
+        "assetNumber": "จว. 13.1.2/2/68"
+      },
+      {
+        "serial": "3",
+        "row": 1303,
+        "id": "LQQP7VKCW7",
+        "assetNumber": "จว. 13.1.2/3/68"
+      },
+      {
+        "serial": "4",
+        "row": 1304,
+        "id": "M277Q9VMRY",
+        "assetNumber": "จว. 13.1.2/4/68"
+      },
+      {
+        "serial": "5",
+        "row": 1305,
+        "id": "F7G3W9RWNW",
+        "assetNumber": "จว. 13.1.2/5/68"
+      },
+      {
+        "serial": "6",
+        "row": 1306,
+        "id": "MQ2MGXQQJQ",
+        "assetNumber": "จว. 13.1.2/6/68"
+      },
+      {
+        "serial": "7",
+        "row": 1307,
+        "id": "HXQV4R96VN",
+        "assetNumber": "จว. 13.1.2/7/68"
+      },
+      {
+        "serial": "8",
+        "row": 1308,
+        "id": "K00M706HL0",
+        "assetNumber": "จว. 13.1.2/8/68"
+      },
+      {
+        "serial": "9",
+        "row": 1309,
+        "id": "G7H3Y7Q9XF",
+        "assetNumber": "จว. 13.1.2/9/68"
+      },
+      {
+        "serial": "10",
+        "row": 1310,
+        "id": "MNPC2RKX4Y",
+        "assetNumber": "จว. 13.1.2/10/68"
+      },
+      {
+        "serial": "11",
+        "row": 1311,
+        "id": "L235NWHWD9",
+        "assetNumber": "จว. 13.1.2/11/68"
+      },
+      {
+        "serial": "12",
+        "row": 1312,
+        "id": "K6GMH79XXV",
+        "assetNumber": "จว. 13.1.2/12/68"
+      },
+      {
+        "serial": "13",
+        "row": 1313,
+        "id": "CJ3C2C4XDR",
+        "assetNumber": "จว. 13.1.2/13/68"
+      },
+      {
+        "serial": "14",
+        "row": 1314,
+        "id": "CY0VD4L0JL",
+        "assetNumber": "จว. 13.1.2/14/68"
+      },
+      {
+        "serial": "15",
+        "row": 1315,
+        "id": "CGXM6W642K",
+        "assetNumber": "จว. 13.1.2/15/68"
+      },
+      {
+        "serial": "16",
+        "row": 1316,
+        "id": "H5KQV3344D",
+        "assetNumber": "จว. 13.1.2/16/68"
+      },
+      {
+        "serial": "17",
+        "row": 1317,
+        "id": "KHWTWQJKK2",
+        "assetNumber": "จว. 13.1.2/17/68"
+      },
+      {
+        "serial": "18",
+        "row": 1318,
+        "id": "LDD2KFF9TM",
+        "assetNumber": "จว. 13.1.2/18/68"
+      },
+      {
+        "serial": "19",
+        "row": 1319,
+        "id": "GDJK7N04T4",
+        "assetNumber": "จว. 13.1.2/19/68"
+      },
+      {
+        "serial": "20",
+        "row": 1320,
+        "id": "GY7X7XNN7V",
+        "assetNumber": "จว. 13.1.2/20/68"
+      }
+    ]
+  }
+}

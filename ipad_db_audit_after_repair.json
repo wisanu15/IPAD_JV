@@ -1,0 +1,135 @@
+{
+  "success": true,
+  "message": "ตรวจสอบข้อมูลสำเร็จ",
+  "expectedRecords": 1299,
+  "ipadRows": 1179,
+  "databaseRows": 1299,
+  "ipadMatched": 1178,
+  "databaseMatched": 1299,
+  "ipadMissingCount": 121,
+  "ipadIdMismatchCount": 0,
+  "ipadAssetMismatchCount": 0,
+  "databaseMissingCount": 0,
+  "databaseIdMismatchCount": 0,
+  "databaseAssetMismatchCount": 0,
+  "ipadExtraCount": 1,
+  "databaseExtraCount": 0,
+  "samples": {
+    "ipadMissing": [
+      {
+        "serial": "FK40THHCC02",
+        "id": "TC32",
+        "assetNumber": "จว. 13.1.2/32/68"
+      },
+      {
+        "serial": "D6JJMV T94N",
+        "id": "TC38",
+        "assetNumber": "จว. 13.1.2/38/68"
+      },
+      {
+        "serial": "M0XL19H6MR",
+        "id": "SC659",
+        "assetNumber": "จว.13.1.2/784/68"
+      },
+      {
+        "serial": "JY2G5QL734",
+        "id": "SC689",
+        "assetNumber": "จว.13.1.2/814/68"
+      },
+      {
+        "serial": "FY6N0LKVP7",
+        "id": "SC690",
+        "assetNumber": "จว.13.1.2/815/68"
+      },
+      {
+        "serial": "H66FH20YGG",
+        "id": "SC691",
+        "assetNumber": "จว.13.1.2/816/68"
+      },
+      {
+        "serial": "G335255491",
+        "id": "SC692",
+        "assetNumber": "จว.13.1.2/817/68"
+      },
+      {
+        "serial": "F3PK92YH53",
+        "id": "SC693",
+        "assetNumber": "จว.13.1.2/818/68"
+      },
+      {
+        "serial": "D9HQVF14D2",
+        "id": "SC694",
+        "assetNumber": "จว.13.1.2/819/68"
+      },
+      {
+        "serial": "F0CFDWYYDF",
+        "id": "SC695",
+        "assetNumber": "จว.13.1.2/820/68"
+      },
+      {
+        "serial": "KW4G0QDGJP",
+        "id": "SC696",
+        "assetNumber": "จว.13.1.2/821/68"
+      },
+      {
+        "serial": "HKQRKJ64WC",
+        "id": "SC697",
+        "assetNumber": "จว.13.1.2/822/68"
+      },
+      {
+        "serial": "DY2HPDQXG7",
+        "id": "SC698",
+        "assetNumber": "จว.13.1.2/823/68"
+      },
+      {
+        "serial": "J59NVM524G",
+        "id": "SC699",
+        "assetNumber": "จว.13.1.2/824/68"
+      },
+      {
+        "serial": "KFHNYX0J6T",
+        "id": "SC700",
+        "assetNumber": "จว.13.1.2/825/68"
+      },
+      {
+        "serial": "C2YC9VMP4X",
+        "id": "SC701",
+        "assetNumber": "จว.13.1.2/826/68"
+      },
+      {
+        "serial": "C9X2XLQY9F",
+        "id": "SC702",
+        "assetNumber": "จว.13.1.2/827/68"
+      },
+      {
+        "serial": "FJFVRWW0XJ",
+        "id": "SC703",
+        "assetNumber": "จว.13.1.2/828/68"
+      },
+      {
+        "serial": "GFYP9W4X29",
+        "id": "SC704",
+        "assetNumber": "จว.13.1.2/829/68"
+      },
+      {
+        "serial": "MXJLQGW1H6",
+        "id": "SC705",
+        "assetNumber": "จว.13.1.2/830/68"
+      }
+    ],
+    "ipadIdMismatch": [],
+    "ipadAssetMismatch": [],
+    "databaseMissing": [],
+    "databaseIdMismatch": [],
+    "databaseAssetMismatch": [],
+    "ipadExtra": [
+      {
+        "serial": "D6JJMVT94N",
+        "row": 38,
+        "id": "TC38",
+        "assetCode": "จว. 13.1.2/38/68"
+      }
+    ],
+    "databaseExtra": []
+  }
+}
