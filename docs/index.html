@@ -8,10 +8,12 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="iPad JV">
+  <meta name="format-detection" content="telephone=no">
   <title>iPad JV</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-192.png">
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     html, body { width: 100%; height: 100%; margin: 0; }
@@ -142,6 +144,19 @@
       font-size: 13px;
       color: #64748b;
     }
+    .platform-steps {
+      margin: 18px 0 0;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 13px;
+      line-height: 1.55;
+      text-align: left;
+    }
+    .platform-steps strong {
+      color: #0f172a;
+    }
     .setup-panel h1 {
       margin: 0 0 8px;
       font-size: 22px;
@@ -188,6 +203,9 @@
       }
 
       var forceOpen = params.get('open') === '1';
+      var userAgent = navigator.userAgent || '';
+      var isIOS = /iPad|iPhone|iPod/.test(userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations()
@@ -209,15 +227,24 @@
         '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' +
         encodeURIComponent(gasUrl) +
         ';end';
+      var primaryUrl = isIOS ? gasUrl : chromeIntentUrl;
+      var primaryText = isIOS ? 'เปิดระบบบน Safari' : 'เปิดด้วย Chrome';
+      var helpText = isIOS ?
+        '<div class="platform-steps"><strong>ติดตั้งบน iPhone/iPad:</strong><br>1. เปิดหน้านี้ด้วย Safari<br>2. กดปุ่มแชร์<br>3. เลือก Add to Home Screen หรือ เพิ่มไปยังหน้าจอโฮม<br>4. เปิดไอคอน iPad JV แล้วกดปุ่มเปิดระบบ</div>' :
+        '<div class="platform-steps"><strong>ติดตั้งบน Android:</strong><br>เปิดหน้านี้ด้วย Chrome แล้วเลือก Add to Home screen หรือ Install app</div>';
+      var noteText = isIOS ?
+        'ถ้าเปิดจาก LINE/Facebook แล้วไม่ทำงาน ให้คัดลอกลิงก์นี้ไปเปิดใน Safari โดยตรง' :
+        'ถ้ายังขึ้น Google Drive ให้คัดลอก URL แล้ววางในแถบที่อยู่ของ Chrome โดยตรง';
 
       shell.innerHTML =
         '<section class="launch-card">' +
           '<img class="launch-icon" src="./icons/icon-192.png" alt="">' +
           '<h1>iPad JV</h1>' +
-          '<p>เปิดระบบบริหารจัดการไอแพดด้วย Chrome ปกติ เพื่อเลี่ยงปัญหา Google Drive error ของ Apps Script ใน Custom Tab</p>' +
-          '<a class="launch-button" href="' + chromeIntentUrl.replace(/"/g, '&quot;') + '">เปิดด้วย Chrome</a>' +
+          '<p>เปิดระบบบริหารจัดการไอแพดผ่านเบราว์เซอร์หลักของเครื่อง เพื่อให้ Apps Script ทำงานเสถียรที่สุด</p>' +
+          '<a class="launch-button" href="' + primaryUrl.replace(/"/g, '&quot;') + '">' + primaryText + '</a>' +
           '<a class="launch-button secondary" target="_blank" rel="noopener" href="' + gasUrl.replace(/"/g, '&quot;') + '">เปิดลิงก์สำรอง</a>' +
-          '<div class="launch-note">ถ้ายังขึ้น Google Drive ให้คัดลอก URL แล้ววางในแถบที่อยู่ของ Chrome โดยตรง</div>' +
+          helpText +
+          '<div class="launch-note">' + noteText + '</div>' +
         '</section>';
     }());
   </script>

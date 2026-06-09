@@ -2,7 +2,7 @@
   "name": "ระบบบริหารจัดการไอแพด",
   "short_name": "iPad JV",
   "description": "โรงเรียนจักราชวิทยา - ระบบบริหารจัดการไอแพด",
-  "start_url": "./index.html?v=direct-1c6fa80",
+  "start_url": "./index.html?v=ios-ipad-1",
   "scope": "./",
   "display": "browser",
   "orientation": "any",

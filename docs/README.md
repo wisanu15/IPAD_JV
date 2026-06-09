@@ -1,6 +1,6 @@
 # iPad JV GitHub Pages wrapper
 
-This folder is a small installable PWA wrapper for Android Chrome. It hosts the real manifest and service worker on GitHub Pages, then opens the Google Apps Script web app inside an iframe.
+This folder is a small mobile launcher for the Google Apps Script web app. It is hosted on GitHub Pages and gives Android, iPhone, and iPad users a stable Home Screen entry point.
 
 ## Setup
 
@@ -16,6 +16,21 @@ window.IPAD_JV_CONFIG = {
 
 4. Push this repository to GitHub.
 5. In GitHub repository settings, enable Pages from the `docs` folder.
-6. Open the GitHub Pages URL on Android Chrome and use Install app/Add to Home screen.
+6. Open the GitHub Pages URL on the phone or tablet.
 
-The Apps Script web app must keep `setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)` in `doGet`, otherwise the iframe will be blocked.
+## Install
+
+Android:
+
+1. Open the GitHub Pages URL in Chrome.
+2. Choose Add to Home screen or Install app.
+3. Open iPad JV and tap Open with Chrome.
+
+iPhone/iPad:
+
+1. Open the GitHub Pages URL in Safari.
+2. Tap Share.
+3. Choose Add to Home Screen.
+4. Open iPad JV and tap Open in Safari.
+
+If Apps Script shows a Google Drive error inside an in-app browser, copy the Apps Script `/exec` URL and paste it into Safari or Chrome directly.
