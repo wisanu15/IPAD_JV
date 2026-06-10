@@ -238,6 +238,11 @@
         return;
       }
 
+      if (isAndroid && isStandalone) {
+        window.location.replace(gasUrl);
+        return;
+      }
+
       if ((isIOS && isStandalone) || (forceEmbed && !isAndroid)) {
         shell.style.padding = '0';
         shell.style.display = 'block';
