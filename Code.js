@@ -510,6 +510,10 @@ function notifyAdmins_(subject, body) {
 
 // ── Admin Auth ────────────────────────────────────────────────────────────────
 
+function testPushNotification() {
+  notifyAdminPush_('🔔 ทดสอบ', 'ทดสอบการแจ้งเตือนจาก iPad JV', '', {});
+}
+
 function notifyAdminPush_(title, message, url, data) {
   try {
     const props = PropertiesService.getScriptProperties();
