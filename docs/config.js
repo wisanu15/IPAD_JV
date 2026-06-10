@@ -4,5 +4,5 @@ window.IPAD_JV_CONFIG = {
   GAS_WEB_APP_URL: 'https://script.google.com/a/*/macros/s/AKfycby079h5QsFuJtoOWk9E2-jJK1uhxnjlpw1Jrg-HthTxa5CeN15CRPyZCVxvHRYYdstmUQ/exec',
 
   // OneSignal Web Push App ID. Leave blank to hide notification setup.
-  ONESIGNAL_APP_ID: ''
+  ONESIGNAL_APP_ID: '365c35d1-33cf-4aa8-8857-c1c1e539c64b'
 };
