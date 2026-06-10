@@ -107,6 +107,55 @@ Relevant client functions in `Index.html`:
 - `saveAdminRememberIfRequested`
 - `tryRememberedAdminLogin`
 
+## Pending requested GAS change
+
+The user now wants admin remembered login to happen automatically, without requiring the admin to tick a checkbox.
+
+Recommended implementation:
+
+1. Keep the server-side remember-token system as-is.
+2. In `Index.html`, make `saveAdminRememberIfRequested()` always save a remember token whenever an admin login succeeds.
+3. Remove or hide the `admin-remember-device` checkbox from the admin login UI.
+4. Keep logout behavior unchanged: `confirmLogout()` should still call `clearRememberedAdminToken()` so logout removes remembered login.
+
+Current function to change:
+
+```js
+function saveAdminRememberIfRequested() {
+  var cb = document.getElementById('admin-remember-device');
+  if (!cb || !cb.checked || !_authTok) return;
+  gsr
+    .withSuccessHandler(function(r) {
+      if (r && r.success && r.rememberToken) saveRememberedAdminToken(r.rememberToken);
+    })
+    .withFailureHandler(function(){})
+    .createRememberForCurrentSession();
+}
+```
+
+Suggested replacement:
+
+```js
+function saveAdminRememberIfRequested() {
+  if (!_authTok) return;
+  gsr
+    .withSuccessHandler(function(r) {
+      if (r && r.success && r.rememberToken) saveRememberedAdminToken(r.rememberToken);
+    })
+    .withFailureHandler(function(){})
+    .createRememberForCurrentSession();
+}
+```
+
+Then remove or hide this admin-login checkbox block:
+
+```html
+<label style="display:flex;align-items:center;gap:8px;margin:4px 0 12px;font-size:13px;color:var(--muted);cursor:pointer">
+  <input id="admin-remember-device" type="checkbox" checked>
+  <span>จำเครื่องนี้ไว้ ไม่ต้องกรอกรหัสครั้งหน้า</span>
+</label>
+```
+
 ## Apps Script deployment caution
 
 This environment can `clasp push`, but updating an existing web app deployment may fail unless the account is in the same domain as the script owner.
