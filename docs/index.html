@@ -221,7 +221,7 @@
         return;
       }
 
-      if (((isIOS || isAndroid) && isStandalone) || (forceEmbed && !isAndroid)) {
+      if ((isIOS && isStandalone) || (forceEmbed && !isAndroid)) {
         shell.style.padding = '0';
         shell.style.display = 'block';
         var iframe = document.createElement('iframe');
@@ -238,14 +238,14 @@
         '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' +
         encodeURIComponent(gasUrl) +
         ';end';
-      var primaryUrl = isIOS ? gasUrl : './index.html?v=android-install-1';
-      var primaryText = isIOS ? 'เปิดระบบบน Safari' : 'ติดตั้งจากหน้านี้';
+      var primaryUrl = isIOS ? gasUrl : gasUrl;
+      var primaryText = isIOS ? 'เปิดระบบบน Safari' : 'เปิดระบบใน Chrome';
       var helpText = isIOS ?
         '<div class="platform-steps"><strong>ติดตั้งบน iPhone/iPad:</strong><br>1. เปิดหน้านี้ด้วย Safari<br>2. กดปุ่มแชร์<br>3. เลือก Add to Home Screen หรือ เพิ่มไปยังหน้าจอโฮม<br>4. เปิดไอคอน iPad JV แล้วกดปุ่มเปิดระบบ</div>' :
         '<div class="platform-steps"><strong>ติดตั้งบน Android:</strong><br>เปิดหน้านี้ด้วย Chrome แล้วเลือก Add to Home screen หรือ Install app</div>';
       var noteText = isIOS ?
         'ถ้าเปิดจาก LINE/Facebook แล้วไม่ทำงาน ให้คัดลอกลิงก์นี้ไปเปิดใน Safari โดยตรง' :
-        'Chrome ปกติอาจแสดง Google Drive error เมื่อเปิด GAS ใน iframe ให้ใช้ไอคอนที่ติดตั้งแล้วสำหรับโหมดเต็มจอ';
+        'Android จะเปิดระบบใน Chrome ปกติ ไม่ใช้ iframe เพื่อเลี่ยงหน้า Google Drive error';
 
       shell.innerHTML =
         '<section class="launch-card">' +
