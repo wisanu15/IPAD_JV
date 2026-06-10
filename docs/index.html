@@ -276,7 +276,7 @@
         ';end';
       var showOpenChrome = isAndroid && !isChrome && !isStandalone;
       var helpText = isIOS ?
-        '<div class="platform-steps"><strong>ติดตั้งบน iPhone/iPad:</strong><br>1. เปิดหน้านี้ด้วย Safari<br>2. กดปุ่มแชร์<br>3. เลือก Add to Home Screen หรือ เพิ่มไปยังหน้าจอโฮม<br>4. เปิดไอคอน iPad JV แล้วกดปุ่มเปิดระบบ</div>' :
+        '<div class="platform-steps"><strong>ติดตั้งบน iPhone/iPad:</strong><br>1. เปิดหน้านี้ด้วย Safari<br>2. กดปุ่มแชร์<br>3. เลือก Add to Home Screen หรือ เพิ่มไปยังหน้าจอโฮม<br>4. เปิดไอคอน iPad JV แล้วระบบจะเข้าแบบเต็มจอ</div>' :
         (showOpenChrome ?
           '<div class="platform-steps"><strong>เปิดด้วย Chrome ก่อน:</strong><br>กดปุ่ม เปิดใน Chrome เพื่อไปหน้าติดตั้งที่ถูกต้อง</div>' :
           '<div class="platform-steps"><strong>ติดตั้งบน Android:</strong><br>1. กดปุ่ม ติดตั้ง<br>2. ถ้าไม่ขึ้นหน้าต่างติดตั้ง ให้กดเมนู Chrome ⋮ แล้วเลือก Install app หรือ Add to Home screen<br>3. หลังติดตั้งเสร็จ ให้เปิดจากไอคอน iPad JV เพื่อทดสอบโหมดเต็มจอ</div>');
@@ -289,6 +289,7 @@
           '<img class="launch-icon" src="./icons/icon-192.png" alt="">' +
           '<h1>iPad JV</h1>' +
           '<p>ติดตั้ง iPad JV ไว้ที่หน้าจอหลัก แล้วเปิดใช้งานจากไอคอนแอป</p>' +
+          (isIOS ? '<a class="launch-button" href="' + gasUrl.replace(/"/g, '&quot;') + '">เปิดระบบบน Safari</a>' : '') +
           '<button class="launch-button install" id="install-app-btn" type="button">ติดตั้ง</button>' +
           '<a class="launch-button open-chrome" id="open-chrome-btn" href="' + chromeIntentUrl.replace(/"/g, '&quot;') + '">เปิดใน Chrome</a>' +
           helpText +
