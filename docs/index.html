@@ -290,7 +290,7 @@
       function updateNotifyButton() {
         var btn = document.getElementById('notifyFab');
         if (!btn) return;
-        if (!oneSignalAppId || !isStandalone || !oneSignalReady || !adminNotifyAllowed) {
+        if (!oneSignalAppId || !oneSignalReady || !adminNotifyAllowed) {
           btn.classList.remove('show');
           return;
         }
@@ -299,6 +299,9 @@
           if (window.Notification && Notification.permission === 'granted') {
             btn.classList.add('ready');
             btn.textContent = '✓';
+          } else {
+            btn.classList.remove('ready');
+            btn.textContent = '🔔';
           }
         } catch (_e) {}
       }
