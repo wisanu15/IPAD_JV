@@ -139,6 +139,12 @@
       background: #e8eefc;
       color: #27468f;
     }
+    .launch-button.install {
+      display: none;
+      margin-top: 10px;
+      background: #10b981;
+      color: #fff;
+    }
     .launch-note {
       margin-top: 14px;
       font-size: 13px;
@@ -185,6 +191,7 @@
   <script src="./config.js"></script>
   <script>
     (function () {
+      var deferredInstallPrompt = null;
       var params = new URLSearchParams(window.location.search);
       var configuredUrl = (window.IPAD_JV_CONFIG && window.IPAD_JV_CONFIG.GAS_WEB_APP_URL || '').trim();
       var gasUrl = (params.get('gas') || configuredUrl).trim();
@@ -209,6 +216,19 @@
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       var isAndroid = /Android/i.test(userAgent);
       var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+      function updateInstallButton() {
+        var btn = document.getElementById('install-app-btn');
+        if (!btn) return;
+        btn.style.display = (deferredInstallPrompt && isAndroid && !isStandalone) ? 'inline-flex' : 'none';
+      }
+
+      window.addEventListener('beforeinstallprompt', function (event) {
+        if (!isAndroid) return;
+        event.preventDefault();
+        deferredInstallPrompt = event;
+        updateInstallButton();
+      });
 
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
@@ -238,7 +258,7 @@
         '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' +
         encodeURIComponent(gasUrl) +
         ';end';
-      var primaryUrl = isIOS ? gasUrl : gasUrl;
+      var primaryUrl = isIOS ? gasUrl : chromeIntentUrl;
       var primaryText = isIOS ? 'เปิดระบบบน Safari' : 'เปิดระบบใน Chrome';
       var helpText = isIOS ?
         '<div class="platform-steps"><strong>ติดตั้งบน iPhone/iPad:</strong><br>1. เปิดหน้านี้ด้วย Safari<br>2. กดปุ่มแชร์<br>3. เลือก Add to Home Screen หรือ เพิ่มไปยังหน้าจอโฮม<br>4. เปิดไอคอน iPad JV แล้วกดปุ่มเปิดระบบ</div>' :
@@ -253,10 +273,24 @@
           '<h1>iPad JV</h1>' +
           '<p>เปิดระบบบริหารจัดการไอแพดผ่านเบราว์เซอร์หลักของเครื่อง เพื่อให้ Apps Script ทำงานเสถียรที่สุด</p>' +
           '<a class="launch-button" href="' + primaryUrl.replace(/"/g, '&quot;') + '">' + primaryText + '</a>' +
+          '<button class="launch-button install" id="install-app-btn" type="button">ติดตั้งแอป</button>' +
           '<a class="launch-button secondary" target="_blank" rel="noopener" href="' + gasUrl.replace(/"/g, '&quot;') + '">เปิดลิงก์สำรอง</a>' +
           helpText +
           '<div class="launch-note">' + noteText + '</div>' +
         '</section>';
+
+      var installBtn = document.getElementById('install-app-btn');
+      if (installBtn) {
+        installBtn.addEventListener('click', function () {
+          if (!deferredInstallPrompt) return;
+          deferredInstallPrompt.prompt();
+          deferredInstallPrompt.userChoice.finally(function () {
+            deferredInstallPrompt = null;
+            updateInstallButton();
+          });
+        });
+      }
+      updateInstallButton();
     }());
   </script>
 </body>
