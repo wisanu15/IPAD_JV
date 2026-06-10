@@ -326,7 +326,7 @@
       function updateNotifyButton() {
         var btn = document.getElementById('notifyFab');
         if (!btn) return;
-        if (!oneSignalAppId || !oneSignalReady || !adminNotifyAllowed) {
+        if (!oneSignalAppId || !adminNotifyAllowed) {
           btn.classList.remove('show');
           return;
         }
@@ -348,13 +348,14 @@
         window.OneSignalDeferred.push(function (OneSignal) {
           return OneSignal.init({
             appId: oneSignalAppId,
-            serviceWorkerPath: 'push/onesignal/OneSignalSDKWorker.js',
-            serviceWorkerParam: { scope: './push/onesignal/' }
+            serviceWorkerPath: '/IPAD_JV/push/onesignal/OneSignalSDKWorker.js',
+            serviceWorkerParam: { scope: '/IPAD_JV/push/onesignal/' }
           }).then(function () {
             oneSignalReady = true;
             updateNotifyButton();
-          }).catch(function () {
+          }).catch(function (err) {
             oneSignalReady = false;
+            notifyToast('OneSignal init ล้มเหลว: ' + (err && err.message ? err.message : 'ไม่ทราบสาเหตุ'));
           });
         });
       }
@@ -362,6 +363,10 @@
       function enableAdminNotifications() {
         if (!oneSignalAppId) {
           notifyToast('ยังไม่ได้ตั้งค่า OneSignal App ID');
+          return;
+        }
+        if (!oneSignalReady) {
+          notifyToast('OneSignal กำลังโหลด กรุณารอสักครู่แล้วลองใหม่');
           return;
         }
         window.OneSignalDeferred = window.OneSignalDeferred || [];
