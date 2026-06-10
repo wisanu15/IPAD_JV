@@ -23,8 +23,10 @@ window.IPAD_JV_CONFIG = {
 Android:
 
 1. Open the GitHub Pages URL in Chrome.
-2. Choose Add to Home screen or Install app.
-3. Open iPad JV and tap Open with Chrome.
+2. Tap Test Android fullscreen.
+3. If the app loads correctly, go back to the launcher page.
+4. Choose Add to Home screen or Install app.
+5. Open iPad JV from the Home Screen. It should open fullscreen.
 
 iPhone/iPad:
 
