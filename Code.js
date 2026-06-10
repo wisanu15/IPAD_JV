@@ -520,7 +520,7 @@ function notifyAdminPush_(title, message, url, data) {
     const payload = {
       app_id: appId,
       target_channel: 'push',
-      filters: [{ field: 'tag', key: 'role', relation: '=', value: 'admin' }],
+      included_segments: ['Total Subscriptions'],
       headings: { en: title || 'iPad JV', th: title || 'iPad JV' },
       contents: { en: message || '', th: message || '' },
       url: url || String(props.getProperty('IPAD_JV_PWA_URL') || 'https://wisanu15.github.io/IPAD_JV/'),
