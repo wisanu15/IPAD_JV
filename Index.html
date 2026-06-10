@@ -61,7 +61,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);dis
 /* ─── Main ───────────────────────────────────────── */
 #main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh}
 .topbar{background:rgba(255,255,255,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:13px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
-.topbar h1{font-size:17px;font-weight:700}
+.topbar h1{font-size:17px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
 .topbar .actions{display:flex;gap:8px}
 .content{padding:24px;flex:1}
 .card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1px solid rgba(0,0,0,.04)}
@@ -177,8 +177,21 @@ tbody tr:hover{background:var(--bg)}
 .grade-section{margin-bottom:28px}
 
 /* ─── Mobile ─────────────────────────────────────── */
-#menu-toggle{display:none;background:none;border:none;cursor:pointer;font-size:22px;color:var(--text);padding:4px;line-height:1}
-@media(max-width:768px){
+#menu-toggle{display:none;background:none;border:none;cursor:pointer;font-size:22px;color:var(--text);padding:4px;line-height:1;min-width:36px;min-height:36px;align-items:center;justify-content:center}
+/* ─── Tablet (iPad portrait and up) ──────────────── */
+@media(min-width:640px) and (max-width:900px){
+  .content{padding:18px}
+  .topbar{padding:12px 18px}
+  .stats-grid{grid-template-columns:repeat(3,1fr);gap:10px}
+  .filter-bar{flex-wrap:wrap;gap:6px}
+  tbody td,thead th{padding:10px 10px}
+  .btn{padding:9px 14px;font-size:13.5px}
+  #sidebar nav a{padding:12px 12px}
+  .pg-hd{flex-wrap:wrap;gap:10px}
+  .pg-hd-actions{flex-wrap:wrap}
+}
+/* ─── Mobile (<640px) ────────────────────────────── */
+@media(max-width:639px){
   #sidebar{transform:translateX(-240px)}
   #sidebar.open{transform:translateX(0);box-shadow:var(--sh-lg)}
   #main{margin-left:0}
@@ -187,7 +200,7 @@ tbody tr:hover{background:var(--bg)}
   .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px}
   .content{padding:16px}
   .topbar{padding:12px 16px}
-  #toast{bottom:16px;right:12px;left:12px;text-align:center;max-width:none}
+  #toast{bottom:74px;right:12px;left:12px;text-align:center;max-width:none}
   .reg-card{padding:24px 18px;max-width:440px}
   .home-menu-grid{gap:10px}
   .home-menu-icon{font-size:28px}
@@ -299,7 +312,10 @@ body.mode-register #register-app{display:flex}
 .sta-bc-sep{color:var(--border)}
 .sta-bc-link{color:var(--primary);cursor:pointer;font-weight:600;transition:opacity var(--dur)}
 .sta-bc-link:hover{opacity:.7}
-.sta-body{padding:16px;flex:1;max-width:900px;width:100%;margin:0 auto}
+.sta-body{padding:16px;flex:1;max-width:1200px;width:100%;margin:0 auto}
+#modal-issue,#modal-login,#register-page-app,#modal-manual{display:none;position:absolute;inset:0;background:var(--bg);z-index:11;overflow-y:auto;flex-direction:column;border-radius:18px}
+#modal-issue.show,#modal-login.show,#register-page-app.show,#modal-manual.show{display:flex}
+.app-footer{padding:14px 16px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;background:var(--card)}
 .sta-stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
 @media(min-width:480px){.sta-stat-grid{grid-template-columns:repeat(4,1fr)}}
 .sta-stat{background:var(--card);border-radius:var(--r);padding:16px;text-align:center;box-shadow:var(--sh-sm);border:1px solid rgba(0,0,0,.04)}
@@ -339,7 +355,10 @@ body.mode-register #register-app{display:flex}
 .sta-detail-label{color:var(--muted);font-size:10px;margin-bottom:2px;text-transform:uppercase;letter-spacing:.03em}
 .sta-detail-value{font-weight:600;font-size:12px;font-family:'Inter',monospace;word-break:break-all}
 .sta-detail-photo{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#EEF2FF,#E0E7FF);border:2px solid #C7D7FD;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--primary);overflow:hidden;flex-shrink:0;margin-right:10px}
-.sta-detail-photo img{width:100%;height:100%;object-fit:cover}
+.sta-detail-photo img{width:100%;height:100%;object-fit:cover;object-position:center top}
+.sta-copy-btn{background:none;border:none;cursor:pointer;font-size:13px;color:var(--muted);padding:0 0 0 4px;opacity:.55;transition:opacity .15s,color .15s;vertical-align:middle;line-height:1;flex-shrink:0}
+.sta-copy-btn:hover{opacity:1;color:var(--primary)}
+.sta-detail-value{display:flex;align-items:center;gap:2px;flex-wrap:wrap}
 .sta-detail-top{display:flex;align-items:center;margin-bottom:8px}
 .sta-detail-name{font-size:15px;font-weight:700;line-height:1.3}
 .sta-detail-sub{font-size:11px;color:var(--muted);margin-top:1px}
@@ -349,9 +368,9 @@ body.mode-register #register-app{display:flex}
 .sta-stu-meta{font-size:11px;color:var(--muted);font-family:'Inter',monospace;margin-top:2px}
 .sta-stu-date{font-size:11px;color:var(--muted-l);margin-top:1px}
 .sta-no-ipad{opacity:.5}
-.sta-stu-photo-wrap{position:relative;width:40px;height:40px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#EEF2FF,#E0E7FF);border:2px solid #C7D7FD;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--primary);overflow:hidden}
-.sta-stu-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%}
-.sta-stu-photo-ph{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#EEF2FF,#E0E7FF);border:2px solid #C7D7FD;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--primary);flex-shrink:0}
+.sta-stu-photo-wrap{position:relative;width:44px;height:44px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#EEF2FF,#E0E7FF);border:2px solid #C7D7FD;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--primary);overflow:hidden}
+.sta-stu-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top}
+.sta-stu-photo-ph{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#EEF2FF,#E0E7FF);border:2px solid #C7D7FD;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--primary);flex-shrink:0}
 
 /* ─── Photo Upload ───────────────────────────────── */
 .photo-preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(116px,1fr));gap:10px;max-height:320px;overflow-y:auto;padding:4px 0}
@@ -498,7 +517,7 @@ html{scroll-behavior:smooth}
 .mn-btn.active .mn-icon{transform:scale(1.1)}
 .mn-btn.active .mn-label{color:var(--primary)}
 .mn-btn:active{transform:scale(.88)}
-@media(max-width:768px){
+@media(max-width:639px){
   #mobile-nav{display:flex}
   #main{padding-bottom:58px}
   body.mode-register #mobile-nav{display:none!important}
@@ -518,6 +537,13 @@ html{scroll-behavior:smooth}
 .rg-orb2{width:380px;height:380px;bottom:-120px;left:-100px;background:radial-gradient(circle,rgba(16,185,129,.28),transparent 65%);animation:orbFloat 13s ease-in-out infinite;animation-delay:-4s}
 .rg-orb3{width:250px;height:250px;top:45%;left:38%;background:radial-gradient(circle,rgba(139,92,246,.22),transparent 65%);animation:orbFloat 9s ease-in-out infinite;animation-delay:-7s}
 @keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes rgFadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+body.mode-register .rg-top{animation:rgFadeUp .55s cubic-bezier(.16,1,.3,1) .08s both}
+body.mode-register .rg-grid .rg-card-btn:nth-child(1){animation:rgFadeUp .45s cubic-bezier(.16,1,.3,1) .18s both}
+body.mode-register .rg-grid .rg-card-btn:nth-child(2){animation:rgFadeUp .45s cubic-bezier(.16,1,.3,1) .26s both}
+body.mode-register .rg-grid .rg-card-btn:nth-child(3){animation:rgFadeUp .45s cubic-bezier(.16,1,.3,1) .34s both}
+body.mode-register .rg-grid .rg-card-btn:nth-child(4){animation:rgFadeUp .45s cubic-bezier(.16,1,.3,1) .42s both}
+body.mode-register .rg-links{animation:rgFadeUp .4s cubic-bezier(.16,1,.3,1) .5s both}
 body.mode-register .reg-card{
   background:rgba(255,255,255,.06)!important;
   backdrop-filter:blur(40px)!important;-webkit-backdrop-filter:blur(40px)!important;
@@ -552,7 +578,7 @@ body.mode-register .reg-card{
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
   margin:0 0 6px;line-height:1.2;letter-spacing:-.4px
 }
-.rg-school-sub{font-size:13px;color:rgba(255,255,255,.45);margin:0}
+.rg-school-sub{font-size:13px;color:rgba(255,255,255,.72);margin:0}
 body.mode-register .reg-success{background:rgba(16,185,129,.15)!important;border-color:rgba(16,185,129,.35)!important;color:#6EE7B7!important}
 .rg-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
 .rg-card-btn{
@@ -568,7 +594,7 @@ body.mode-register .reg-success{background:rgba(16,185,129,.15)!important;border
 .rg-card-btn:hover .rg-btn-glow{opacity:1}
 .rg-btn-icon{font-size:28px;width:50px;height:50px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.15);border-radius:15px;flex-shrink:0;line-height:1}
 .rg-btn-title{font-size:14.5px;font-weight:800;color:#fff;line-height:1.2}
-.rg-btn-sub{font-size:10.5px;color:rgba(255,255,255,.68);line-height:1.45;margin:0}
+.rg-btn-sub{font-size:10.5px;color:rgba(255,255,255,.82);line-height:1.45;margin:0}
 .rg-blue{background:linear-gradient(145deg,#3B82F6,#2563EB);box-shadow:0 8px 28px rgba(37,99,235,.5)}
 .rg-blue:hover{box-shadow:0 16px 44px rgba(37,99,235,.65)!important}
 .rg-amber{background:linear-gradient(145deg,#F59E0B,#D97706);box-shadow:0 8px 28px rgba(217,119,6,.5)}
@@ -580,17 +606,17 @@ body.mode-register .reg-success{background:rgba(16,185,129,.15)!important;border
 .rg-links{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
 .rg-link{
   background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
-  color:rgba(255,255,255,.6);padding:8px 18px;border-radius:999px;
+  color:rgba(255,255,255,.78);padding:8px 18px;border-radius:999px;
   font-family:'Sarabun',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;
   transition:all .15s ease;-webkit-tap-highlight-color:transparent
 }
 .rg-link:hover{background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.28)}
 .rg-link:active{transform:scale(.95)}
 body.mode-register .form-ctrl{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.15)!important;color:#fff!important}
-body.mode-register .form-ctrl::placeholder{color:rgba(255,255,255,.35)!important}
+body.mode-register .form-ctrl::placeholder{color:rgba(255,255,255,.52)!important}
 body.mode-register .form-ctrl:focus{background:rgba(255,255,255,.12)!important;border-color:rgba(79,126,247,.6)!important;box-shadow:0 0 0 3px rgba(79,126,247,.2)!important}
 body.mode-register .form-ctrl option{background:#1E1B4B;color:#fff}
-body.mode-register .form-label{color:rgba(255,255,255,.55)!important}
+body.mode-register .form-label{color:rgba(255,255,255,.75)!important}
 body.mode-register .reg-warn{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.3);color:#FCD34D}
 body.mode-register .ac-list{background:#1E1B4B!important;border-color:rgba(79,126,247,.5)!important}
 body.mode-register .ac-item{color:rgba(255,255,255,.82)!important;border-bottom-color:rgba(255,255,255,.06)!important}
@@ -679,7 +705,7 @@ body.dark-mode:not(.mode-register) table{
 }
 body.dark-mode:not(.mode-register) thead th{
   background:rgba(255,255,255,.07)!important;
-  color:rgba(255,255,255,.5)!important;
+  color:rgba(255,255,255,.72)!important;
   border-bottom-color:rgba(255,255,255,.08)!important
 }
 body.dark-mode:not(.mode-register) tbody td{
@@ -747,6 +773,12 @@ body.dark-mode:not(.mode-register) .manual-hd:hover{background:rgba(79,126,247,.
 body.dark-mode:not(.mode-register) .manual-body{background:rgba(255,255,255,.03)!important;color:rgba(255,255,255,.75)!important;border-top-color:rgba(255,255,255,.07)!important}
 body.dark-mode:not(.mode-register) .manual-body .note{background:rgba(245,158,11,.12)!important;color:#FCD34D!important}
 body.dark-mode:not(.mode-register) .manual-body .tip{background:rgba(16,185,129,.1)!important;color:#6EE7B7!important}
+body.dark-mode.mode-register .manual-section{border-color:rgba(255,255,255,.12)!important}
+body.dark-mode.mode-register .manual-hd{background:rgba(255,255,255,.07)!important;color:rgba(255,255,255,.85)!important}
+body.dark-mode.mode-register .manual-hd:hover{background:rgba(79,126,247,.2)!important;color:#93BBFF!important}
+body.dark-mode.mode-register .manual-body{background:rgba(255,255,255,.04)!important;color:rgba(255,255,255,.75)!important;border-top-color:rgba(255,255,255,.08)!important}
+body.dark-mode.mode-register .manual-body .note{background:rgba(245,158,11,.12)!important;color:#FCD34D!important}
+body.dark-mode.mode-register .manual-body .tip{background:rgba(16,185,129,.1)!important;color:#6EE7B7!important}
 body.dark-mode:not(.mode-register) .login-tabs{border-bottom-color:rgba(255,255,255,.09)!important}
 body.dark-mode:not(.mode-register) .login-tab{color:rgba(255,255,255,.45)!important}
 body.dark-mode:not(.mode-register) .login-tab.active{color:var(--primary)!important;border-bottom-color:var(--primary)!important}
@@ -827,7 +859,7 @@ body:not(.dark-mode) .pg-hd-info h2{color:var(--text)}
 .pg-hd-info p{
   font-size:12.5px;margin:0;
 }
-body.dark-mode .pg-hd-info p{color:rgba(255,255,255,.45)}
+body.dark-mode .pg-hd-info p{color:rgba(255,255,255,.62)}
 body:not(.dark-mode) .pg-hd-info p{color:var(--muted)}
 .pg-hd-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0}
 
@@ -839,7 +871,7 @@ body:not(.dark-mode) .pg-hd-info p{color:var(--muted)}
 }
 .sec-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.07)}
 body:not(.dark-mode) .sec-label::after{background:var(--border)}
-body.dark-mode .sec-label{color:rgba(255,255,255,.38)}
+body.dark-mode .sec-label{color:rgba(255,255,255,.58)}
 body:not(.dark-mode) .sec-label{color:var(--muted)}
 
 /* Filter bar redesign */
@@ -863,7 +895,7 @@ body:not(.dark-mode) .filter-bar input{
 }
 .filter-bar input:focus{border-color:var(--primary)!important;background:rgba(255,255,255,.11)!important}
 body:not(.dark-mode) .filter-bar input:focus{background:#fff!important}
-.filter-bar input::placeholder{color:rgba(255,255,255,.3)}
+.filter-bar input::placeholder{color:rgba(255,255,255,.5)}
 body:not(.dark-mode) .filter-bar input::placeholder{color:var(--muted-l)}
 .filter-bar select{
   padding:7px 10px;border:1.5px solid rgba(255,255,255,.1);border-radius:10px;
@@ -880,8 +912,8 @@ body:not(.dark-mode) .filter-bar select option{background:#fff;color:var(--text)
 
 /* Stats grid improved */
 .stats-grid{margin-bottom:20px}
-.stat-card{border-radius:16px!important;padding:20px!important}
-.stat-card .value{font-size:34px!important}
+.stat-card{border-radius:16px!important}
+@media(min-width:481px){.stat-card{padding:20px!important}.stat-card .value{font-size:34px!important}}
 
 /* Charts card */
 .chart-card{
@@ -891,7 +923,7 @@ body:not(.dark-mode) .filter-bar select option{background:#fff;color:var(--text)
 }
 body:not(.dark-mode) .chart-card{background:var(--card);border-color:rgba(0,0,0,.04);box-shadow:var(--sh)}
 .chart-card-label{
-  font-size:11px;font-weight:700;color:rgba(255,255,255,.38);
+  font-size:11px;font-weight:700;color:rgba(255,255,255,.58);
   letter-spacing:.5px;text-transform:uppercase;margin-bottom:14px
 }
 body:not(.dark-mode) .chart-card-label{color:var(--muted-l)}
@@ -918,6 +950,116 @@ tbody tr{transition:background .1s}
 /* Content padding */
 .content{padding:22px 24px!important}
 @media(max-width:768px){.content{padding:14px 14px!important}}
+
+/* ═══ ADMIN RESPONSIVE ═══════════════════════════════════════════════════ */
+
+/* Page header stacks on mobile */
+@media(max-width:640px){
+  .pg-hd{flex-direction:column;gap:10px;margin-bottom:14px}
+  .pg-hd-info h2{font-size:17px}
+  .pg-hd-actions{width:100%;justify-content:flex-start;gap:6px}
+  .pg-hd-actions .btn{font-size:13px;padding:7px 12px}
+}
+
+/* Stats card: compact on small phones */
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .stat-card{padding:14px 12px!important}
+  .stat-card .value{font-size:26px!important}
+  .stat-card .label{font-size:10.5px}
+}
+
+/* Room/grade grid responsive */
+@media(max-width:640px){
+  .room-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+}
+@media(max-width:420px){
+  .room-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .room-card{padding:12px}
+  .room-card .rname{font-size:13px}
+}
+
+/* Modal: fit viewport on small screens */
+@media(max-width:600px){
+  .modal-overlay{padding:12px 10px;align-items:flex-end}
+  .modal,.modal-box{max-width:100%!important;border-radius:18px 18px 0 0!important;margin-bottom:0}
+  .modal-body{padding:16px}
+  .modal-header{padding:14px 16px 12px}
+  .modal-footer{padding:12px 16px;gap:6px;flex-wrap:wrap}
+}
+@media(max-width:480px){
+  .modal-footer .btn{flex:1;justify-content:center;min-width:100px}
+}
+
+/* Table cells: compact on mobile */
+@media(max-width:600px){
+  thead th{font-size:10.5px;padding:8px 10px}
+  tbody td{font-size:13px;padding:9px 10px}
+}
+
+/* Filter bar: compact on mobile */
+@media(max-width:600px){
+  .filter-bar{padding:10px 12px;gap:6px}
+  .filter-bar input{min-width:0;flex:1}
+}
+
+/* Prevent iOS Safari auto-zoom on input focus */
+@media(max-width:768px){
+  .form-ctrl,.filter-bar input,.filter-bar select,
+  .search-bar input,.search-bar select{font-size:16px!important}
+}
+
+/* Touch targets: larger tap area */
+@media(max-width:768px){
+  .btn{min-height:40px}
+  .btn-sm{min-height:36px;padding:7px 12px!important}
+  .bicon{min-height:36px;min-width:36px;display:inline-flex;align-items:center;justify-content:center}
+  tbody td .btn-sm{min-height:32px;padding:5px 10px!important}
+}
+
+/* Topbar: tighter on very small phones */
+@media(max-width:420px){
+  .topbar{padding:10px 12px}
+  .topbar h1{font-size:15px}
+  .topbar .actions{gap:6px}
+  .topbar .actions .btn{padding:6px 10px;font-size:12.5px}
+}
+
+/* Sidebar brand: compact on mobile */
+@media(max-width:768px){
+  #sidebar .brand{padding:16px 16px 14px}
+  #sidebar .brand img{width:44px;height:44px}
+  #sidebar .brand .school-name{font-size:12px}
+}
+
+/* Search bar: readable on mobile */
+@media(max-width:600px){
+  .search-bar{padding:10px 12px;gap:6px}
+  .search-bar input{min-width:0}
+}
+
+/* Quick-action row wraps well on mobile */
+@media(max-width:480px){
+  .qa-row{gap:6px}
+  .qa-row .btn{font-size:12.5px;padding:7px 10px}
+}
+
+/* Sidebar nav items: better tap targets on mobile */
+@media(max-width:768px){
+  #sidebar nav a{padding:11px 14px;font-size:14px}
+}
+
+/* Table-wrap: ensure clear scroll indicator */
+@media(max-width:768px){
+  .table-wrap{position:relative}
+  .table-wrap::after{
+    content:'';position:absolute;top:0;right:0;width:24px;height:100%;
+    background:linear-gradient(to left,rgba(255,255,255,.25),transparent);
+    pointer-events:none;border-radius:0 16px 16px 0;opacity:.6
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════ */
 
 
 /* ═══════════════════ SMOOTH TRANSITIONS ═══════════════════════ */
@@ -992,19 +1134,19 @@ tbody tr{animation:rowIn .12s ease both}
 #status-app .skel-row{border-bottom-color:rgba(255,255,255,.06)!important}
 
 /* Status app always-dark text overrides — prevent light-mode vars from blending into dark bg */
-#status-app .sta-detail-item{background:rgba(255,255,255,.08)!important}
-#status-app .sta-detail-label{color:rgba(255,255,255,.5)!important}
-#status-app .sta-detail-value{color:rgba(255,255,255,.92)!important}
-#status-app .sta-stu-name{color:#F1F5F9!important}
-#status-app .sta-stu-meta,#status-app .sta-stu-date{color:rgba(255,255,255,.45)!important}
-#status-app .sta-stu-num{background:rgba(255,255,255,.08)!important;color:rgba(255,255,255,.4)!important}
-#status-app .sta-stu-card{background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.09)!important}
-#status-app .sta-stu-card:hover{background:rgba(255,255,255,.1)!important}
-#status-app .sta-stu-detail{border-top-color:rgba(255,255,255,.08)!important}
-#status-app .sta-detail-top .sta-detail-name{color:#F1F5F9!important}
-#status-app .sta-detail-top .sta-detail-sub{color:rgba(255,255,255,.45)!important}
-#status-app .sta-stu-chevron{color:rgba(255,255,255,.3)!important}
-#status-app .loading-cell{color:rgba(255,255,255,.4)!important}
+body.dark-mode #status-app .sta-detail-item{background:rgba(255,255,255,.08)!important}
+body.dark-mode #status-app .sta-detail-label{color:rgba(255,255,255,.5)!important}
+body.dark-mode #status-app .sta-detail-value{color:rgba(255,255,255,.92)!important}
+body.dark-mode #status-app .sta-stu-name{color:#F1F5F9!important}
+body.dark-mode #status-app .sta-stu-meta,body.dark-mode #status-app .sta-stu-date{color:rgba(255,255,255,.45)!important}
+body.dark-mode #status-app .sta-stu-num{background:rgba(255,255,255,.08)!important;color:rgba(255,255,255,.4)!important}
+body.dark-mode #status-app .sta-stu-card{background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.09)!important}
+body.dark-mode #status-app .sta-stu-card:hover{background:rgba(255,255,255,.1)!important}
+body.dark-mode #status-app .sta-stu-detail{border-top-color:rgba(255,255,255,.08)!important}
+body.dark-mode #status-app .sta-detail-top .sta-detail-name{color:#F1F5F9!important}
+body.dark-mode #status-app .sta-detail-top .sta-detail-sub{color:rgba(255,255,255,.45)!important}
+body.dark-mode #status-app .sta-stu-chevron{color:rgba(255,255,255,.3)!important}
+body.dark-mode #status-app .loading-cell{color:rgba(255,255,255,.4)!important}
 
 
 /* Status App Search Bar */
@@ -1287,7 +1429,7 @@ body:not(.dark-mode) .rc-row b{color:var(--text)}
 body:not(.dark-mode) .sta-stu-card{background:#fff;border:1px solid rgba(0,0,0,.06);box-shadow:0 1px 6px rgba(0,0,0,.04)}
 body:not(.dark-mode) .sta-stu-card:hover{box-shadow:0 4px 14px rgba(79,126,247,.1);border-color:rgba(79,126,247,.15)}
 body:not(.dark-mode) .sta-stu-name{color:var(--text)}
-body:not(.dark-mode) .sta-stu-meta,.sta-stu-date{color:var(--muted)}
+body:not(.dark-mode) .sta-stu-meta,body:not(.dark-mode) .sta-stu-date{color:var(--muted)}
 body:not(.dark-mode) .sta-stu-num{background:var(--bg);color:var(--muted-l)}
 body:not(.dark-mode) #status-app .empty-state .es-title{color:var(--text)}
 body:not(.dark-mode) #status-app .empty-state .es-text{color:var(--muted)}
@@ -1324,21 +1466,21 @@ body.dark-mode .sta-back-btn{background:rgba(255,255,255,.1);border:1px solid rg
 body.dark-mode .sta-back-btn:hover{background:rgba(255,255,255,.18);color:#fff}
 body.dark-mode .sta-refresh-btn{background:rgba(79,126,247,.15);border:1px solid rgba(79,126,247,.3);color:rgba(165,180,252,1)}
 body.dark-mode .sta-refresh-btn:hover{background:rgba(79,126,247,.25)}
-body.dark-mode .sta-breadcrumb{background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07);color:rgba(255,255,255,.4)}
+body.dark-mode .sta-breadcrumb{background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07);color:rgba(255,255,255,.62)}
 body.dark-mode .sta-bc-link{color:rgba(165,180,252,.9)}
 body.dark-mode .sta-bc-sep{color:rgba(255,255,255,.2)}
 body.dark-mode .sta-search-wrap{background:linear-gradient(160deg,#060B1A,#0A1228,#0C0A1E)}
 body.dark-mode .sta-search-box{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12)}
 body.dark-mode .sta-search-box:focus-within{border-color:rgba(79,126,247,.7);background:rgba(255,255,255,.1)}
 body.dark-mode #sta-search-input{color:#F1F5F9}
-body.dark-mode #sta-search-input::placeholder{color:rgba(255,255,255,.35)}
+body.dark-mode #sta-search-input::placeholder{color:rgba(255,255,255,.52)}
 body.dark-mode .sta-body{color:#F1F5F9}
-body.dark-mode .sta-section-hd{color:rgba(255,255,255,.35)}
+body.dark-mode .sta-section-hd{color:rgba(255,255,255,.58)}
 
 /* Dark stat cards */
 body.dark-mode .sta-stat{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 body.dark-mode .sta-stat .sv{color:#fff}
-body.dark-mode .sta-stat .sl{color:rgba(255,255,255,.5)}
+body.dark-mode .sta-stat .sl{color:rgba(255,255,255,.65)}
 body.dark-mode .sta-stat.blue{background:rgba(79,126,247,.1);border-color:rgba(79,126,247,.25);box-shadow:0 4px 20px rgba(79,126,247,.1)}
 body.dark-mode .sta-stat.blue .sv{color:rgba(165,180,252,1)}
 body.dark-mode .sta-stat.yellow{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.25);box-shadow:0 4px 20px rgba(245,158,11,.1)}
@@ -1352,47 +1494,47 @@ body.dark-mode .sta-stat.purple .sv{color:rgba(196,181,253,1)}
 body.dark-mode .sta-grade-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 body.dark-mode .sta-grade-card:hover{background:rgba(255,255,255,.1);box-shadow:0 10px 30px rgba(0,0,0,.3)}
 body.dark-mode .gc-grade{background:linear-gradient(135deg,#818CF8,#A78BFA);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-body.dark-mode .gc-sub{color:rgba(255,255,255,.4)}
+body.dark-mode .gc-sub{color:rgba(255,255,255,.62)}
 body.dark-mode .gc-bar{background:rgba(255,255,255,.08)}
-body.dark-mode .gc-foot{color:rgba(255,255,255,.45)}
+body.dark-mode .gc-foot{color:rgba(255,255,255,.62)}
 
 /* Dark teacher card */
 body.dark-mode .sta-teacher-card{background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);backdrop-filter:blur(10px)}
 body.dark-mode .sta-teacher-card:hover{background:rgba(139,92,246,.15)}
 body.dark-mode .tc-label{color:rgba(196,181,253,1)}
-body.dark-mode .tc-count{color:rgba(255,255,255,.4)}
+body.dark-mode .tc-count{color:rgba(255,255,255,.62)}
 
 /* Dark room cards */
 body.dark-mode .sta-room-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-left:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 body.dark-mode .sta-room-card:hover{background:rgba(255,255,255,.1)}
 body.dark-mode .rc-name{color:#F1F5F9}
-body.dark-mode .rc-stats{color:rgba(255,255,255,.5)}
+body.dark-mode .rc-stats{color:rgba(255,255,255,.65)}
 body.dark-mode .rc-row b{color:rgba(255,255,255,.85)}
 
 /* Dark student cards */
 body.dark-mode .sta-stu-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
 body.dark-mode .sta-stu-card:hover{background:rgba(255,255,255,.08)}
 body.dark-mode .sta-stu-name{color:#F1F5F9}
-body.dark-mode .sta-stu-meta{color:rgba(255,255,255,.4)}
-body.dark-mode .sta-stu-date{color:rgba(255,255,255,.3)}
-body.dark-mode .sta-stu-num{background:rgba(255,255,255,.08);color:rgba(255,255,255,.4)}
+body.dark-mode .sta-stu-meta{color:rgba(255,255,255,.62)}
+body.dark-mode .sta-stu-date{color:rgba(255,255,255,.58)}
+body.dark-mode .sta-stu-num{background:rgba(255,255,255,.08);color:rgba(255,255,255,.62)}
 body.dark-mode .sta-stu-photo-wrap{background:linear-gradient(135deg,rgba(79,126,247,.2),rgba(139,92,246,.15));border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.7)}
 body.dark-mode #status-app .empty-state .es-title{color:rgba(255,255,255,.8)}
-body.dark-mode #status-app .empty-state .es-text{color:rgba(255,255,255,.4)}
+body.dark-mode #status-app .empty-state .es-text{color:rgba(255,255,255,.62)}
 
 /* Dark search results */
 body.dark-mode .sta-result-card{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08)}
 body.dark-mode .sta-result-card:hover{background:rgba(79,126,247,.12);border-color:rgba(79,126,247,.3)}
 body.dark-mode .sta-result-name{color:#F1F5F9}
-body.dark-mode .sta-result-sub{color:rgba(255,255,255,.45)}
-body.dark-mode .sta-search-count{color:rgba(255,255,255,.4)}
+body.dark-mode .sta-result-sub{color:rgba(255,255,255,.65)}
+body.dark-mode .sta-search-count{color:rgba(255,255,255,.62)}
 
 /* Dark status badges */
 body.dark-mode #status-app .badge.b-borrowed{background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);color:rgba(253,230,138,1)}
 body.dark-mode #status-app .badge.b-available{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:rgba(110,231,183,1)}
 body.dark-mode #status-app .badge.b-returned{background:rgba(96,165,250,.15);border:1px solid rgba(96,165,250,.3);color:rgba(147,197,253,1)}
 body.dark-mode #status-app .badge.b-claimed{background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3);color:rgba(196,181,253,1)}
-body.dark-mode #status-app .badge.b-user{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5)}
+body.dark-mode #status-app .badge.b-user{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:rgba(255,255,255,.78)}
 body.dark-mode mark{background:rgba(79,126,247,.35);color:#A5B4FC}
 
 
@@ -1416,10 +1558,16 @@ body.dark-mode:not(.mode-register) .b-claim2{background:rgba(91,33,182,.28)!impo
 
 
 /* ═══ Home page panel system ══════════════════════════════════════════════ */
-body.mode-register .reg-card{overflow:hidden;transition:height .28s cubic-bezier(.16,1,.3,1)}
-body.mode-register .reg-card.panel-open{overflow-y:auto}
+body.mode-register .reg-card{overflow:hidden;transition:height .38s cubic-bezier(.16,1,.3,1),max-width .38s cubic-bezier(.16,1,.3,1),border-radius .38s cubic-bezier(.16,1,.3,1)}
+body.mode-register .reg-card.panel-open{overflow-y:auto;max-width:min(1120px,calc(100vw - 32px))!important}
+body.mode-register .reg-card.panel-open #status-app.show,
+body.mode-register .reg-card.panel-open #modal-issue.show,
+body.mode-register .reg-card.panel-open #modal-login.show,
+body.mode-register .reg-card.panel-open #register-page-app.show,
+body.mode-register .reg-card.panel-open .modal-overlay.show{animation:panelFadeIn .22s ease .18s both}
+@keyframes panelFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 /* Status app is now inside .reg-card — absolute fill covers the card */
-body.mode-register #status-app.show{border-radius:18px}
+body.mode-register #status-app.show,body.mode-register #modal-issue.show,body.mode-register #modal-login.show,body.mode-register #register-page-app.show{border-radius:18px}
 /* Login/Issue modals: in mode-register they are panels inside .reg-card */
 body.mode-register .modal-overlay{position:absolute!important;inset:0!important;background:var(--bg)!important;z-index:10!important;padding:0!important;border-radius:18px!important;overflow-y:auto!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important}
 body.mode-register .modal-overlay.show{display:flex!important}
@@ -1456,8 +1604,6 @@ body.mode-register .modal-overlay .modal-header{border-radius:18px 18px 0 0}
       <p class="rg-school-sub" data-i18n="homeSub">บริการนักเรียน ครู และผู้ดูแลระบบ</p>
     </div>
 
-    <div class="reg-success" id="reg-success"></div>
-
     <div id="reg-start-buttons">
       <div class="rg-grid" aria-label="เมนูหลัก">
         <button class="rg-card-btn rg-blue" onclick="openStatusApp()">
@@ -1472,11 +1618,11 @@ body.mode-register .modal-overlay .modal-header{border-radius:18px 18px 0 0}
           <span class="rg-btn-title" data-i18n="homeBtn2">แจ้งปัญหา</span>
           <span class="rg-btn-sub" data-i18n="homeBtn2Sub">ส่งเรื่องให้ผู้ดูแลตรวจสอบ</span>
         </button>
-        <button class="rg-card-btn rg-green" onclick="openLoginModal()">
+        <button class="rg-card-btn rg-green" onclick="openManual()">
           <span class="rg-btn-glow"></span>
-          <span class="rg-btn-icon">🔑</span>
-          <span class="rg-btn-title" data-i18n="homeBtn3">ครู / นักเรียน</span>
-          <span class="rg-btn-sub" data-i18n="homeBtn3Sub">เข้าสู่ระบบส่วนตัว</span>
+          <span class="rg-btn-icon">📖</span>
+          <span class="rg-btn-title" data-i18n="homeBtn3">คู่มือการใช้งาน</span>
+          <span class="rg-btn-sub" data-i18n="homeBtn3Sub">วิธีใช้งานระบบและคำแนะนำ</span>
         </button>
         <button class="rg-card-btn rg-violet" id="reg-start-btn" onclick="startRegister()">
           <span class="rg-btn-glow"></span>
@@ -1486,67 +1632,7 @@ body.mode-register .modal-overlay .modal-header{border-radius:18px 18px 0 0}
         </button>
       </div>
       <div class="rg-links">
-        <button class="rg-link" onclick="openManual()"><span data-i18n="homeManual">📖 คู่มือการใช้งาน</span></button>
         <button class="rg-link" onclick="enterAdmin()"><span data-i18n="homeAdmin">🔐 ผู้ดูแลระบบ</span></button>
-      </div>
-    </div>
-
-    <div class="reg-form" id="reg-form">
-      <div class="form-group">
-        <label class="form-label">เลือกชั้น / ห้อง *</label>
-        <select id="reg-class" class="form-ctrl" onchange="onRegClassChange()">
-          <option value="">กำลังโหลด...</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">เลือกชื่อนักเรียน *</label>
-        <select id="reg-student" class="form-ctrl" disabled onchange="onRegStudentChange()">
-          <option value="">— เลือกชั้นก่อน —</option>
-        </select>
-        <div class="reg-warn" id="reg-student-warn" style="display:none"></div>
-      </div>
-
-      <!-- กรอกชื่อเอง -->
-      <div class="reg-manual-box" id="reg-manual-student-box">
-        <div class="reg-manual-warn">⚠️ การกรอกชื่อนอกรายการจะแจ้งเตือน Admin และ Super Admin ทันที</div>
-        <div class="reg-manual-row">
-          <div class="form-group" style="flex:0 0 100px">
-            <label class="form-label">คำนำหน้า</label>
-            <select id="reg-prefix" class="form-ctrl">
-              <option>นาย</option><option>นางสาว</option><option>นาง</option>
-              <option>เด็กชาย</option><option>เด็กหญิง</option>
-            </select>
-          </div>
-          <div class="form-group" style="flex:1">
-            <label class="form-label">ชื่อจริง *</label>
-            <input id="reg-first" class="form-ctrl" placeholder="ชื่อจริง">
-          </div>
-          <div class="form-group" style="flex:1">
-            <label class="form-label">นามสกุล *</label>
-            <input id="reg-last" class="form-ctrl" placeholder="นามสกุล">
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">รหัสนักเรียน (ถ้ามี)</label>
-          <input id="reg-code" class="form-ctrl" placeholder="รหัสนักเรียน">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">เลขซีเรียล (Serial) *</label>
-        <div class="autocomplete">
-          <input id="reg-serial" class="form-ctrl" autocomplete="off" maxlength="10"
-                 placeholder="พิมพ์เลขซีเรียลบางตัว แล้วเลือกจากรายการ"
-                 style="text-transform:uppercase"
-                 oninput="this.value=this.value.toUpperCase();onSerialInput()" onfocus="onSerialInput()" onkeydown="onSerialKey(event)" onblur="setTimeout(hideAc,150)">
-          <div class="ac-list" id="serial-ac"></div>
-        </div>
-        <div id="serial-hint" style="font-size:12px;color:var(--muted);margin-top:5px">แสดงเฉพาะเครื่องที่ยังว่าง — หรือพิมพ์ครบ 10 ตัวเพื่อเพิ่มเครื่องใหม่</div>
-        <div id="serial-manual-warn" class="reg-manual-warn" style="display:none;margin-top:6px">⚠️ Serial นี้ไม่อยู่ในรายการ — จะแจ้งเตือน Admin เพื่อตรวจสอบ</div>
-      </div>
-      <div style="display:flex;gap:10px;margin-top:18px">
-        <button class="btn btn-outline" onclick="cancelRegister()">ยกเลิก</button>
-        <button class="btn btn-primary" id="reg-submit" style="flex:1;justify-content:center" onclick="submitRegister()">✅ ลงทะเบียน</button>
       </div>
     </div>
 
@@ -1554,15 +1640,15 @@ body.mode-register .modal-overlay .modal-header{border-radius:18px 18px 0 0}
   <div id="status-app">
     <div class="sta-header">
       <button class="sta-back-btn" id="sta-back-btn" onclick="staBack()">‹</button>
-      <div class="sta-header-title" id="sta-header-title">ตรวจสอบสถานะ</div>
+      <div class="sta-header-title" id="sta-header-title" data-i18n="staTitle">ตรวจสอบสถานะ</div>
       <div style="display:flex;align-items:center;gap:6px">
         <button class="sta-ctrl-btn" id="sta-lang-toggle" onclick="toggleLang()" title="Language">TH</button>
         <button class="sta-ctrl-btn" id="sta-theme-toggle" onclick="toggleDark()" title="Theme">🌙</button>
-        <button class="sta-refresh-btn" onclick="staRefresh()">🔄 รีเฟรช</button>
+        <button class="sta-refresh-btn" id="sta-refresh-btn" onclick="staRefresh()" data-i18n="staRefresh">🔄 รีเฟรช</button>
       </div>
     </div>
     <div class="sta-breadcrumb" id="sta-breadcrumb">
-      <span class="sta-bc-link" onclick="staRender(0)">ภาพรวม</span>
+      <span class="sta-bc-link" onclick="staRender(0)" data-i18n="staBcOverview">ภาพรวม</span>
     </div>
     <div class="sta-search-wrap">
       <div class="sta-search-box">
@@ -1576,243 +1662,412 @@ body.mode-register .modal-overlay .modal-header{border-radius:18px 18px 0 0}
     </div>
   </div>
 
-  <!-- Modal: Issue Report -->
-  <div id="modal-issue" class="modal-overlay">
-    <div class="modal" style="max-width:520px">
-      <div class="modal-header">
-        <h3>⚠️ แจ้งปัญหาไอแพด</h3>
-        <button class="close-btn" onclick="closeModal('modal-issue')">×</button>
+  <!-- Issue App -->
+  <div id="modal-issue">
+    <div class="sta-header">
+      <button class="sta-back-btn" onclick="closeModal('modal-issue')">‹</button>
+      <div class="sta-header-title" data-i18n="issueTitle">⚠️ แจ้งปัญหาไอแพด</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="sta-ctrl-btn" id="issue-theme-btn" onclick="toggleDark()">🌙</button>
       </div>
-      <div class="modal-body">
+    </div>
+    <div class="sta-body" style="max-width:700px;display:flex;flex-direction:column;gap:0">
 
-        <!-- Step 1: Enter student code -->
-        <div id="issue-step1" class="issue-step active">
-          <div class="form-group">
-            <label class="form-label">รหัสนักเรียน *</label>
-            <div style="display:flex;gap:8px">
-              <input id="issue-student-code" class="form-ctrl" placeholder="กรอกรหัสนักเรียน" maxlength="20" oninput="this.value=this.value.trim()" onkeydown="if(event.key==='Enter')lookupStudentForIssue()">
-              <button class="btn btn-primary" onclick="lookupStudentForIssue()" id="btn-lookup-issue">ค้นหา</button>
-            </div>
-          </div>
-          <div id="issue-lookup-msg" style="font-size:13px;color:var(--danger);margin-top:6px;display:none"></div>
-        </div>
-
-        <!-- Step 2: Student info + issue form -->
-        <div id="issue-step2" class="issue-step">
-          <div class="stu-info-box" id="issue-stu-info"></div>
-          <div class="form-group">
-            <label class="form-label">ประเภทปัญหา *</label>
-            <select id="issue-type" class="form-ctrl">
-              <option value="">— เลือกประเภท —</option>
-              <option>หน้าจอแตก/แตกร้าว</option>
-              <option>แบตเตอรี่เสีย</option>
-              <option>ปุ่มเสีย</option>
-              <option>ลำโพงเสีย</option>
-              <option>กล้องเสีย</option>
-              <option>ชาร์จไม่ได้</option>
-              <option>ซอฟต์แวร์มีปัญหา</option>
-              <option>อื่นๆ</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">รายละเอียดปัญหา *</label>
-            <textarea id="issue-description" class="form-ctrl" rows="3" placeholder="อธิบายอาการปัญหาโดยละเอียด..."></textarea>
-          </div>
-          <div class="form-group">
-            <label class="form-label">ไฟล์แนบ (รูปภาพ/วิดีโอ สูงสุด 10 ไฟล์)</label>
-            <div class="file-drop-zone" id="issue-drop-zone" onclick="document.getElementById('issue-files').click()"
-                 ondragover="event.preventDefault();this.classList.add('drag-over')"
-                 ondragleave="this.classList.remove('drag-over')"
-                 ondrop="handleIssueDrop(event)">
-              <div style="font-size:28px;margin-bottom:6px">📎</div>
-              <div style="font-size:13px;font-weight:600">คลิกเพื่อเลือกไฟล์ หรือลากมาวาง</div>
-              <div style="font-size:11px;color:var(--muted)">รองรับ JPG, PNG, PDF, MP4 (สูงสุด 10 MB ต่อไฟล์)</div>
-            </div>
-            <input type="file" id="issue-files" multiple accept="image/*,video/mp4,application/pdf" style="display:none" onchange="handleIssueFiles(event)">
-            <div class="file-list" id="issue-file-list"></div>
-            <div id="issue-upload-status" class="upload-status"></div>
+      <!-- Step 1: Enter student code -->
+      <div id="issue-step1" class="issue-step active">
+        <div class="form-group">
+          <label class="form-label" data-i18n="issueLblCode">รหัสนักเรียน *</label>
+          <div style="display:flex;gap:8px">
+            <input id="issue-student-code" class="form-ctrl" placeholder="กรอกรหัสนักเรียน" maxlength="20" oninput="this.value=this.value.trim()" onkeydown="if(event.key==='Enter')lookupStudentForIssue()">
+            <button class="btn btn-primary" onclick="lookupStudentForIssue()" id="btn-lookup-issue" data-i18n="issueBtnSearch">ค้นหา</button>
           </div>
         </div>
-
+        <div id="issue-lookup-msg" style="font-size:13px;color:var(--danger);margin-top:6px;display:none"></div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" id="btn-issue-back" onclick="issueGoBack()" style="display:none">← ย้อนกลับ</button>
-        <button class="btn btn-outline" onclick="closeModal('modal-issue')">ยกเลิก</button>
-        <button class="btn btn-warning" id="btn-issue-submit" onclick="submitIssueForm()" style="display:none">📤 ส่งเรื่อง</button>
+
+      <!-- Step 2: Student info + issue form -->
+      <div id="issue-step2" class="issue-step">
+        <div class="stu-info-box" id="issue-stu-info"></div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="issueLblType">ประเภทปัญหา *</label>
+          <select id="issue-type" class="form-ctrl">
+            <option value="" data-i18n="issueTypeSelect">— เลือกประเภท —</option>
+            <option value="หน้าจอแตก/แตกร้าว" data-i18n="issueType1">หน้าจอแตก/แตกร้าว</option>
+            <option value="แบตเตอรี่เสีย" data-i18n="issueType2">แบตเตอรี่เสีย</option>
+            <option value="ปุ่มเสีย" data-i18n="issueType3">ปุ่มเสีย</option>
+            <option value="ลำโพงเสีย" data-i18n="issueType4">ลำโพงเสีย</option>
+            <option value="กล้องเสีย" data-i18n="issueType5">กล้องเสีย</option>
+            <option value="ชาร์จไม่ได้" data-i18n="issueType6">ชาร์จไม่ได้</option>
+            <option value="ซอฟต์แวร์มีปัญหา" data-i18n="issueType7">ซอฟต์แวร์มีปัญหา</option>
+            <option value="อื่นๆ" data-i18n="issueType8">อื่นๆ</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="issueLblDesc">รายละเอียดปัญหา *</label>
+          <textarea id="issue-description" class="form-ctrl" rows="3" placeholder="อธิบายอาการปัญหาโดยละเอียด..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="issueLblFiles">ไฟล์แนบ (รูปภาพ/วิดีโอ สูงสุด 10 ไฟล์)</label>
+          <div class="file-drop-zone" id="issue-drop-zone" onclick="document.getElementById('issue-files').click()"
+               ondragover="event.preventDefault();this.classList.add('drag-over')"
+               ondragleave="this.classList.remove('drag-over')"
+               ondrop="handleIssueDrop(event)">
+            <div style="font-size:28px;margin-bottom:6px">📎</div>
+            <div style="font-size:13px;font-weight:600" data-i18n="issueDropTitle">คลิกเพื่อเลือกไฟล์ หรือลากมาวาง</div>
+            <div style="font-size:11px;color:var(--muted)" data-i18n="issueDropSub">รองรับ JPG, PNG, PDF, MP4 (สูงสุด 10 MB ต่อไฟล์)</div>
+          </div>
+          <input type="file" id="issue-files" multiple accept="image/*,video/mp4,application/pdf" style="display:none" onchange="handleIssueFiles(event)">
+          <div class="file-list" id="issue-file-list"></div>
+          <div id="issue-upload-status" class="upload-status"></div>
+        </div>
+      </div>
+
+      <div class="app-footer">
+        <button class="btn btn-outline" id="btn-issue-back" onclick="issueGoBack()" style="display:none" data-i18n="issueBtnBack">← ย้อนกลับ</button>
+        <button class="btn btn-outline" onclick="closeModal('modal-issue')" data-i18n="btnCancel">ยกเลิก</button>
+        <button class="btn btn-warning" id="btn-issue-submit" onclick="submitIssueForm()" style="display:none" data-i18n="issueBtnSubmit">📤 ส่งเรื่อง</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal: Login -->
-  <div id="modal-login" class="modal-overlay">
-    <div class="modal" style="max-width:440px">
-      <div class="modal-header">
-        <h3>🔑 เข้าสู่ระบบ</h3>
-        <button class="close-btn" onclick="closeModal('modal-login')">×</button>
+  <!-- Login App -->
+  <div id="modal-login">
+    <div class="sta-header">
+      <button class="sta-back-btn" onclick="closeModal('modal-login')">‹</button>
+      <div class="sta-header-title">🔑 เข้าสู่ระบบ</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="sta-ctrl-btn" id="login-theme-btn" onclick="toggleDark()">🌙</button>
       </div>
-      <div class="modal-body">
-        <div class="login-tabs">
-          <div class="login-tab active" id="tab-student" onclick="switchLoginTab('student')">🎓 นักเรียน</div>
-          <div class="login-tab" id="tab-teacher" onclick="switchLoginTab('teacher')">👩‍🏫 ครู</div>
-          <div class="login-tab" id="tab-admin" onclick="switchLoginTab('admin')">🔧 ผู้ดูแล</div>
-          <div class="login-tab" id="tab-otp" onclick="switchLoginTab('otp')">✉️ OTP</div>
-        </div>
+    </div>
+    <div class="sta-body" style="max-width:540px">
+      <div class="login-tabs">
+        <div class="login-tab active" id="tab-student" onclick="switchLoginTab('student')">🎓 นักเรียน</div>
+        <div class="login-tab" id="tab-teacher" onclick="switchLoginTab('teacher')">👩‍🏫 ครู</div>
+        <div class="login-tab" id="tab-admin" onclick="switchLoginTab('admin')">🔧 ผู้ดูแล</div>
+        <div class="login-tab" id="tab-otp" onclick="switchLoginTab('otp')">✉️ OTP</div>
+      </div>
 
-        <!-- Student pane -->
-        <div id="pane-student" class="login-pane active">
-          <!-- Step 1: code lookup -->
-          <div id="stu-login-step1" class="login-step active">
-            <div class="form-group">
-              <label class="form-label">รหัสนักเรียน *</label>
-              <input id="stu-code-input" class="form-ctrl" placeholder="กรอกรหัสนักเรียน" onkeydown="if(event.key==='Enter')loginStuLookup()">
-            </div>
-            <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="loginStuLookup()">ถัดไป →</button>
+      <!-- Student pane -->
+      <div id="pane-student" class="login-pane active">
+        <!-- Step 1: code lookup -->
+        <div id="stu-login-step1" class="login-step active">
+          <div class="form-group">
+            <label class="form-label">รหัสนักเรียน *</label>
+            <input id="stu-code-input" class="form-ctrl" placeholder="กรอกรหัสนักเรียน" onkeydown="if(event.key==='Enter')loginStuLookup()">
           </div>
-          <!-- Step 2a: first-time setup -->
-          <div id="stu-login-step2a" class="login-step">
-            <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:13px">
-              <b id="stu-found-name"></b><br><span style="color:var(--muted)">ยังไม่มีบัญชีในระบบ — ตั้ง username/password ครั้งแรก</span>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Username *</label>
-              <input id="stu-new-username" class="form-ctrl" placeholder="ตั้ง username">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Password *</label>
-              <input id="stu-new-password" class="form-ctrl" type="password" placeholder="ตั้ง password">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Email (สำหรับรับ password ฉุกเฉิน)</label>
-              <input id="stu-new-email" class="form-ctrl" type="email" placeholder="(ถ้ามี)">
-            </div>
-            <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="stuCreateAccount()">✅ สร้างบัญชี</button>
-            <div style="margin-top:10px"><button class="btn btn-outline btn-sm" onclick="resetLoginStep('student')">← กลับ</button></div>
-          </div>
-          <!-- Step 2b: returning login -->
-          <div id="stu-login-step2b" class="login-step">
-            <div style="font-size:13px;color:var(--muted);margin-bottom:12px">บัญชีนักเรียน — <b id="stu-return-name"></b></div>
-            <div class="form-group">
-              <label class="form-label">Username *</label>
-              <input id="stu-username" class="form-ctrl" placeholder="Username">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Password *</label>
-              <input id="stu-password" class="form-ctrl" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')stuLogin()">
-            </div>
-            <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="stuLogin()">เข้าสู่ระบบ</button>
-            <div style="margin-top:8px;display:flex;justify-content:space-between">
-              <button class="btn btn-outline btn-sm" onclick="resetLoginStep('student')">← กลับ</button>
-              <button class="btn btn-outline btn-sm" onclick="stuForgotPassword()">ลืม password</button>
-            </div>
-          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="loginStuLookup()">ถัดไป →</button>
         </div>
-
-        <!-- Admin pane -->
-        <div id="pane-admin" class="login-pane">
-          <p style="font-size:13px;color:var(--muted);margin-bottom:16px">ถ้าอีเมลของท่านมีสิทธิ์อยู่แล้ว ระบบจะเข้าได้ทันทีจากปุ่มผู้ดูแลหน้าแรก หากยังไม่มีสิทธิ์ให้ใช้รหัสผู้ดูแลเริ่มต้น</p>
+        <!-- Step 2a: first-time setup -->
+        <div id="stu-login-step2a" class="login-step">
+          <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:13px">
+            <b id="stu-found-name"></b><br><span style="color:var(--muted)">ยังไม่มีบัญชีในระบบ — ตั้ง username/password ครั้งแรก</span>
+          </div>
           <div class="form-group">
             <label class="form-label">Username *</label>
-            <input id="admin-login-user" class="form-ctrl" placeholder="admin" value="admin">
+            <input id="stu-new-username" class="form-ctrl" placeholder="ตั้ง username">
           </div>
           <div class="form-group">
             <label class="form-label">Password *</label>
-            <input id="admin-login-pass" class="form-ctrl" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')adminPasswordLogin()">
+            <input id="stu-new-password" class="form-ctrl" type="password" placeholder="ตั้ง password">
           </div>
-          <label style="display:flex;align-items:center;gap:8px;margin:4px 0 12px;font-size:13px;color:var(--muted);cursor:pointer">
-            <input id="admin-remember-device" type="checkbox" checked>
-            <span>จำเครื่องนี้ไว้ ไม่ต้องกรอกรหัสครั้งหน้า</span>
-          </label>
-          <button class="btn btn-primary" style="width:100%;justify-content:center" id="btn-admin-login" onclick="adminPasswordLogin()">🔧 เข้าสู่ระบบผู้ดูแล</button>
+          <div class="form-group">
+            <label class="form-label">Email (สำหรับรับ password ฉุกเฉิน)</label>
+            <input id="stu-new-email" class="form-ctrl" type="email" placeholder="(ถ้ามี)">
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="stuCreateAccount()">✅ สร้างบัญชี</button>
+          <div style="margin-top:10px"><button class="btn btn-outline btn-sm" onclick="resetLoginStep('student')">← กลับ</button></div>
         </div>
-
-        <!-- OTP pane -->
-        <div id="pane-otp" class="login-pane">
-          <div id="otp-step1" class="login-step active">
-            <p style="font-size:13px;color:var(--muted);margin-bottom:12px">เข้าสู่ระบบด้วย OTP ผ่าน Email สำหรับ <b>ครู, นักเรียน</b> และ <b>ผู้ดูแล</b></p>
-            <div class="form-group">
-              <label class="form-label">Email *</label>
-              <input id="otp-email" class="form-ctrl" type="email" placeholder="กรอก email ของท่าน" onkeydown="if(event.key==='Enter')sendOTP()">
-            </div>
-            <button class="btn btn-primary" style="width:100%;justify-content:center" id="btn-send-otp" onclick="sendOTP()">📧 ส่ง OTP</button>
+        <!-- Step 2b: returning login -->
+        <div id="stu-login-step2b" class="login-step">
+          <div style="font-size:13px;color:var(--muted);margin-bottom:12px">บัญชีนักเรียน — <b id="stu-return-name"></b></div>
+          <div class="form-group">
+            <label class="form-label">Username *</label>
+            <input id="stu-username" class="form-ctrl" placeholder="Username">
           </div>
-          <div id="otp-step2" class="login-step">
-            <div style="background:#EEF2FF;border:1px solid #C7D7FD;border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:13px">
-              ส่ง OTP ไปที่ <b id="otp-sent-email"></b> แล้ว<br>
-              <span style="color:var(--muted)">หมดอายุใน 5 นาที</span>
-              <span id="otp-countdown" style="float:right;font-family:'Inter',monospace;font-weight:700;color:var(--primary)">5:00</span>
-            </div>
-            <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:#92400E">
-              📬 ไม่พบอีเมล? กรุณาตรวจสอบใน <b>โฟลเดอร์จดหมายขยะ (Spam / Junk)</b>
-            </div>
-            <div class="form-group">
-              <label class="form-label">รหัส OTP 6 หลัก *</label>
-              <input id="otp-code" class="form-ctrl" type="number" placeholder="000000" maxlength="6" style="letter-spacing:6px;font-size:22px;text-align:center;font-family:'Inter',monospace" onkeydown="if(event.key==='Enter')verifyOTPLogin()">
-            </div>
-            <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="verifyOTPLogin()">✅ ยืนยัน OTP</button>
-            <div style="margin-top:10px;display:flex;justify-content:space-between">
-              <button class="btn btn-outline btn-sm" onclick="resetOTPStep()">← กลับ</button>
-              <button class="btn btn-outline btn-sm" id="btn-resend-otp" onclick="sendOTP(true)" disabled>ส่งใหม่</button>
-            </div>
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <input id="stu-password" class="form-ctrl" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')stuLogin()">
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="stuLogin()">เข้าสู่ระบบ</button>
+          <div style="margin-top:8px;display:flex;justify-content:space-between">
+            <button class="btn btn-outline btn-sm" onclick="resetLoginStep('student')">← กลับ</button>
+            <button class="btn btn-outline btn-sm" onclick="stuForgotPassword()">ลืม password</button>
           </div>
         </div>
+      </div>
 
-        <!-- Teacher pane -->
-        <div id="pane-teacher" class="login-pane">
-          <!-- Step 1: name lookup -->
-          <div id="tch-login-step1" class="login-step active">
-            <div class="form-group">
-              <label class="form-label">ชื่อจริง *</label>
-              <input id="tch-first" class="form-ctrl" placeholder="ชื่อจริง">
-            </div>
-            <div class="form-group">
-              <label class="form-label">นามสกุล *</label>
-              <input id="tch-last" class="form-ctrl" placeholder="นามสกุล" onkeydown="if(event.key==='Enter')loginTchLookup()">
-            </div>
-            <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="loginTchLookup()">ถัดไป →</button>
+      <!-- Admin pane -->
+      <div id="pane-admin" class="login-pane">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">ถ้าอีเมลของท่านมีสิทธิ์อยู่แล้ว ระบบจะเข้าได้ทันทีจากปุ่มผู้ดูแลหน้าแรก หากยังไม่มีสิทธิ์ให้ใช้รหัสผู้ดูแลเริ่มต้น</p>
+        <div class="form-group">
+          <label class="form-label">Username *</label>
+          <input id="admin-login-user" class="form-ctrl" placeholder="admin" value="admin">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password *</label>
+          <input id="admin-login-pass" class="form-ctrl" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')adminPasswordLogin()">
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" id="btn-admin-login" onclick="adminPasswordLogin()">🔧 เข้าสู่ระบบผู้ดูแล</button>
+      </div>
+
+      <!-- OTP pane -->
+      <div id="pane-otp" class="login-pane">
+        <div id="otp-step1" class="login-step active">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:12px">เข้าสู่ระบบด้วย OTP ผ่าน Email สำหรับ <b>ครู, นักเรียน</b> และ <b>ผู้ดูแล</b></p>
+          <div class="form-group">
+            <label class="form-label">Email *</label>
+            <input id="otp-email" class="form-ctrl" type="email" placeholder="กรอก email ของท่าน" onkeydown="if(event.key==='Enter')sendOTP()">
           </div>
-          <!-- Step 2a: first-time setup -->
-          <div id="tch-login-step2a" class="login-step">
-            <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:13px">
-              <b id="tch-found-name"></b><br><span style="color:var(--muted)">ยังไม่มีบัญชีในระบบ — ตั้ง username/password</span>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Username *</label>
-              <input id="tch-new-username" class="form-ctrl" placeholder="ตั้ง username">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Password *</label>
-              <input id="tch-new-password" class="form-ctrl" type="password" placeholder="ตั้ง password">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Email (สำหรับรับ password ฉุกเฉิน)</label>
-              <input id="tch-new-email" class="form-ctrl" type="email" placeholder="(ถ้ามี)">
-            </div>
-            <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="tchCreateAccount()">✅ สร้างบัญชี</button>
-            <div style="margin-top:10px"><button class="btn btn-outline btn-sm" onclick="resetLoginStep('teacher')">← กลับ</button></div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center" id="btn-send-otp" onclick="sendOTP()">📧 ส่ง OTP</button>
+        </div>
+        <div id="otp-step2" class="login-step">
+          <div style="background:#EEF2FF;border:1px solid #C7D7FD;border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:13px">
+            ส่ง OTP ไปที่ <b id="otp-sent-email"></b> แล้ว<br>
+            <span style="color:var(--muted)">หมดอายุใน 5 นาที</span>
+            <span id="otp-countdown" style="float:right;font-family:'Inter',monospace;font-weight:700;color:var(--primary)">5:00</span>
           </div>
-          <!-- Step 2b: returning login -->
-          <div id="tch-login-step2b" class="login-step">
-            <div style="font-size:13px;color:var(--muted);margin-bottom:12px">บัญชีครู — <b id="tch-return-name"></b></div>
-            <div class="form-group">
-              <label class="form-label">Username *</label>
-              <input id="tch-username" class="form-ctrl" placeholder="Username">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Password *</label>
-              <input id="tch-password" class="form-ctrl" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')tchLogin()">
-            </div>
-            <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="tchLogin()">เข้าสู่ระบบ</button>
-            <div style="margin-top:8px;display:flex;justify-content:space-between">
-              <button class="btn btn-outline btn-sm" onclick="resetLoginStep('teacher')">← กลับ</button>
-              <button class="btn btn-outline btn-sm" onclick="tchForgotPassword()">ลืม password</button>
-            </div>
+          <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:#92400E">
+            📬 ไม่พบอีเมล? กรุณาตรวจสอบใน <b>โฟลเดอร์จดหมายขยะ (Spam / Junk)</b>
+          </div>
+          <div class="form-group">
+            <label class="form-label">รหัส OTP 6 หลัก *</label>
+            <input id="otp-code" class="form-ctrl" type="number" placeholder="000000" maxlength="6" style="letter-spacing:6px;font-size:22px;text-align:center;font-family:'Inter',monospace" onkeydown="if(event.key==='Enter')verifyOTPLogin()">
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="verifyOTPLogin()">✅ ยืนยัน OTP</button>
+          <div style="margin-top:10px;display:flex;justify-content:space-between">
+            <button class="btn btn-outline btn-sm" onclick="resetOTPStep()">← กลับ</button>
+            <button class="btn btn-outline btn-sm" id="btn-resend-otp" onclick="sendOTP(true)" disabled>ส่งใหม่</button>
           </div>
         </div>
+      </div>
 
-        <div id="login-msg" style="margin-top:12px;font-size:13px;text-align:center;display:none"></div>
+      <!-- Teacher pane -->
+      <div id="pane-teacher" class="login-pane">
+        <!-- Step 1: name lookup -->
+        <div id="tch-login-step1" class="login-step active">
+          <div class="form-group">
+            <label class="form-label">ชื่อจริง *</label>
+            <input id="tch-first" class="form-ctrl" placeholder="ชื่อจริง">
+          </div>
+          <div class="form-group">
+            <label class="form-label">นามสกุล *</label>
+            <input id="tch-last" class="form-ctrl" placeholder="นามสกุล" onkeydown="if(event.key==='Enter')loginTchLookup()">
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="loginTchLookup()">ถัดไป →</button>
+        </div>
+        <!-- Step 2a: first-time setup -->
+        <div id="tch-login-step2a" class="login-step">
+          <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:13px">
+            <b id="tch-found-name"></b><br><span style="color:var(--muted)">ยังไม่มีบัญชีในระบบ — ตั้ง username/password</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Username *</label>
+            <input id="tch-new-username" class="form-ctrl" placeholder="ตั้ง username">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <input id="tch-new-password" class="form-ctrl" type="password" placeholder="ตั้ง password">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email (สำหรับรับ password ฉุกเฉิน)</label>
+            <input id="tch-new-email" class="form-ctrl" type="email" placeholder="(ถ้ามี)">
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="tchCreateAccount()">✅ สร้างบัญชี</button>
+          <div style="margin-top:10px"><button class="btn btn-outline btn-sm" onclick="resetLoginStep('teacher')">← กลับ</button></div>
+        </div>
+        <!-- Step 2b: returning login -->
+        <div id="tch-login-step2b" class="login-step">
+          <div style="font-size:13px;color:var(--muted);margin-bottom:12px">บัญชีครู — <b id="tch-return-name"></b></div>
+          <div class="form-group">
+            <label class="form-label">Username *</label>
+            <input id="tch-username" class="form-ctrl" placeholder="Username">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <input id="tch-password" class="form-ctrl" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')tchLogin()">
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="tchLogin()">เข้าสู่ระบบ</button>
+          <div style="margin-top:8px;display:flex;justify-content:space-between">
+            <button class="btn btn-outline btn-sm" onclick="resetLoginStep('teacher')">← กลับ</button>
+            <button class="btn btn-outline btn-sm" onclick="tchForgotPassword()">ลืม password</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="login-msg" style="margin-top:12px;font-size:13px;text-align:center;display:none"></div>
+    </div>
+  </div>
+
+  <!-- Register Page App -->
+  <div id="register-page-app">
+    <div class="sta-header">
+      <button class="sta-back-btn" onclick="cancelRegister()">‹</button>
+      <div class="sta-header-title" data-i18n="regTitle">📱 ลงทะเบียนรับไอแพด</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="sta-ctrl-btn" id="reg-app-theme-btn" onclick="toggleDark()">🌙</button>
+      </div>
+    </div>
+    <div class="sta-body" style="max-width:640px">
+      <div class="reg-success" id="reg-success"></div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="regLblClass">เลือกชั้น / ห้อง *</label>
+        <select id="reg-class" class="form-ctrl" onchange="onRegClassChange()">
+          <option value="">กำลังโหลด...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="regLblStudent">เลือกชื่อนักเรียน *</label>
+        <select id="reg-student" class="form-ctrl" disabled onchange="onRegStudentChange()">
+          <option value="">— เลือกชั้นก่อน —</option>
+        </select>
+        <div class="reg-warn" id="reg-student-warn" style="display:none"></div>
+      </div>
+
+      <!-- กรอกชื่อเอง -->
+      <div class="reg-manual-box" id="reg-manual-student-box">
+        <div class="reg-manual-warn" data-i18n="regManualWarn">⚠️ การกรอกชื่อนอกรายการจะแจ้งเตือน Admin และ Super Admin ทันที</div>
+        <div class="reg-manual-row">
+          <div class="form-group" style="flex:0 0 100px">
+            <label class="form-label" data-i18n="regLblPrefix">คำนำหน้า</label>
+            <select id="reg-prefix" class="form-ctrl">
+              <option>นาย</option><option>นางสาว</option><option>นาง</option>
+              <option>เด็กชาย</option><option>เด็กหญิง</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex:1">
+            <label class="form-label" data-i18n="regLblFirst">ชื่อจริง *</label>
+            <input id="reg-first" class="form-ctrl" placeholder="ชื่อจริง">
+          </div>
+          <div class="form-group" style="flex:1">
+            <label class="form-label" data-i18n="regLblLast">นามสกุล *</label>
+            <input id="reg-last" class="form-ctrl" placeholder="นามสกุล">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="regLblCode">รหัสนักเรียน (ถ้ามี)</label>
+          <input id="reg-code" class="form-ctrl" placeholder="รหัสนักเรียน">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" data-i18n="regLblSerial">เลขซีเรียล (Serial) *</label>
+        <div class="autocomplete">
+          <input id="reg-serial" class="form-ctrl" autocomplete="off" maxlength="10"
+                 placeholder="พิมพ์เลขซีเรียลบางตัว แล้วเลือกจากรายการ"
+                 style="text-transform:uppercase"
+                 oninput="this.value=this.value.toUpperCase();onSerialInput()" onfocus="onSerialInput()" onkeydown="onSerialKey(event)" onblur="setTimeout(hideAc,150)">
+          <div class="ac-list" id="serial-ac"></div>
+        </div>
+        <div id="serial-hint" style="font-size:12px;color:var(--muted);margin-top:5px" data-i18n="regSerialHint">แสดงเฉพาะเครื่องที่ยังว่าง — หรือพิมพ์ครบ 10 ตัวเพื่อเพิ่มเครื่องใหม่</div>
+        <div id="serial-manual-warn" class="reg-manual-warn" style="display:none;margin-top:6px" data-i18n="regSerialWarn">⚠️ Serial นี้ไม่อยู่ในรายการ — จะแจ้งเตือน Admin เพื่อตรวจสอบ</div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:18px">
+        <button class="btn btn-outline" onclick="cancelRegister()" data-i18n="btnCancel">ยกเลิก</button>
+        <button class="btn btn-primary" id="reg-submit" style="flex:1;justify-content:center" onclick="submitRegister()" data-i18n="regBtnSubmit">✅ ลงทะเบียน</button>
       </div>
     </div>
   </div>
+
+  <!-- Manual Panel -->
+  <div id="modal-manual">
+    <div class="sta-header">
+      <button class="sta-back-btn" onclick="closeModal('modal-manual')">‹</button>
+      <div class="sta-header-title" data-i18n="manualTitle">📖 คู่มือการใช้งาน</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="sta-ctrl-btn" id="manual-theme-btn" onclick="toggleDark()">🌙</button>
+      </div>
+    </div>
+    <div class="sta-body">
+      <div class="manual-section">
+        <div class="manual-hd" onclick="toggleManual(this)">
+          📱 ลงทะเบียนไอแพด — รับเครื่องวันแรก
+          <span class="chevron">▼</span>
+        </div>
+        <div class="manual-body">
+          <ul>
+            <li>กดปุ่ม <b>"ลงทะเบียน"</b> บนหน้าแรก</li>
+            <li>เลือก <b>ชั้น/ห้อง</b> ของตัวเอง</li>
+            <li>เลือก <b>ชื่อ-นามสกุล</b> จากรายการ — ถ้าไม่พบให้เลือก "ชื่อไม่อยู่ในรายการ" แล้วกรอกเอง</li>
+            <li>เลือก <b>Serial Number</b> ที่อยู่บนกล่องหรือหลังเครื่อง</li>
+            <li>กด <b>"ลงทะเบียน"</b> — ระบบบันทึกและแสดงข้อความสำเร็จ</li>
+          </ul>
+          <div class="tip">✅ ทำแค่ครั้งเดียวตอนรับเครื่อง — ไม่ต้องทำซ้ำทุกวัน</div>
+          <div class="note">⚠️ ถ้าพิมพ์ชื่อหรือ Serial เอง Admin จะได้รับแจ้งเตือนทาง Email ให้ตรวจสอบด้วย</div>
+        </div>
+      </div>
+      <div class="manual-section">
+        <div class="manual-hd" onclick="toggleManual(this)">
+          🔍 ตรวจสอบสถานะ — ดูว่าไอแพดอยู่ที่ไหน
+          <span class="chevron">▼</span>
+        </div>
+        <div class="manual-body">
+          <ul>
+            <li>กดปุ่ม <b>"ตรวจสอบสถานะ"</b> บนหน้าแรก</li>
+            <li>เลือก <b>ระดับชั้น</b> แล้วเลือก <b>ห้อง</b></li>
+            <li>จะเห็นรายชื่อนักเรียนทุกคนพร้อมสถานะไอแพดของแต่ละคน</li>
+            <li>กดที่ชื่อนักเรียนเพื่อดูรายละเอียด เช่น Serial, รหัสครุภัณฑ์</li>
+          </ul>
+          <div class="tip">✅ ความหมายสีสถานะ:<br>🟢 ว่าง &nbsp;|&nbsp; 🟡 กำลังยืม &nbsp;|&nbsp; 🔵 คืนแล้ว &nbsp;|&nbsp; 🔴 มีปัญหา/เคลม</div>
+        </div>
+      </div>
+      <div class="manual-section">
+        <div class="manual-hd" onclick="toggleManual(this)">
+          ⚠️ แจ้งปัญหาไอแพด — เครื่องหาย/เสีย/มีรอย
+          <span class="chevron">▼</span>
+        </div>
+        <div class="manual-body">
+          <ul>
+            <li>กดปุ่ม <b>"แจ้งปัญหา"</b> บนหน้าแรก</li>
+            <li>กรอก <b>รหัสนักเรียน</b> แล้วกด <b>"ค้นหา"</b></li>
+            <li>ตรวจสอบว่าชื่อและเครื่องถูกต้อง</li>
+            <li>เลือก <b>ประเภทปัญหา</b> และกรอก <b>รายละเอียด</b> ให้ครบ</li>
+            <li>แนบ <b>รูปภาพ</b> ของเครื่องที่มีปัญหา (ถ้ามี) สูงสุด 10 ไฟล์</li>
+            <li>กด <b>"ส่งเรื่อง"</b> — Admin ได้รับแจ้งทาง Email ทันที</li>
+          </ul>
+          <div class="note">⚠️ หลังส่งเรื่อง สถานะจะเปลี่ยนเป็น "อยู่ระหว่างดำเนินการ" รอ Admin ติดต่อกลับ</div>
+        </div>
+      </div>
+      <div class="manual-section">
+        <div class="manual-hd" onclick="toggleManual(this)">
+          🔐 ผู้ดูแลระบบ (Admin)
+          <span class="chevron">▼</span>
+        </div>
+        <div class="manual-body">
+          <ul>
+            <li>กดลิงก์ <b>"ผู้ดูแลระบบ"</b> ด้านล่างหน้าแรก แล้วใส่รหัสผ่าน Admin</li>
+            <li><b>แดชบอร์ด</b> — สรุปสถิติการยืมทั้งโรงเรียนแบบ real-time</li>
+            <li><b>รายการไอแพด</b> — ค้นหา กรอง แก้ไข เปลี่ยนสถานะ</li>
+            <li><b>ภาพรวมห้องเรียน</b> — ดูสถานะทุกห้องในมุมมองกว้าง</li>
+            <li><b>รายชื่อนักเรียน/ครู</b> — เพิ่ม แก้ไข นำเข้า CSV</li>
+            <li><b>ปัญหาไอแพด</b> — รับเรื่อง ติดตาม อัพเดทสถานะ</li>
+            <li><b>จัดการผู้ใช้</b> — เพิ่ม/ลบบัญชี Admin (Super Admin เท่านั้น)</li>
+          </ul>
+          <div class="tip">✅ Super Admin: ลบข้อมูลและจัดการผู้ใช้ได้ &nbsp;|&nbsp; Admin: จัดการข้อมูลได้แต่ลบไม่ได้</div>
+        </div>
+      </div>
+      <div class="manual-section">
+        <div class="manual-hd" onclick="toggleManual(this)">
+          📂 นำเข้าข้อมูล CSV (สำหรับ Admin)
+          <span class="chevron">▼</span>
+        </div>
+        <div class="manual-body">
+          <b>นำเข้ารายชื่อนักเรียน:</b>
+          <ul>
+            <li>หน้า "รายชื่อนักเรียน" → กด <b>"นำเข้า CSV"</b></li>
+            <li>ไฟล์ต้องมีคอลัมน์: <b>ลำดับ | รหัส | ชื่อ-นามสกุล</b></li>
+            <li>ระบบอ่านชั้น/ห้องจาก header อัตโนมัติ — ลากหลายไฟล์พร้อมกันได้</li>
+          </ul>
+          <b>นำเข้าข้อมูลไอแพด:</b>
+          <ul>
+            <li>หน้า "รายการไอแพด" → กด <b>"นำเข้าจากแบบยืม"</b></li>
+            <li>คอลัมน์: <b>ลำดับ | Serial | รหัสครุภัณฑ์ | รหัสนักเรียน | ชื่อ-นามสกุล</b></li>
+          </ul>
+          <div class="note">⚠️ ไฟล์ต้องเป็น UTF-8 — ใน Excel ให้ Save As → CSV UTF-8 ก่อน import</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   </div>
 </div>
 
@@ -1976,8 +2231,8 @@ body.mode-register .modal-overlay .modal-header{border-radius:18px 18px 0 0}
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Username</th><th>Role</th><th>รหัสผ่าน</th><th>จัดการ</th></tr></thead>
-          <tbody id="admin-accounts-tbody"><tr><td colspan="4" class="loading-cell">กำลังโหลด...</td></tr></tbody>
+          <thead><tr><th>Username</th><th>Email</th><th>Role</th><th>รหัสผ่าน</th><th>จัดการ</th></tr></thead>
+          <tbody id="admin-accounts-tbody"><tr><td colspan="5" class="loading-cell">กำลังโหลด...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -2250,6 +2505,11 @@ body.mode-register .modal-overlay .modal-header{border-radius:18px 18px 0 0}
           <input id="aa-password" class="form-ctrl" type="password" placeholder="รหัสผ่าน">
           <button type="button" onclick="toggleAaPass()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;font-size:18px;opacity:.6" id="aa-pass-eye">👁</button>
         </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email (สำหรับ OTP Login)</label>
+        <input id="aa-email" class="form-ctrl" type="email" placeholder="email@jv.ac.th (ถ้ามี)">
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">ใส่อีเมลเพื่อให้แอดมินล็อกอินด้วย OTP ได้</div>
       </div>
       <div class="form-group">
         <label class="form-label">Role *</label>
@@ -2579,139 +2839,6 @@ body.mode-register .modal-overlay .modal-header{border-radius:18px 18px 0 0}
   </div>
 </div>
 
-<!-- Modal: User Manual -->
-<div id="modal-manual" class="modal-overlay">
-  <div class="modal" style="max-width:640px">
-    <div class="modal-header">
-      <h3>📖 คู่มือการใช้งานระบบไอแพด</h3>
-      <button class="close-btn" onclick="closeModal('modal-manual')">×</button>
-    </div>
-    <div class="modal-body" style="max-height:70vh;overflow-y:auto">
-
-      <div class="manual-section">
-        <div class="manual-hd" onclick="toggleManual(this)">
-          📱 การลงทะเบียนไอแพด
-          <span class="chevron">▼</span>
-        </div>
-        <div class="manual-body">
-          <ul>
-            <li>กดปุ่ม <b>"ลงทะเบียนไอแพด"</b> บนหน้าแรก</li>
-            <li>เลือก <b>ชั้น/ห้อง</b> จากรายการ</li>
-            <li>เลือก <b>ชื่อนักเรียน</b> — ถ้าชื่อไม่อยู่ในรายการให้เลือก "ชื่อไม่อยู่ในรายการ" แล้วกรอกเอง</li>
-            <li>กรอกหรือเลือก <b>เลขซีเรียล (Serial)</b> จาก dropdown</li>
-            <li>กด <b>"ลงทะเบียน"</b> — ระบบจะบันทึกและแสดงผลสำเร็จ</li>
-          </ul>
-          <div class="note">⚠️ ถ้ากรอกชื่อหรือ Serial นอกรายการ Admin จะได้รับแจ้งเตือนทาง Email ทันที</div>
-        </div>
-      </div>
-
-      <div class="manual-section">
-        <div class="manual-hd" onclick="toggleManual(this)">
-          🔍 การตรวจสอบสถานะ
-          <span class="chevron">▼</span>
-        </div>
-        <div class="manual-body">
-          <ul>
-            <li>กดปุ่ม <b>"ตรวจสอบสถานะ"</b> บนหน้าแรก</li>
-            <li>เลือกระดับชั้น → ห้อง → ดูรายชื่อนักเรียนพร้อมสถานะ</li>
-            <li>กดไอคอน <b>ครู</b> เพื่อดูรายชื่อครูและสถานะเครื่อง</li>
-            <li>กด <b>"รีเฟรช"</b> เพื่ออัพเดทข้อมูลล่าสุด</li>
-          </ul>
-          <div class="tip">✅ สถานะสี: เขียว = ว่าง | เหลือง = ยืม | น้ำเงิน = คืนแล้ว | แดง = เคลม/มีปัญหา</div>
-        </div>
-      </div>
-
-      <div class="manual-section">
-        <div class="manual-hd" onclick="toggleManual(this)">
-          ⚠️ การแจ้งปัญหาไอแพด
-          <span class="chevron">▼</span>
-        </div>
-        <div class="manual-body">
-          <ul>
-            <li>กดปุ่ม <b>"แจ้งปัญหาไอแพด"</b> บนหน้าแรก</li>
-            <li>กรอก <b>รหัสนักเรียน</b> แล้วกด "ค้นหา"</li>
-            <li>ตรวจสอบข้อมูลนักเรียนและไอแพดที่แสดงขึ้นมา</li>
-            <li>เลือก <b>ประเภทปัญหา</b> และกรอก <b>รายละเอียด</b></li>
-            <li>แนบ <b>รูปภาพหรือวิดีโอ</b> ได้สูงสุด 10 ไฟล์ (ไม่เกิน 10 MB ต่อไฟล์)</li>
-            <li>กด <b>"ส่งเรื่อง"</b> — Admin จะได้รับแจ้งเตือนทาง Email ทันที</li>
-          </ul>
-          <div class="note">⚠️ หลังส่งเรื่อง สถานะไอแพดจะเปลี่ยนเป็น "อยู่ระหว่างการส่งเรื่อง" จนกว่า Admin จะดำเนินการ</div>
-        </div>
-      </div>
-
-      <div class="manual-section">
-        <div class="manual-hd" onclick="toggleManual(this)">
-          🔑 การเข้าสู่ระบบ (นักเรียน/ครู)
-          <span class="chevron">▼</span>
-        </div>
-        <div class="manual-body">
-          <b>นักเรียน:</b>
-          <ul>
-            <li>กด <b>"เข้าสู่ระบบ"</b> → แท็บ "นักเรียน"</li>
-            <li>กรอก <b>รหัสนักเรียน</b> แล้วกด "ถัดไป"</li>
-            <li>ถ้าเข้าครั้งแรก: ตั้ง <b>Username/Password</b> ใหม่</li>
-            <li>ถ้าเคยตั้งแล้ว: กรอก Username/Password เพื่อเข้าระบบ</li>
-          </ul>
-          <b>ครู:</b>
-          <ul>
-            <li>กด <b>"เข้าสู่ระบบ"</b> → แท็บ "ครู"</li>
-            <li>กรอก <b>ชื่อจริง + นามสกุล</b> แล้วกด "ถัดไป"</li>
-            <li>ถ้าเข้าครั้งแรก: ตั้ง Username/Password ใหม่</li>
-            <li>ถ้าเคยตั้งแล้ว: กรอก Username/Password เพื่อเข้าระบบ</li>
-          </ul>
-          <div class="note">⚠️ ลืม Password: กด "ลืม password" ในหน้า Login — Admin จะได้รับแจ้งเตือนและส่ง Password ใหม่ให้</div>
-        </div>
-      </div>
-
-      <div class="manual-section">
-        <div class="manual-hd" onclick="toggleManual(this)">
-          🏠 การจัดการระบบ (Admin)
-          <span class="chevron">▼</span>
-        </div>
-        <div class="manual-body">
-          <ul>
-            <li><b>แดชบอร์ด</b> — สรุปสถิติและตาราง % การยืมตามชั้น/ห้อง</li>
-            <li><b>รายการไอแพด</b> — ค้นหา กรอง แก้ไข เปลี่ยนสถานะ ลบ (Super Admin)</li>
-            <li><b>ภาพรวมห้องเรียน</b> — card แต่ละห้อง คลิกดูรายชื่อ</li>
-            <li><b>รายชื่อนักเรียน</b> — ค้นหา เพิ่มรายคน นำเข้า CSV หลายไฟล์พร้อมกัน</li>
-            <li><b>รายชื่อครู</b> — เพิ่ม แก้ไข ลบ (Super Admin)</li>
-            <li><b>ปัญหาไอแพด</b> — รับเรื่อง อัพเดทสถานะ ตั้งกำหนดส่งห้อง 441</li>
-            <li><b>จัดการผู้ใช้</b> — เพิ่ม/แก้ไข/ลบบัญชี Admin (Super Admin เท่านั้น)</li>
-            <li><b>รีเซ็ต Password</b> — รีเซ็ต Password นักเรียน/ครูที่ลืม</li>
-          </ul>
-          <div class="tip">✅ Super Admin: สามารถลบข้อมูลและจัดการผู้ใช้ได้ | Admin: จัดการข้อมูลได้แต่ลบไม่ได้</div>
-        </div>
-      </div>
-
-      <div class="manual-section">
-        <div class="manual-hd" onclick="toggleManual(this)">
-          📂 การนำเข้าข้อมูล CSV
-          <span class="chevron">▼</span>
-        </div>
-        <div class="manual-body">
-          <b>นำเข้ารายชื่อนักเรียน:</b>
-          <ul>
-            <li>หน้า "รายชื่อนักเรียน" → กด <b>"นำเข้า CSV"</b></li>
-            <li>ไฟล์ CSV ต้องมีคอลัมน์: <b>ลำดับ, รหัส, ชื่อ-นามสกุล</b></li>
-            <li>ระบบอ่าน ชั้น/ห้อง จาก header อัตโนมัติ — ลากไฟล์หลายไฟล์พร้อมกันได้</li>
-          </ul>
-          <b>นำเข้าจากแบบยืมไอแพด:</b>
-          <ul>
-            <li>หน้า "รายการไอแพด" → กด <b>"นำเข้าจากแบบยืม"</b></li>
-            <li>คอลัมน์: <b>ลำดับ | Serial | รหัสครุภัณฑ์ | รหัสนักเรียน | ชื่อ-นามสกุล</b></li>
-            <li>รองรับทั้งไฟล์นักเรียนและครูในชุดเดียวกัน</li>
-          </ul>
-          <div class="note">⚠️ Encoding: ต้องเป็น UTF-8 (ตรวจสอบก่อน export จาก Excel โดย Save As → CSV UTF-8)</div>
-        </div>
-      </div>
-
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-primary" onclick="closeModal('modal-manual')">ปิด</button>
-    </div>
-  </div>
-</div>
-
 <!-- Modal: Admin Reset Password -->
 <div id="modal-reset-pw" class="modal-overlay">
   <div class="modal" style="max-width:420px">
@@ -2838,8 +2965,7 @@ function clearRememberedAdminToken() {
 }
 
 function saveAdminRememberIfRequested() {
-  var cb = document.getElementById('admin-remember-device');
-  if (!cb || !cb.checked || !_authTok) return;
+  if (!_authTok) return;
   gsr
     .withSuccessHandler(function(r) {
       if (r && r.success && r.rememberToken) saveRememberedAdminToken(r.rememberToken);
@@ -2896,46 +3022,67 @@ function loadRegisterData() { loadClasses(); loadAvailSerials(); }
 
 function loadClasses() {
   var sel = document.getElementById('reg-class');
+  var cached = _cacheGet(_CK_CLASSES);
+  if (cached) {
+    regClasses = cached;
+    sel.innerHTML = regClasses.length
+      ? '<option value="">— เลือกชั้น / ห้อง —</option>' +
+          regClasses.map(function(c,i){ return '<option value="'+i+'">'+c.grade+' / '+c.room+'</option>'; }).join('')
+      : '<option value="">— ยังไม่มีข้อมูลชั้นเรียน —</option>';
+  }
   gsr
     .withSuccessHandler(function(list) {
       regClasses = list || [];
+      _cacheSet(_CK_CLASSES, regClasses);
       sel.innerHTML = regClasses.length
         ? '<option value="">— เลือกชั้น / ห้อง —</option>' +
             regClasses.map(function(c,i){ return '<option value="'+i+'">'+c.grade+' / '+c.room+'</option>'; }).join('')
         : '<option value="">— ยังไม่มีข้อมูลชั้นเรียน —</option>';
     })
-    .withFailureHandler(function(){ sel.innerHTML = '<option value="">— โหลดชั้นเรียนไม่สำเร็จ —</option>'; })
+    .withFailureHandler(function(){
+      if (!cached) sel.innerHTML = '<option value="">— โหลดชั้นเรียนไม่สำเร็จ —</option>';
+    })
     .getGradesRooms();
 }
 
 function loadAvailSerials() {
   serialsLoading = true;
   var hint = document.getElementById('serial-hint');
+  var cached = _cacheGet(_CK_SERIALS);
+  if (cached) {
+    availSerials = cached; serialLoadError = '';
+    if (hint) hint.textContent = 'มีเครื่องว่าง ' + availSerials.length +
+      ' เครื่อง — พิมพ์เพื่อค้นหา หรือกรอกครบ 10 หลักเพื่อเพิ่มเครื่องใหม่';
+  }
   gsr
     .withSuccessHandler(function(list){
       availSerials = list || []; serialLoadError = ''; serialsLoading = false;
+      _cacheSet(_CK_SERIALS, availSerials);
       if (hint) hint.textContent = 'มีเครื่องว่าง ' + availSerials.length +
         ' เครื่อง — พิมพ์เพื่อค้นหา หรือกรอกครบ 10 หลักเพื่อเพิ่มเครื่องใหม่';
     })
     .withFailureHandler(function(e){
-      availSerials = []; serialsLoading = false;
+      serialsLoading = false;
       serialLoadError = (e && (e.message||e)) || 'ไม่ทราบสาเหตุ';
-      if (hint) hint.textContent = 'โหลดรายการเครื่องว่างไม่สำเร็จ — ยังกรอก Serial เองได้';
+      if (!cached) {
+        availSerials = [];
+        if (hint) hint.textContent = 'โหลดรายการเครื่องว่างไม่สำเร็จ — ยังกรอก Serial เองได้';
+      }
     })
     .getAvailableSerials();
 }
 
 function startRegister() {
   document.getElementById('reg-success').classList.remove('show');
-  document.getElementById('reg-start-buttons').style.display = 'none';
-  document.getElementById('reg-form').classList.add('show');
+  openPanelInCard();
+  document.getElementById('register-page-app').classList.add('show');
 }
 
 function cancelRegister() { resetRegisterForm(); }
 
 function resetRegisterForm() {
-  document.getElementById('reg-form').classList.remove('show');
-  document.getElementById('reg-start-buttons').style.display = '';
+  document.getElementById('register-page-app').classList.remove('show');
+  closePanelInCard();
   document.getElementById('reg-class').value = '';
   var st = document.getElementById('reg-student');
   st.innerHTML = '<option value="">— เลือกชั้นก่อน —</option>';
@@ -3145,6 +3292,13 @@ function enterAdmin() {
     .getCurrentUser();
 }
 
+// ── Local cache (stale-while-revalidate) ────────────────────────────────
+var _CK_STATUS  = 'ipad_jv_status';
+var _CK_CLASSES = 'ipad_jv_classes';
+var _CK_SERIALS = 'ipad_jv_serials';
+function _cacheGet(k){try{var v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch(e){return null;}}
+function _cacheSet(k,v){try{if(v==null){localStorage.removeItem(k);}else{localStorage.setItem(k,JSON.stringify(v));}}catch(e){}}
+
 // ── Status App ──────────────────────────────────────────────────────────
 var staData  = null;
 var staLevel = 0;
@@ -3167,7 +3321,7 @@ function openPanelInCard() {
 function closePanelInCard() {
   var rc = document.querySelector('.reg-card');
   if (!rc || !rc.classList.contains('panel-open')) return;
-  if (document.querySelector('#status-app.show, .modal-overlay.show')) return;
+  if (document.querySelector('#status-app.show, #modal-issue.show, #modal-login.show, #register-page-app.show, #modal-manual.show')) return;
   var fromH = rc.offsetHeight;
   rc.style.height = fromH + 'px';
   rc.classList.remove('panel-open');
@@ -3186,22 +3340,29 @@ function closePanelInCard() {
 function openStatusApp() {
   openPanelInCard();
   document.getElementById('status-app').classList.add('show');
-  if (!staData) {
-    document.getElementById('sta-body').innerHTML = logoLoader();
-    gsr
-      .withSuccessHandler(function(d){ staData = d; staRender(0); })
-      .withFailureHandler(function(){ document.getElementById('sta-body').innerHTML = '<div class="loading-cell">❌ โหลดข้อมูลไม่สำเร็จ</div>'; })
-      .getPublicStatus();
+  var cached = _cacheGet(_CK_STATUS);
+  if (!staData && cached) { staData = cached; }
+  if (staData) {
+    staRender(0);
   } else {
-    staRender(staLevel);
+    document.getElementById('sta-body').innerHTML = logoLoader();
   }
+  gsr
+    .withSuccessHandler(function(d){
+      staData = d; _cacheSet(_CK_STATUS, d);
+      if (staLevel === 0) staRender(0);
+    })
+    .withFailureHandler(function(){
+      if (!staData) document.getElementById('sta-body').innerHTML = '<div class="loading-cell">❌ โหลดข้อมูลไม่สำเร็จ</div>';
+    })
+    .getPublicStatus();
 }
 
 function staRefresh() {
   staData = null;
   document.getElementById('sta-body').innerHTML = '<div style="padding:20px">' + skelCardList(4) + '</div>';
   gsr
-    .withSuccessHandler(function(d){ staData = d; staRender(staLevel); })
+    .withSuccessHandler(function(d){ staData = d; _cacheSet(_CK_STATUS, d); staRender(staLevel); })
     .withFailureHandler(function(){ document.getElementById('sta-body').innerHTML = '<div class="loading-cell">❌ โหลดข้อมูลไม่สำเร็จ</div>'; })
     .getPublicStatus();
 }
@@ -3225,8 +3386,8 @@ function staRender(level) {
   backBtn.textContent = level === 0 ? '✕' : '‹';
 
   if (level === 0) {
-    title.textContent = 'ตรวจสอบสถานะ';
-    bc.innerHTML = '<span>ภาพรวม</span>';
+    title.textContent = t('staTitle');
+    bc.innerHTML = '<span>' + t('staBcOverview') + '</span>';
     if (!staData || !staData.stats || !staData.grades) {
       body.innerHTML = '<div class="empty-state"><div class="es-icon">❌</div><div class="es-title">โหลดข้อมูลไม่สำเร็จ</div><div class="es-text">กรุณากดรีเฟรชเพื่อลองใหม่</div></div>';
       return;
@@ -3237,7 +3398,7 @@ function staRender(level) {
     var teacherSection = '';
     if (staData.teacherList && staData.teacherList.length) {
       teacherSection =
-        '<div class="sta-section-hd" style="margin-top:20px">📋 ครู (' + staData.teacherList.length + ' คน)</div>' +
+        '<div class="sta-section-hd" style="margin-top:20px">📋 ' + t('staTeachers') + ' (' + staData.teacherList.length + ' คน)</div>' +
         '<div class="sta-grade-grid sta-teacher-grid">' +
           staTeacherCard(staData.teacherList) +
         '</div>';
@@ -3250,12 +3411,12 @@ function staRender(level) {
     var totalKnown = borrowedDisp + availDisp + (s.returned||0) + probCount;
     body.innerHTML =
       '<div class="sta-stat-grid">' +
-        staStatCard('เครื่องทั้งหมด', s.totalFromDB || s.totalIPads || totalKnown, 'blue') +
-        staStatCard('กำลังยืม', borrowedDisp, 'yellow') +
-        staStatCard('ว่าง/พร้อมยืม', availDisp, 'green') +
-        staStatCard('สถานะพิเศษ', probCount + (s.returned||0), 'purple') +
+        staStatCard(t('staStatTotal'), s.totalFromDB || s.totalIPads || totalKnown, 'blue') +
+        staStatCard(t('staStatBorrowed'), borrowedDisp, 'yellow') +
+        staStatCard(t('staStatAvailable'), availDisp, 'green') +
+        staStatCard(t('staStatSpecial'), probCount + (s.returned||0), 'purple') +
       '</div>' +
-      '<div class="sta-section-hd" style="margin-top:20px">เลือกระดับชั้น</div>' +
+      '<div class="sta-section-hd" style="margin-top:20px">' + t('staSelectGrade') + '</div>' +
       '<div class="sta-grade-grid">' +
         gradeKeys.map(function(g){ return staGradeCard(g, grades[g]); }).join('') +
       '</div>' +
@@ -3263,12 +3424,12 @@ function staRender(level) {
 
   } else if (level === 1) {
     title.textContent = 'ม.' + staGrade;
-    bc.innerHTML = '<span class="sta-bc-link" onclick="staRender(0)">ภาพรวม</span>' +
+    bc.innerHTML = '<span class="sta-bc-link" onclick="staRender(0)">' + t('staBcOverview') + '</span>' +
       '<span class="sta-bc-sep"> › </span><span>ม.' + staGrade + '</span>';
     var rooms = staData.grades[staGrade];
     var roomKeys = Object.keys(rooms).sort(function(a,b){ return Number(a)-Number(b); });
     body.innerHTML =
-      '<div class="sta-section-hd">ม.' + staGrade + ' — ' + roomKeys.length + ' ห้องเรียน</div>' +
+      '<div class="sta-section-hd">ม.' + staGrade + ' — ' + roomKeys.length + ' ' + t('staRoomList') + '</div>' +
       '<div class="sta-room-grid">' +
         roomKeys.map(function(rm){ return staRoomCard(staGrade, rm, rooms[rm]); }).join('') +
       '</div>';
@@ -3276,18 +3437,18 @@ function staRender(level) {
   } else if (level === 2) {
     var rd = staData.grades[staGrade][staRoom];
     title.textContent = 'ม.' + staGrade + '/' + staRoom;
-    bc.innerHTML = '<span class="sta-bc-link" onclick="staRender(0)">ภาพรวม</span>' +
+    bc.innerHTML = '<span class="sta-bc-link" onclick="staRender(0)">' + t('staBcOverview') + '</span>' +
       '<span class="sta-bc-sep"> › </span>' +
       '<span class="sta-bc-link" onclick="staRender(1)">ม.' + staGrade + '</span>' +
-      '<span class="sta-bc-sep"> › </span><span>ห้อง ' + staRoom + '</span>';
+      '<span class="sta-bc-sep"> › </span><span>' + t('staRooms') + ' ' + staRoom + '</span>';
     body.innerHTML =
       '<div class="sta-stat-grid">' +
-        staStatCard('นักเรียน', rd.total, 'blue') +
-        staStatCard('ยืมแล้ว', rd.borrowed, 'yellow') +
-        staStatCard('ว่างอยู่', rd.available, 'green') +
-        staStatCard('ไม่ยืม', rd.noIpad, 'red') +
+        staStatCard(t('staStudents'), rd.total, 'blue') +
+        staStatCard(t('staStuBorrow'), rd.borrowed, 'yellow') +
+        staStatCard(t('staStuAvail'), rd.available, 'green') +
+        staStatCard(t('staStuNoIpad'), rd.noIpad, 'red') +
       '</div>' +
-      '<div class="sta-section-hd">รายชื่อนักเรียน (' + rd.students.length + ' คน)</div>' +
+      '<div class="sta-section-hd">' + t('staStudentList') + ' (' + rd.students.length + ' คน)</div>' +
       '<div class="sta-student-list">' +
         rd.students.map(function(s, i){ return staStuCard(s, i + 1); }).join('') +
       '</div>';
@@ -3322,9 +3483,9 @@ function staGradeCard(grade, rooms) {
       (withIpad===0?'<div style="flex:1;background:#e2e8f0"></div>':'')+
     '</div>' +
     '<div class="gc-foot">' +
-    '<span style="color:rgba(253,230,138,.8)">ยืม '+borrowed+'</span>' +
-    ' · <span style="color:rgba(110,231,183,.8)">ว่าง '+available+'</span>' +
-    (noIpad ? ' · <span style="color:rgba(255,255,255,.35)">ยังไม่ลง '+noIpad+'</span>' : '') +
+    '<span style="color:rgba(253,230,138,.8)">'+t('staBorrow')+' '+borrowed+'</span>' +
+    ' · <span style="color:rgba(110,231,183,.8)">'+t('staAvail')+' '+available+'</span>' +
+    (noIpad ? ' · <span style="color:rgba(255,255,255,.35)">'+t('staNoIpad')+' '+noIpad+'</span>' : '') +
   '</div>' +
   '</div>';
 }
@@ -3333,13 +3494,13 @@ function staRoomCard(grade, room, data) {
   var pct = data.total ? Math.round(data.borrowed/data.total*100) : 0;
   var color = pct >= 80 ? 'var(--success)' : pct >= 50 ? 'var(--warning)' : 'var(--primary)';
   return '<div class="sta-room-card" style="--room-color:'+color+'" onclick="staSelectRoom(\''+grade+'\',\''+room+'\')">'+
-    '<div class="rc-name">ห้อง '+room+'</div>' +
+    '<div class="rc-name">'+t('staRooms')+' '+room+'</div>' +
     '<div class="rc-stats">' +
-      '<div class="rc-row"><span>นักเรียน</span><b>'+data.total+' คน</b></div>' +
-      '<div class="rc-row"><span>ยืมแล้ว</span><b style="color:rgba(253,230,138,1)">'+data.borrowed+'</b></div>' +
-      '<div class="rc-row"><span>ว่าง</span><b style="color:rgba(110,231,183,1)">'+data.available+'</b></div>' +
-      (data.noIpad?'<div class="rc-row"><span>ไม่ลงทะเบียน</span><b style="color:rgba(255,255,255,.35)">'+data.noIpad+'</b></div>':'')+
-      (data.problem?'<div class="rc-row"><span>สถานะพิเศษ</span><b style="color:rgba(196,181,253,1)">'+data.problem+'</b></div>':'')+
+      '<div class="rc-row"><span>'+t('staStudents')+'</span><b>'+data.total+' คน</b></div>' +
+      '<div class="rc-row"><span>'+t('staStuBorrow')+'</span><b style="color:rgba(253,230,138,1)">'+data.borrowed+'</b></div>' +
+      '<div class="rc-row"><span>'+t('staStuAvail')+'</span><b style="color:rgba(110,231,183,1)">'+data.available+'</b></div>' +
+      (data.noIpad?'<div class="rc-row"><span>'+t('staStuNoIpad')+'</span><b style="color:rgba(255,255,255,.35)">'+data.noIpad+'</b></div>':'')+
+      (data.problem?'<div class="rc-row"><span>'+t('staStatSpecial')+'</span><b style="color:rgba(196,181,253,1)">'+data.problem+'</b></div>':'')+
     '</div>' +
   '</div>';
 }
@@ -3351,12 +3512,12 @@ function staStuCard(s, num) {
                  s.status === 'ยังไม่ยืม' ? 'b-available' :
                  s.status === 'คืน' ? 'b-returned' :
                  s.status === 'เคลม' ? 'b-claimed' : 'b-user';
-  var label = noIpad ? 'ยังไม่ลงทะเบียน' : escHtml(s.status||'');
+  var label = noIpad ? t('staStuNoIpad') : escHtml(s.status||'');
   var meta = s.serial
     ? 'S/N: ' + escHtml(s.serial) + (s.assetCode ? '  |  ' + escHtml(s.assetCode) : '')
     : '<span style="color:#94a3b8">—</span>';
   var dateLine = (s.serial && s.borrowDate)
-    ? '<div class="sta-stu-date">ยืม: ' + escHtml(s.borrowDate) + '</div>'
+    ? '<div class="sta-stu-date">'+t('staStuBorrow')+': ' + escHtml(s.borrowDate) + '</div>'
     : '';
   var initials = s.prefix ? escHtml(s.prefix.charAt(0)) : (s.firstName ? escHtml(s.firstName.charAt(0)) : '?');
   var safePhotoUrl = (s.photoUrl && /^https:\/\//.test(s.photoUrl)) ? s.photoUrl : '';
@@ -3365,12 +3526,12 @@ function staStuCard(s, num) {
     '</div>';
   // detail items
   var di = '';
-  if (s.code)       di += '<div class="sta-detail-item"><div class="sta-detail-label">รหัสนักเรียน</div><div class="sta-detail-value">'+escHtml(s.code)+'</div></div>';
-  if (s.ipadId)     di += '<div class="sta-detail-item"><div class="sta-detail-label">iPad ID</div><div class="sta-detail-value">'+escHtml(String(s.ipadId))+'</div></div>';
-  if (s.serial)     di += '<div class="sta-detail-item"><div class="sta-detail-label">Serial Number</div><div class="sta-detail-value">'+escHtml(s.serial)+'</div></div>';
-  if (s.assetCode)  di += '<div class="sta-detail-item"><div class="sta-detail-label">รหัสครุภัณฑ์</div><div class="sta-detail-value">'+escHtml(s.assetCode)+'</div></div>';
-  if (s.borrowDate) di += '<div class="sta-detail-item"><div class="sta-detail-label">วันที่ยืม</div><div class="sta-detail-value">'+escHtml(s.borrowDate)+'</div></div>';
-  di += '<div class="sta-detail-item"><div class="sta-detail-label">สถานะ</div><div class="sta-detail-value"><span class="badge '+badgeCls+'">'+label+'</span></div></div>';
+  if (s.code)       di += '<div class="sta-detail-item"><div class="sta-detail-label">'+t('studentCode')+'</div><div class="sta-detail-value"><span>'+escHtml(s.code)+'</span><button class="sta-copy-btn" onclick="event.stopPropagation();staCopy(this,\''+escHtml(s.code)+'\')" title="คัดลอก">⧉</button></div></div>';
+  if (s.ipadId)     di += '<div class="sta-detail-item"><div class="sta-detail-label">iPad ID</div><div class="sta-detail-value"><span>'+escHtml(String(s.ipadId))+'</span><button class="sta-copy-btn" onclick="event.stopPropagation();staCopy(this,\''+escHtml(String(s.ipadId))+'\')" title="คัดลอก">⧉</button></div></div>';
+  if (s.serial)     di += '<div class="sta-detail-item"><div class="sta-detail-label">'+t('staSerial')+'</div><div class="sta-detail-value"><span>'+escHtml(s.serial)+'</span><button class="sta-copy-btn" onclick="event.stopPropagation();staCopy(this,\''+escHtml(s.serial)+'\')" title="คัดลอก">⧉</button></div></div>';
+  if (s.assetCode)  di += '<div class="sta-detail-item"><div class="sta-detail-label">รหัสครุภัณฑ์</div><div class="sta-detail-value"><span>'+escHtml(s.assetCode)+'</span><button class="sta-copy-btn" onclick="event.stopPropagation();staCopy(this,\''+escHtml(s.assetCode)+'\')" title="คัดลอก">⧉</button></div></div>';
+  if (s.borrowDate) di += '<div class="sta-detail-item"><div class="sta-detail-label">'+t('staStuBorrow')+'</div><div class="sta-detail-value">'+escHtml(s.borrowDate)+'</div></div>';
+  di += '<div class="sta-detail-item"><div class="sta-detail-label">'+t('staStatusLabel')+'</div><div class="sta-detail-value"><span class="badge '+badgeCls+'">'+label+'</span></div></div>';
   var bigPhoto = '<div class="sta-detail-photo">' + initials +
     (safePhotoUrl ? '<img src="'+escHtml(safePhotoUrl)+'" alt="" onerror="this.style.display=\'none\'">' : '') +
     '</div>';
@@ -3403,6 +3564,17 @@ function staStuCard(s, num) {
 
 
 function staToggleStu(el) { el.classList.toggle('expanded'); }
+function staCopy(btn, text) {
+  var orig = btn.textContent;
+  function done() { btn.textContent = '✓'; btn.style.color = '#22c55e'; setTimeout(function(){ btn.textContent = orig; btn.style.color = ''; }, 1400); }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(function(){
+      try { var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); } catch(e) {}
+    });
+  } else {
+    try { var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); } catch(e) {}
+  }
+}
 function staStatCard(label, val, color, icon) {
   var ic = icon || {blue:'👥',yellow:'📱',green:'✅',red:'⚠️',purple:'🔧'}[color] || '';
   return '<div class="sta-stat '+color+'">' +
@@ -3948,25 +4120,27 @@ function delUser(row, email) {
 // ── Admin Accounts ────────────────────────────────────────────────────
 function loadAdminAccounts() {
   document.getElementById('admin-accounts-tbody').innerHTML =
-    '<tr><td colspan="4">' + logoLoader() + '</td></tr>';
+    '<tr><td colspan="5">' + logoLoader() + '</td></tr>';
   gsr
     .withSuccessHandler(function(data) {
       nprogDone(); hideLoading();
       if (!Array.isArray(data) || data.success === false) {
         document.getElementById('admin-accounts-tbody').innerHTML =
-          '<tr><td colspan="4" class="loading-cell">' + ((data && data.message) || 'ไม่มีข้อมูล') + '</td></tr>';
+          '<tr><td colspan="5" class="loading-cell">' + ((data && data.message) || 'ไม่มีข้อมูล') + '</td></tr>';
         return;
       }
       if (!data.length) {
         document.getElementById('admin-accounts-tbody').innerHTML =
-          '<tr><td colspan="4" class="loading-cell">ไม่มีบัญชีแอดมิน</td></tr>';
+          '<tr><td colspan="5" class="loading-cell">ไม่มีบัญชีแอดมิน</td></tr>';
         return;
       }
       document.getElementById('admin-accounts-tbody').innerHTML = data.map(function(a) {
         var isDefault = a.username === 'admin';
+        var emailDisplay = (a.email && !a.email.endsWith('@admin.local')) ? escHtml(a.email) : '<span style="color:var(--muted);font-size:12px">ยังไม่ได้ตั้ง</span>';
         return '<tr>' +
           '<td><strong>' + escHtml(a.username) + '</strong>' +
             (isDefault ? ' <span style="font-size:11px;color:var(--muted)">(ค่าเริ่มต้น)</span>' : '') + '</td>' +
+          '<td style="font-size:13px">' + emailDisplay + '</td>' +
           '<td>' + roleBadge(a.role) + '</td>' +
           '<td style="color:var(--muted);letter-spacing:2px">••••••</td>' +
           '<td>' +
@@ -3987,6 +4161,7 @@ function openAddAdminAccount() {
   document.getElementById('aa-password').value = '';
   document.getElementById('aa-password').placeholder = 'รหัสผ่าน *';
   document.getElementById('aa-pass-label').textContent = 'Password *';
+  document.getElementById('aa-email').value = '';
   document.getElementById('aa-role').value = 'admin';
   openModal('modal-admin-account');
 }
@@ -3999,6 +4174,7 @@ function openEditAdminAccount(a) {
   document.getElementById('aa-password').value = '';
   document.getElementById('aa-password').placeholder = 'รหัสผ่านใหม่ (ว่าง = ไม่เปลี่ยน)';
   document.getElementById('aa-pass-label').textContent = 'Password ใหม่ (ว่าง = ไม่เปลี่ยน)';
+  document.getElementById('aa-email').value = (a.email && !a.email.endsWith('@admin.local')) ? a.email : '';
   document.getElementById('aa-role').value = a.role || 'admin';
   openModal('modal-admin-account');
 }
@@ -4008,6 +4184,7 @@ function saveAdminAccount() {
   var d = {
     username: document.getElementById('aa-username').value.trim(),
     password: document.getElementById('aa-password').value,
+    email:    document.getElementById('aa-email').value.trim(),
     role:     document.getElementById('aa-role').value
   };
   if (!row && (!d.username || !d.password)) {
@@ -4153,7 +4330,12 @@ function roleBadge(r) {
 
 function openModal(id) {
   if (document.body.classList.contains('mode-register')) {
-    // Close any other open modal first to prevent stacking
+    ['modal-issue','modal-login','register-page-app'].forEach(function(oid){
+      if (oid !== id) {
+        var el = document.getElementById(oid);
+        if (el) el.classList.remove('show');
+      }
+    });
     document.querySelectorAll('.modal-overlay.show').forEach(function(m) {
       if (m.id !== id) m.classList.remove('show');
     });
@@ -4747,6 +4929,7 @@ function doImportBorrow() {
 
 // ── User Manual ────────────────────────────────────────────────────────
 function openManual() {
+  openPanelInCard();
   openModal('modal-manual');
 }
 
@@ -6148,6 +6331,11 @@ function verifyOTPLogin() {
 function initAdminWithUser(u) {
   CU = u;
   _authTok = u.token || '';
+  try {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'IPAD_JV_ADMIN_READY' }, 'https://wisanu15.github.io');
+    }
+  } catch(e) {}
   document.getElementById('uname').textContent  = u.name;
   document.getElementById('uemail').textContent = u.email;
   document.getElementById('urole').innerHTML    = roleBadge(u.role);
@@ -6488,11 +6676,44 @@ var I18N = {
     homeSub:'บริการนักเรียน ครู และผู้ดูแลระบบ',
     homeBtn1:'ตรวจสอบสถานะ',homeBtn1Sub:'ดูข้อมูลห้องเรียนและไอแพด',
     homeBtn2:'แจ้งปัญหา',homeBtn2Sub:'ส่งเรื่องให้ผู้ดูแลตรวจสอบ',
-    homeBtn3:'ครู / นักเรียน',homeBtn3Sub:'เข้าสู่ระบบส่วนตัว',
+    homeBtn3:'คู่มือการใช้งาน',homeBtn3Sub:'วิธีใช้งานระบบและคำแนะนำ',
     homeBtn4:'ลงทะเบียน',homeBtn4Sub:'บันทึกการรับไอแพด',
     homeManual:'📖 คู่มือการใช้งาน',homeAdmin:'🔐 ผู้ดูแลระบบ',
     id:'ID', studentCode:'รหัสนักเรียน', prefix:'คำนำหน้า',
     fname:'ชื่อ', lname:'นามสกุล', grade:'ชั้น', room:'ห้อง',
+    // Status app
+    staTitle:'🔍 ตรวจสอบสถานะ', staRefresh:'🔄 รีเฟรช', staBcOverview:'ภาพรวม',
+    staStatTotal:'เครื่องทั้งหมด', staStatBorrowed:'กำลังยืม', staStatAvailable:'ว่าง/พร้อมยืม',
+    staStatSpecial:'สถานะพิเศษ', staSelectGrade:'เลือกระดับชั้น',
+    staTeachers:'ครู', staRooms:'ห้อง', staStudents:'นักเรียน',
+    staBorrow:'ยืม', staAvail:'ว่าง', staNoIpad:'ยังไม่ลง',
+    staRoomList:'ห้องเรียน', staStudentList:'รายชื่อนักเรียน',
+    staStuBorrow:'ยืมแล้ว', staStuAvail:'ว่างอยู่', staStuNoIpad:'ไม่ยืม',
+    staStatusLabel:'สถานะ', staSerial:'Serial',
+    // Issue modal
+    issueTitle:'⚠️ แจ้งปัญหาไอแพด',
+    issueLblCode:'รหัสนักเรียน *', issueBtnSearch:'ค้นหา',
+    issueLblType:'ประเภทปัญหา *', issueTypeSelect:'— เลือกประเภท —',
+    issueType1:'หน้าจอแตก/แตกร้าว', issueType2:'แบตเตอรี่เสีย', issueType3:'ปุ่มเสีย',
+    issueType4:'ลำโพงเสีย', issueType5:'กล้องเสีย', issueType6:'ชาร์จไม่ได้',
+    issueType7:'ซอฟต์แวร์มีปัญหา', issueType8:'อื่นๆ',
+    issueLblDesc:'รายละเอียดปัญหา *', issueLblFiles:'ไฟล์แนบ (รูปภาพ/วิดีโอ สูงสุด 10 ไฟล์)',
+    issueDropTitle:'คลิกเพื่อเลือกไฟล์ หรือลากมาวาง',
+    issueDropSub:'รองรับ JPG, PNG, PDF, MP4 (สูงสุด 10 MB ต่อไฟล์)',
+    issueBtnBack:'← ย้อนกลับ', issueBtnSubmit:'📤 ส่งเรื่อง',
+    // Register panel
+    regTitle:'📱 ลงทะเบียนรับไอแพด',
+    regLblClass:'เลือกชั้น / ห้อง *', regLblStudent:'เลือกชื่อนักเรียน *',
+    regManualWarn:'⚠️ การกรอกชื่อนอกรายการจะแจ้งเตือน Admin และ Super Admin ทันที',
+    regLblPrefix:'คำนำหน้า', regLblFirst:'ชื่อจริง *', regLblLast:'นามสกุล *',
+    regLblCode:'รหัสนักเรียน (ถ้ามี)', regLblSerial:'เลขซีเรียล (Serial) *',
+    regSerialHint:'แสดงเฉพาะเครื่องที่ยังว่าง — หรือพิมพ์ครบ 10 ตัวเพื่อเพิ่มเครื่องใหม่',
+    regSerialWarn:'⚠️ Serial นี้ไม่อยู่ในรายการ — จะแจ้งเตือน Admin เพื่อตรวจสอบ',
+    regBtnSubmit:'✅ ลงทะเบียน',
+    // Manual
+    manualTitle:'📖 คู่มือการใช้งาน',
+    // Common
+    btnCancel:'ยกเลิก',
   },
   en: {
     navHome:'Registration', navDash:'Dashboard', navIpads:'iPad List',
@@ -6504,14 +6725,51 @@ var I18N = {
     homeBadge:'📱 iPad Management System',
     homeSub:'For students, teachers and administrators',
     homeBtn1:'Check Status',homeBtn1Sub:'View classroom and iPad info',
-    homeBtn2:'Report Issue',homeBtn2Sub:'Send to administrator for review',
-    homeBtn3:'Teacher / Student',homeBtn3Sub:'Personal login',
+    homeBtn2:'Report Issue',homeBtn2Sub:'Send a report to the administrator',
+    homeBtn3:'User Manual',homeBtn3Sub:'How-to guide and tips',
     homeBtn4:'Register',homeBtn4Sub:'Record iPad receipt',
     homeManual:'📖 User Manual',homeAdmin:'🔐 Administrator',
     id:'ID', studentCode:'Student Code', prefix:'Title',
     fname:'First Name', lname:'Last Name', grade:'Grade', room:'Room',
+    // Status app
+    staTitle:'🔍 Check Status', staRefresh:'🔄 Refresh', staBcOverview:'Overview',
+    staStatTotal:'Total iPads', staStatBorrowed:'In Use', staStatAvailable:'Available',
+    staStatSpecial:'Special Status', staSelectGrade:'Select Grade Level',
+    staTeachers:'Teachers', staRooms:'rooms', staStudents:'students',
+    staBorrow:'In Use', staAvail:'Available', staNoIpad:'No iPad',
+    staRoomList:'Classrooms', staStudentList:'Student List',
+    staStuBorrow:'Borrowed', staStuAvail:'Available', staStuNoIpad:'No iPad',
+    staStatusLabel:'Status', staSerial:'Serial',
+    // Issue modal
+    issueTitle:'⚠️ Report iPad Issue',
+    issueLblCode:'Student Code *', issueBtnSearch:'Search',
+    issueLblType:'Issue Type *', issueTypeSelect:'— Select type —',
+    issueType1:'Cracked/Broken Screen', issueType2:'Battery Issue', issueType3:'Button Not Working',
+    issueType4:'Speaker Issue', issueType5:'Camera Issue', issueType6:'Cannot Charge',
+    issueType7:'Software Problem', issueType8:'Other',
+    issueLblDesc:'Issue Description *', issueLblFiles:'Attachments (images/video, max 10 files)',
+    issueDropTitle:'Click to select files or drag and drop here',
+    issueDropSub:'Supports JPG, PNG, PDF, MP4 (max 10 MB per file)',
+    issueBtnBack:'← Back', issueBtnSubmit:'📤 Submit',
+    // Register panel
+    regTitle:'📱 iPad Registration',
+    regLblClass:'Select Grade / Room *', regLblStudent:'Select Student *',
+    regManualWarn:'⚠️ Entering a name not on the list will immediately notify Admin and Super Admin',
+    regLblPrefix:'Title', regLblFirst:'First Name *', regLblLast:'Last Name *',
+    regLblCode:'Student Code (optional)', regLblSerial:'Serial Number *',
+    regSerialHint:'Type a serial to search, or enter 10 digits to add a new device',
+    regSerialWarn:'⚠️ This serial is not in the list — Admin will be notified to verify',
+    regBtnSubmit:'✅ Register',
+    // Manual
+    manualTitle:'📖 User Manual',
+    // Common
+    btnCancel:'Cancel',
   }
 };
+
+function t(key) {
+  return (I18N[_lang] && I18N[_lang][key]) || (I18N.th && I18N.th[key]) || key;
+}
 var PAGE_TITLES_EN = {
   dashboard:'Dashboard', ipads:'iPad List', overview:'Classroom Overview',
   students:'Students', users:'Manage Users', log:'Activity Log',
@@ -6523,7 +6781,6 @@ var _dark = false; // always start in light mode for everyone
 function applyLang(lang) {
   _lang = lang;
   localStorage.setItem('app-lang', lang);
-  // update all data-i18n elements
   document.querySelectorAll('[data-i18n]').forEach(function(el) {
     var key = el.getAttribute('data-i18n');
     var val = I18N[lang] && I18N[lang][key];
@@ -6540,6 +6797,19 @@ function applyLang(lang) {
     var b = document.getElementById(id);
     if (b) b.textContent = lang === 'th' ? 'EN' : 'TH';
   });
+  // sync dynamic placeholders
+  var si = document.getElementById('sta-search-input');
+  if (si) si.placeholder = lang === 'en' ? 'Search name, Serial, room, grade...' : 'ค้นหาชื่อ, Serial, ห้อง, ชั้น...';
+  var ic = document.getElementById('issue-student-code');
+  if (ic) ic.placeholder = lang === 'en' ? 'Enter student code' : 'กรอกรหัสนักเรียน';
+  var id2 = document.getElementById('issue-description');
+  if (id2) id2.placeholder = lang === 'en' ? 'Describe the issue in detail...' : 'อธิบายอาการปัญหาโดยละเอียด...';
+  var rs = document.getElementById('reg-serial');
+  if (rs) rs.placeholder = lang === 'en' ? 'Type serial to search, or full 10 digits' : 'พิมพ์เลขซีเรียลบางตัว แล้วเลือกจากรายการ';
+  // re-render status if open
+  if (staData && document.getElementById('status-app').classList.contains('show')) {
+    staRender(staLevel);
+  }
 }
 
 function toggleLang() {
@@ -6553,7 +6823,7 @@ function applyDark(dark) {
   } else {
     document.body.classList.remove('dark-mode');
   }
-  ['theme-toggle','rg-theme-toggle','sta-theme-toggle'].forEach(function(id){
+  ['theme-toggle','rg-theme-toggle','sta-theme-toggle','issue-theme-btn','login-theme-btn','reg-app-theme-btn','manual-theme-btn'].forEach(function(id){
     var b = document.getElementById(id);
     if (b) b.textContent = dark ? '☀️' : '🌙';
   });

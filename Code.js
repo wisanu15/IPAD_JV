@@ -407,7 +407,7 @@ function getAdminAccounts() {
   if (!sheet) return [];
   const data = sheet.getDataRange().getValues();
   return data.slice(1).filter(r => r[0]).map((r, i) => ({
-    row: i + 2, username: String(r[0]), role: String(r[2] || CONFIG.ROLES.SUPER)
+    row: i + 2, username: String(r[0]), role: String(r[2] || CONFIG.ROLES.SUPER), email: String(r[3] || '')
   }));
 }
 
@@ -420,7 +420,7 @@ function addAdminAccount(d) {
   const data = sheet.getDataRange().getValues();
   if (data.slice(1).some(r => String(r[0]).trim().toLowerCase() === String(d.username).trim().toLowerCase()))
     return err('Username นี้มีในระบบแล้ว');
-  sheet.appendRow([d.username.trim(), d.password, d.role || CONFIG.ROLES.ADMIN]);
+  sheet.appendRow([d.username.trim(), d.password, d.role || CONFIG.ROLES.ADMIN, d.email || '']);
   log_(u.email, 'เพิ่มบัญชีแอดมิน', d.username);
   return ok('เพิ่มบัญชีแอดมินสำเร็จ');
 }
@@ -432,7 +432,8 @@ function updateAdminAccount(row, d) {
   const existing = String(sheet.getRange(row, 1).getValue()).trim();
   const newPass = d.password || String(sheet.getRange(row, 2).getValue());
   const newUser = d.username || existing;
-  sheet.getRange(row, 1, 1, 3).setValues([[newUser, newPass, d.role || CONFIG.ROLES.ADMIN]]);
+  const existingEmail = String(sheet.getRange(row, 4).getValue());
+  sheet.getRange(row, 1, 1, 4).setValues([[newUser, newPass, d.role || CONFIG.ROLES.ADMIN, d.email !== undefined ? d.email : existingEmail]]);
   log_(u.email, 'แก้ไขบัญชีแอดมิน', newUser);
   return ok('แก้ไขสำเร็จ');
 }
@@ -508,6 +509,39 @@ function notifyAdmins_(subject, body) {
 }
 
 // ── Admin Auth ────────────────────────────────────────────────────────────────
+
+function notifyAdminPush_(title, message, url, data) {
+  try {
+    const props = PropertiesService.getScriptProperties();
+    const appId = String(props.getProperty('ONESIGNAL_APP_ID') || '').trim();
+    const apiKey = String(props.getProperty('ONESIGNAL_REST_API_KEY') || '').trim();
+    if (!appId || !apiKey) return;
+
+    const payload = {
+      app_id: appId,
+      target_channel: 'push',
+      filters: [{ field: 'tag', key: 'role', relation: '=', value: 'admin' }],
+      headings: { en: title || 'iPad JV', th: title || 'iPad JV' },
+      contents: { en: message || '', th: message || '' },
+      url: url || String(props.getProperty('IPAD_JV_PWA_URL') || 'https://wisanu15.github.io/IPAD_JV/'),
+      data: data || {}
+    };
+
+    const res = UrlFetchApp.fetch('https://onesignal.com/api/v1/notifications', {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { Authorization: 'Basic ' + apiKey },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+    const code = res.getResponseCode();
+    if (code < 200 || code >= 300) {
+      log_('system', 'Push notification failed', code + ': ' + res.getContentText());
+    }
+  } catch(e) {
+    log_('system', 'Push notification error', e.message);
+  }
+}
 
 function adminLogin(user, pass, remember) {
   ensureDefaultAdminAccount_();
@@ -1377,6 +1411,12 @@ function submitIssue(data) {
     `ชั้น/ห้อง: ${lookup.student.grade}/${lookup.student.room}\nSerial: ${lookup.ipad.serial}\n` +
     `ประเภทปัญหา: ${data.issueType || 'ไม่ระบุ'}\nรายละเอียด: ${data.description || '-'}\nเวลา: ${ts}` +
     fileInfo + `\n\nกรุณาเข้าระบบเพื่อดำเนินการ`);
+  notifyAdminPush_(
+    'แจ้งปัญหา iPad ใหม่',
+    `${studentName} ${lookup.student.grade}/${lookup.student.room} | Serial ${lookup.ipad.serial} | ${data.issueType || 'ไม่ระบุประเภท'}`,
+    '',
+    { issueId: newId, serial: lookup.ipad.serial, studentCode: data.studentCode }
+  );
   log_(data.studentCode, 'แจ้งปัญหาไอแพด', `Serial: ${lookup.ipad.serial} | ${data.issueType}`);
   return ok('แจ้งปัญหาสำเร็จ เจ้าหน้าที่จะดำเนินการโดยเร็ว');
 }

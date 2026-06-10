@@ -175,6 +175,45 @@
       text-align: left;
     }
     .install-status.show { display: block; }
+    .notify-fab {
+      position: fixed;
+      right: max(14px, env(safe-area-inset-right));
+      bottom: max(14px, env(safe-area-inset-bottom));
+      z-index: 20;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border: 0;
+      border-radius: 999px;
+      background: #10b981;
+      color: #fff;
+      font-size: 21px;
+      box-shadow: 0 12px 26px rgba(15, 23, 42, .24);
+      cursor: pointer;
+    }
+    .notify-fab.show { display: inline-flex; }
+    .notify-fab.ready { background: #4F7EF7; }
+    .notify-toast {
+      position: fixed;
+      left: max(14px, env(safe-area-inset-left));
+      right: max(14px, env(safe-area-inset-right));
+      bottom: calc(max(14px, env(safe-area-inset-bottom)) + 60px);
+      z-index: 21;
+      display: none;
+      max-width: 440px;
+      margin: 0 auto;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, .94);
+      color: #fff;
+      font-size: 13px;
+      line-height: 1.45;
+      text-align: center;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, .24);
+    }
+    .notify-toast.show { display: block; }
     .setup-panel h1 {
       margin: 0 0 8px;
       font-size: 22px;
@@ -199,14 +238,18 @@
 </head>
 <body>
   <main class="app-shell" id="appShell" aria-label="iPad JV"></main>
+  <button class="notify-fab" id="notifyFab" type="button" aria-label="เปิดแจ้งเตือนผู้ดูแล">🔔</button>
+  <div class="notify-toast" id="notifyToast"></div>
 
   <script src="./config.js"></script>
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
     (function () {
       var deferredInstallPrompt = null;
       var params = new URLSearchParams(window.location.search);
       var configuredUrl = (window.IPAD_JV_CONFIG && window.IPAD_JV_CONFIG.GAS_WEB_APP_URL || '').trim();
       var gasUrl = (params.get('gas') || configuredUrl).trim();
+      var oneSignalAppId = (window.IPAD_JV_CONFIG && window.IPAD_JV_CONFIG.ONESIGNAL_APP_ID || '').trim();
       var shell = document.getElementById('appShell');
 
       if (!gasUrl) {
@@ -232,6 +275,89 @@
       var isChrome = /Chrome|CriOS/i.test(userAgent) && !isInAppBrowser;
       var isSafari = isIOS && /Safari/i.test(userAgent) && !/CriOS|FxiOS|EdgiOS/i.test(userAgent) && !isInAppBrowser;
       var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+      var oneSignalReady = false;
+      var adminNotifyAllowed = false;
+
+      function notifyToast(message) {
+        var el = document.getElementById('notifyToast');
+        if (!el) return;
+        el.textContent = message;
+        el.classList.add('show');
+        clearTimeout(notifyToast._timer);
+        notifyToast._timer = setTimeout(function () { el.classList.remove('show'); }, 3600);
+      }
+
+      function updateNotifyButton() {
+        var btn = document.getElementById('notifyFab');
+        if (!btn) return;
+        if (!oneSignalAppId || !isStandalone || !oneSignalReady || !adminNotifyAllowed) {
+          btn.classList.remove('show');
+          return;
+        }
+        btn.classList.add('show');
+        try {
+          if (window.Notification && Notification.permission === 'granted') {
+            btn.classList.add('ready');
+            btn.textContent = '✓';
+          }
+        } catch (_e) {}
+      }
+
+      function initOneSignal() {
+        if (!oneSignalAppId || !('Notification' in window) || !('serviceWorker' in navigator)) return;
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        window.OneSignalDeferred.push(function (OneSignal) {
+          return OneSignal.init({
+            appId: oneSignalAppId,
+            serviceWorkerPath: 'push/onesignal/OneSignalSDKWorker.js',
+            serviceWorkerParam: { scope: './push/onesignal/' }
+          }).then(function () {
+            oneSignalReady = true;
+            updateNotifyButton();
+          }).catch(function () {
+            oneSignalReady = false;
+          });
+        });
+      }
+
+      function enableAdminNotifications() {
+        if (!oneSignalAppId) {
+          notifyToast('ยังไม่ได้ตั้งค่า OneSignal App ID');
+          return;
+        }
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        window.OneSignalDeferred.push(function (OneSignal) {
+          return Promise.resolve()
+            .then(function () {
+              if (OneSignal.Notifications && OneSignal.Notifications.requestPermission) {
+                return OneSignal.Notifications.requestPermission();
+              }
+            })
+            .then(function () {
+              if (OneSignal.User && OneSignal.User.addTag) {
+                return OneSignal.User.addTag('role', 'admin');
+              }
+            })
+            .then(function () {
+              updateNotifyButton();
+              notifyToast('เปิดแจ้งเตือนผู้ดูแลแล้ว');
+            })
+            .catch(function () {
+              notifyToast('เปิดแจ้งเตือนไม่สำเร็จ กรุณาตรวจสิทธิ์แจ้งเตือนของ Chrome');
+            });
+        });
+      }
+
+      var notifyFab = document.getElementById('notifyFab');
+      if (notifyFab) notifyFab.addEventListener('click', enableAdminNotifications);
+      initOneSignal();
+
+      window.addEventListener('message', function (event) {
+        var data = event && event.data;
+        if (!data || data.type !== 'IPAD_JV_ADMIN_READY') return;
+        adminNotifyAllowed = true;
+        updateNotifyButton();
+      });
 
       function updateInstallButton() {
         var btn = document.getElementById('install-app-btn');
@@ -267,6 +393,7 @@
         iframe.referrerPolicy = 'no-referrer-when-downgrade';
         iframe.allow = 'clipboard-read; clipboard-write; fullscreen';
         shell.appendChild(iframe);
+        updateNotifyButton();
         return;
       }
 
