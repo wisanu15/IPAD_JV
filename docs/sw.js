@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ipad-jv-wrapper-v8';
+const CACHE_NAME = 'ipad-jv-wrapper-v9';
 const SHELL_ASSETS = [
   './',
   './index.html',

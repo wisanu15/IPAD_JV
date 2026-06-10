@@ -134,24 +134,6 @@
       font-weight: 800;
       text-decoration: none;
     }
-    .launch-button.secondary {
-      margin-top: 10px;
-      background: #e8eefc;
-      color: #27468f;
-    }
-    .launch-button.install {
-      display: none;
-      margin-top: 10px;
-      background: #10b981;
-      color: #fff;
-    }
-    .launch-button.copy {
-      margin-top: 10px;
-      border: 0;
-      background: #f1f5f9;
-      color: #334155;
-      cursor: pointer;
-    }
     .launch-note {
       margin-top: 14px;
       font-size: 13px;
@@ -198,7 +180,6 @@
   <script src="./config.js"></script>
   <script>
     (function () {
-      var deferredInstallPrompt = null;
       var params = new URLSearchParams(window.location.search);
       var configuredUrl = (window.IPAD_JV_CONFIG && window.IPAD_JV_CONFIG.GAS_WEB_APP_URL || '').trim();
       var gasUrl = (params.get('gas') || configuredUrl).trim();
@@ -223,19 +204,6 @@
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       var isAndroid = /Android/i.test(userAgent);
       var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-
-      function updateInstallButton() {
-        var btn = document.getElementById('install-app-btn');
-        if (!btn) return;
-        btn.style.display = (deferredInstallPrompt && isAndroid && !isStandalone) ? 'inline-flex' : 'none';
-      }
-
-      window.addEventListener('beforeinstallprompt', function (event) {
-        if (!isAndroid) return;
-        event.preventDefault();
-        deferredInstallPrompt = event;
-        updateInstallButton();
-      });
 
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
@@ -280,41 +248,19 @@
           '<img class="launch-icon" src="./icons/icon-192.png" alt="">' +
           '<h1>iPad JV</h1>' +
           '<p>เปิดระบบบริหารจัดการไอแพดผ่านเบราว์เซอร์หลักของเครื่อง เพื่อให้ Apps Script ทำงานเสถียรที่สุด</p>' +
-          '<a class="launch-button" href="' + primaryUrl.replace(/"/g, '&quot;') + '"' + primaryTarget + '>' + primaryText + '</a>' +
-          '<button class="launch-button install" id="install-app-btn" type="button">ติดตั้งแอป</button>' +
-          '<button class="launch-button copy" id="copy-link-btn" type="button">คัดลอกลิงก์ระบบ</button>' +
-          '<a class="launch-button secondary" target="_blank" rel="noopener" href="' + gasUrl.replace(/"/g, '&quot;') + '">เปิดลิงก์สำรอง</a>' +
+          '<a class="launch-button" id="open-chrome-btn" href="' + primaryUrl.replace(/"/g, '&quot;') + '"' + primaryTarget + '>' + primaryText + '</a>' +
           helpText +
           '<div class="launch-note">' + noteText + '</div>' +
         '</section>';
 
-      var installBtn = document.getElementById('install-app-btn');
-      if (installBtn) {
-        installBtn.addEventListener('click', function () {
-          if (!deferredInstallPrompt) return;
-          deferredInstallPrompt.prompt();
-          deferredInstallPrompt.userChoice.finally(function () {
-            deferredInstallPrompt = null;
-            updateInstallButton();
-          });
+      var openBtn = document.getElementById('open-chrome-btn');
+      if (openBtn && !isIOS) {
+        openBtn.addEventListener('click', function () {
+          setTimeout(function () {
+            window.location.href = gasUrl;
+          }, 250);
         });
       }
-      var copyBtn = document.getElementById('copy-link-btn');
-      if (copyBtn) {
-        copyBtn.addEventListener('click', function () {
-          if (!navigator.clipboard) {
-            window.prompt('คัดลอกลิงก์นี้', gasUrl);
-            return;
-          }
-          navigator.clipboard.writeText(gasUrl).then(function () {
-            copyBtn.textContent = 'คัดลอกแล้ว';
-            setTimeout(function () { copyBtn.textContent = 'คัดลอกลิงก์ระบบ'; }, 1600);
-          }).catch(function () {
-            window.prompt('คัดลอกลิงก์นี้', gasUrl);
-          });
-        });
-      }
-      updateInstallButton();
     }());
   </script>
 </body>
