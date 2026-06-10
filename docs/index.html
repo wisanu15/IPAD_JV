@@ -145,6 +145,25 @@
       display: none;
       margin-top: 10px;
     }
+    .launch-button.copy-safari {
+      display: none;
+      margin-top: 10px;
+      border: 0;
+      background: #0f172a;
+      color: #fff;
+      cursor: pointer;
+    }
+    .safari-link-box {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #eef2ff;
+      color: #334155;
+      font-size: 12px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+      text-align: left;
+    }
     .launch-note {
       margin-top: 14px;
       font-size: 13px;
@@ -278,6 +297,22 @@
       var oneSignalReady = false;
       var adminNotifyAllowed = false;
 
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, function (char) {
+          return {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+          }[char];
+        });
+      }
+
+      function escapeAttr(value) {
+        return escapeHtml(value);
+      }
+
       function notifyToast(message) {
         var el = document.getElementById('notifyToast');
         if (!el) return;
@@ -400,7 +435,7 @@
         return;
       }
 
-      var launcherUrl = new URL('./index.html?v=ios-line-safari-1', window.location.href).href;
+      var launcherUrl = new URL('./index.html?v=ios-safari-copy-1', window.location.href).href;
       var chromeIntentUrl = 'intent://' +
         launcherUrl.replace(/^https?:\/\//, '') +
         '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' +
@@ -409,14 +444,14 @@
       var showOpenChrome = isAndroid && !isChrome && !isStandalone;
       var showSafariHelp = isIOS && !isSafari && !isStandalone;
       var helpText = showSafariHelp ?
-        '<div class="platform-steps"><strong>เปิดด้วย Safari ก่อน:</strong><br>ตอนนี้ยังอยู่ใน LINE/Facebook browser จึงเปิดระบบตรงๆ ไม่ได้<br>1. กดปุ่มแชร์หรือเมนูของ LINE<br>2. เลือก เปิดใน Safari หรือคัดลอกลิงก์นี้ไปเปิดใน Safari<br>3. จาก Safari ให้กดแชร์ แล้วเลือก Add to Home Screen</div>' :
+        '<div class="platform-steps"><strong>ต้องเปิดด้วย Safari ก่อน:</strong><br>iPad/iPhone ไม่อนุญาตให้เว็บใน LINE เด้งออกไป Safari อัตโนมัติเสมอไป<br>1. กด คัดลอกลิงก์สำหรับ Safari<br>2. เปิดแอป Safari แล้ววางลิงก์นี้<br>3. จาก Safari ให้กดแชร์ แล้วเลือก Add to Home Screen</div>' :
         (isIOS ?
           '<div class="platform-steps"><strong>ติดตั้งบน iPhone/iPad:</strong><br>1. กดปุ่มแชร์<br>2. เลือก Add to Home Screen หรือ เพิ่มไปยังหน้าจอโฮม<br>3. เปิดไอคอน iPad JV แล้วระบบจะเข้าแบบเต็มจอ</div>' :
         (showOpenChrome ?
           '<div class="platform-steps"><strong>เปิดด้วย Chrome ก่อน:</strong><br>กดปุ่ม เปิดใน Chrome เพื่อไปหน้าติดตั้งที่ถูกต้อง</div>' :
           '<div class="platform-steps"><strong>ติดตั้งบน Android:</strong><br>1. กดปุ่ม ติดตั้ง<br>2. ถ้าไม่ขึ้นหน้าต่างติดตั้ง ให้กดเมนู Chrome ⋮ แล้วเลือก Install app หรือ Add to Home screen<br>3. หลังติดตั้งเสร็จ ให้เปิดจากไอคอน iPad JV เพื่อทดสอบโหมดเต็มจอ</div>'));
       var noteText = showSafariHelp ?
-        'ห้ามกดเปิดระบบจาก LINE โดยตรง ให้เปิดลิงก์ GitHub Pages นี้ใน Safari ก่อน' :
+        'ถ้ามีเมนู เปิดใน Safari ใน LINE ให้ใช้เมนูนั้นได้เลย ถ้าไม่มีให้คัดลอกลิงก์ไปวางใน Safari' :
         (isIOS ?
           'หน้านี้ใช้สำหรับติดตั้งเท่านั้น หลังติดตั้งให้เข้าแอปจากไอคอนบนหน้าจอหลัก' :
         (showOpenChrome ? 'หน้านี้ยังไม่ได้เปิดใน Chrome จึงยังติดตั้งไม่ได้' : 'หน้านี้ใช้สำหรับติดตั้งเท่านั้น หลังติดตั้งให้เข้าแอปจากไอคอนบนหน้าจอหลัก'));
@@ -426,9 +461,11 @@
           '<img class="launch-icon" src="./icons/icon-192.png" alt="">' +
           '<h1>iPad JV</h1>' +
           '<p>ติดตั้ง iPad JV ไว้ที่หน้าจอหลัก แล้วเปิดใช้งานจากไอคอนแอป</p>' +
-          (isIOS && isSafari ? '<a class="launch-button" href="' + gasUrl.replace(/"/g, '&quot;') + '">เปิดระบบบน Safari</a>' : '') +
+          (isIOS && isSafari ? '<a class="launch-button" href="' + escapeAttr(gasUrl) + '">เปิดระบบบน Safari</a>' : '') +
           '<button class="launch-button install" id="install-app-btn" type="button">ติดตั้ง</button>' +
-          '<a class="launch-button open-chrome" id="open-chrome-btn" href="' + chromeIntentUrl.replace(/"/g, '&quot;') + '">เปิดใน Chrome</a>' +
+          '<a class="launch-button open-chrome" id="open-chrome-btn" href="' + escapeAttr(chromeIntentUrl) + '">เปิดใน Chrome</a>' +
+          '<button class="launch-button copy-safari" id="copy-safari-btn" type="button" data-copy-url="' + escapeAttr(launcherUrl) + '">คัดลอกลิงก์สำหรับ Safari</button>' +
+          (showSafariHelp ? '<div class="safari-link-box">' + escapeHtml(launcherUrl) + '</div>' : '') +
           helpText +
           '<div class="install-status" id="install-status"><strong>ติดตั้งแล้ว</strong><br>ให้ปิด Chrome แล้วเปิดแอปจากไอคอน iPad JV ที่หน้าจอหลัก</div>' +
           '<div class="launch-note">' + noteText + '</div>' +
@@ -436,7 +473,35 @@
 
       var installBtn = document.getElementById('install-app-btn');
       var openChromeBtn = document.getElementById('open-chrome-btn');
+      var copySafariBtn = document.getElementById('copy-safari-btn');
       if (openChromeBtn) openChromeBtn.style.display = showOpenChrome ? 'inline-flex' : 'none';
+      if (copySafariBtn) {
+        copySafariBtn.style.display = showSafariHelp ? 'inline-flex' : 'none';
+        copySafariBtn.addEventListener('click', function () {
+          var url = copySafariBtn.getAttribute('data-copy-url') || launcherUrl;
+          var setCopied = function () {
+            var status = document.getElementById('install-status');
+            if (status) {
+              status.classList.add('show');
+              status.innerHTML = '<strong>คัดลอกแล้ว</strong><br>เปิด Safari แล้ววางลิงก์นี้ จากนั้นกดแชร์เพื่อ Add to Home Screen';
+            }
+          };
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(setCopied).catch(function () {});
+            return;
+          }
+          var ta = document.createElement('textarea');
+          ta.value = url;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'fixed';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand('copy'); } catch (_e) {}
+          document.body.removeChild(ta);
+          setCopied();
+        });
+      }
       if (installBtn) {
         if (showOpenChrome) installBtn.style.display = 'none';
         installBtn.addEventListener('click', function () {
