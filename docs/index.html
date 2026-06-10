@@ -135,7 +135,6 @@
       text-decoration: none;
     }
     .launch-button.install {
-      display: none;
       margin-top: 10px;
       border: 0;
       background: #10b981;
@@ -160,6 +159,18 @@
     .platform-steps strong {
       color: #0f172a;
     }
+    .install-status {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #ecfdf5;
+      color: #065f46;
+      font-size: 13px;
+      line-height: 1.55;
+      text-align: left;
+    }
+    .install-status.show { display: block; }
     .setup-panel h1 {
       margin: 0 0 8px;
       font-size: 22px;
@@ -218,7 +229,8 @@
       function updateInstallButton() {
         var btn = document.getElementById('install-app-btn');
         if (!btn) return;
-        btn.style.display = (deferredInstallPrompt && isAndroid && !isStandalone) ? 'inline-flex' : 'none';
+        btn.style.display = (isAndroid && !isStandalone) ? 'inline-flex' : 'none';
+        btn.textContent = deferredInstallPrompt ? 'ติดตั้ง' : 'ติดตั้งจากเมนู Chrome ⋮';
       }
 
       window.addEventListener('beforeinstallprompt', function (event) {
@@ -256,47 +268,43 @@
         return;
       }
 
-      var launcherUrl = new URL('./index.html?v=line-install-first-1', window.location.href).href;
-      var chromeIntentUrl = 'intent://' +
-        launcherUrl.replace(/^https?:\/\//, '') +
-        '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' +
-        encodeURIComponent(launcherUrl) +
-        ';end';
-      var primaryUrl = isIOS ? gasUrl : chromeIntentUrl;
-      var primaryText = isIOS ? 'เปิดระบบบน Safari' : 'เปิดระบบใน Chrome';
-      var primaryTarget = isIOS ? '' : ' target="_blank" rel="noopener"';
       var helpText = isIOS ?
         '<div class="platform-steps"><strong>ติดตั้งบน iPhone/iPad:</strong><br>1. เปิดหน้านี้ด้วย Safari<br>2. กดปุ่มแชร์<br>3. เลือก Add to Home Screen หรือ เพิ่มไปยังหน้าจอโฮม<br>4. เปิดไอคอน iPad JV แล้วกดปุ่มเปิดระบบ</div>' :
-        '<div class="platform-steps"><strong>ติดตั้งบน Android:</strong><br>เปิดหน้านี้ด้วย Chrome แล้วเลือก Add to Home screen หรือ Install app</div>';
+        '<div class="platform-steps"><strong>ติดตั้งบน Android:</strong><br>1. กดปุ่ม ติดตั้ง<br>2. ถ้าไม่ขึ้นหน้าต่างติดตั้ง ให้กดเมนู Chrome ⋮ แล้วเลือก Install app หรือ Add to Home screen<br>3. หลังติดตั้งเสร็จ ให้กลับไปเปิดจากไอคอน iPad JV ที่หน้าจอหลัก</div>';
       var noteText = isIOS ?
         'ถ้าเปิดจาก LINE/Facebook แล้วไม่ทำงาน ให้คัดลอกลิงก์นี้ไปเปิดใน Safari โดยตรง' :
-        'Android จะเปิดระบบใน Chrome ปกติ ไม่ใช้ iframe เพื่อเลี่ยงหน้า Google Drive error';
+        'หน้านี้ใช้สำหรับติดตั้งเท่านั้น หลังติดตั้งให้เข้าแอปจากไอคอนบนหน้าจอหลัก';
 
       shell.innerHTML =
         '<section class="launch-card">' +
           '<img class="launch-icon" src="./icons/icon-192.png" alt="">' +
           '<h1>iPad JV</h1>' +
-          '<p>เปิดระบบบริหารจัดการไอแพดผ่านเบราว์เซอร์หลักของเครื่อง เพื่อให้ Apps Script ทำงานเสถียรที่สุด</p>' +
+          '<p>ติดตั้ง iPad JV ไว้ที่หน้าจอหลัก แล้วเปิดใช้งานจากไอคอนแอป</p>' +
           '<button class="launch-button install" id="install-app-btn" type="button">ติดตั้ง</button>' +
-          '<a class="launch-button" id="open-chrome-btn" href="' + primaryUrl.replace(/"/g, '&quot;') + '"' + primaryTarget + '>' + primaryText + '</a>' +
           helpText +
+          '<div class="install-status" id="install-status"><strong>ติดตั้งแล้ว</strong><br>ให้ปิด Chrome แล้วเปิดแอปจากไอคอน iPad JV ที่หน้าจอหลัก</div>' +
           '<div class="launch-note">' + noteText + '</div>' +
         '</section>';
 
-      var openBtn = document.getElementById('open-chrome-btn');
-      if (openBtn && !isIOS) {
-        openBtn.addEventListener('click', function () {
-          setTimeout(function () {
-            window.location.href = gasUrl;
-          }, 250);
-        });
-      }
       var installBtn = document.getElementById('install-app-btn');
       if (installBtn) {
         installBtn.addEventListener('click', function () {
-          if (!deferredInstallPrompt) return;
+          if (!deferredInstallPrompt) {
+            var status = document.getElementById('install-status');
+            if (status) {
+              status.classList.add('show');
+              status.innerHTML = '<strong>ติดตั้งด้วยเมนู Chrome</strong><br>กดเมนู ⋮ มุมขวาบน แล้วเลือก Install app หรือ Add to Home screen';
+            }
+            return;
+          }
           deferredInstallPrompt.prompt();
-          deferredInstallPrompt.userChoice.finally(function () {
+          deferredInstallPrompt.userChoice.then(function (choice) {
+            var status = document.getElementById('install-status');
+            if (status && choice && choice.outcome === 'accepted') {
+              status.classList.add('show');
+              status.innerHTML = '<strong>ติดตั้งแล้ว</strong><br>ให้ปิด Chrome แล้วเปิดแอปจากไอคอน iPad JV ที่หน้าจอหลัก';
+            }
+          }).finally(function () {
             deferredInstallPrompt = null;
             updateInstallButton();
           });
