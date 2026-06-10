@@ -445,7 +445,7 @@
         iframe.addEventListener('load', function () {
           try {
             var tok = localStorage.getItem('ipad_jv_admin_remember') || '';
-            if (tok) iframe.contentWindow.postMessage({ type: 'IPAD_JV_SEND_REMEMBER', token: tok }, 'https://script.google.com');
+            if (tok) iframe.contentWindow.postMessage({ type: 'IPAD_JV_SEND_REMEMBER', token: tok }, '*');
           } catch (e) {}
         });
         shell.appendChild(iframe);

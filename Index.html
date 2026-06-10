@@ -2999,6 +2999,7 @@ function tryRememberedAdminLogin(tok) {
 }
 
 window.addEventListener('message', function(e) {
+  if (!e.origin || e.origin.indexOf('wisanu15.github.io') === -1) return;
   if (!e.data || e.data.type !== 'IPAD_JV_SEND_REMEMBER' || !e.data.token) return;
   if (!_authTok) tryRememberedAdminLogin(e.data.token);
 });
