@@ -255,7 +255,7 @@
         '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' +
         encodeURIComponent(gasUrl) +
         ';end';
-      var primaryUrl = gasUrl;
+      var primaryUrl = isIOS ? gasUrl : chromeIntentUrl;
       var primaryText = isIOS ? 'เปิดระบบบน Safari' : 'เปิดระบบใน Chrome';
       var primaryTarget = isIOS ? '' : ' target="_blank" rel="noopener"';
       var helpText = isIOS ?
