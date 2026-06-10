@@ -769,6 +769,12 @@ function registerIPadBatch(registrations, grade, room) {
     notifyAdmins_(`[ไอแพด] แจ้งเตือน: มีการลงทะเบียนด้วยข้อมูลที่กรอกเอง`,
       `มีการลงทะเบียนไอแพดชั้น ${grade}/${room} ที่ใช้ข้อมูลนอกรายการ เมื่อ ${ts}\n\n` +
       lines.join('\n') + `\n\nกรุณาตรวจสอบที่ระบบไอแพดโรงเรียนจักราชวิทยา`);
+    notifyAdminPush_(
+      '⚠️ ลงทะเบียนข้อมูลนอกรายการ',
+      `ชั้น ${grade}/${room} | ${lines[0]}${lines.length > 1 ? ` +อีก ${lines.length - 1} รายการ` : ''}`,
+      '',
+      { grade, room, manualCount: manualEntries.length }
+    );
     log_(u || 'visitor', 'แจ้งเตือน admin', `Manual entry: ${lines.join('; ')}`);
   }
   if (errors.length && !count) return err(errors.join('\n'));
