@@ -250,10 +250,11 @@
         return;
       }
 
+      var launcherUrl = new URL('./index.html?v=line-install-first-1', window.location.href).href;
       var chromeIntentUrl = 'intent://' +
-        gasUrl.replace(/^https?:\/\//, '') +
+        launcherUrl.replace(/^https?:\/\//, '') +
         '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' +
-        encodeURIComponent(gasUrl) +
+        encodeURIComponent(launcherUrl) +
         ';end';
       var primaryUrl = isIOS ? gasUrl : chromeIntentUrl;
       var primaryText = isIOS ? 'เปิดระบบบน Safari' : 'เปิดระบบใน Chrome';
@@ -270,8 +271,8 @@
           '<img class="launch-icon" src="./icons/icon-192.png" alt="">' +
           '<h1>iPad JV</h1>' +
           '<p>เปิดระบบบริหารจัดการไอแพดผ่านเบราว์เซอร์หลักของเครื่อง เพื่อให้ Apps Script ทำงานเสถียรที่สุด</p>' +
-          '<a class="launch-button" id="open-chrome-btn" href="' + primaryUrl.replace(/"/g, '&quot;') + '"' + primaryTarget + '>' + primaryText + '</a>' +
           '<button class="launch-button install" id="install-app-btn" type="button">ติดตั้ง</button>' +
+          '<a class="launch-button" id="open-chrome-btn" href="' + primaryUrl.replace(/"/g, '&quot;') + '"' + primaryTarget + '>' + primaryText + '</a>' +
           helpText +
           '<div class="launch-note">' + noteText + '</div>' +
         '</section>';
