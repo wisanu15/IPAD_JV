@@ -134,6 +134,14 @@
       font-weight: 800;
       text-decoration: none;
     }
+    .launch-button.install {
+      display: none;
+      margin-top: 10px;
+      border: 0;
+      background: #10b981;
+      color: #fff;
+      cursor: pointer;
+    }
     .launch-note {
       margin-top: 14px;
       font-size: 13px;
@@ -180,6 +188,7 @@
   <script src="./config.js"></script>
   <script>
     (function () {
+      var deferredInstallPrompt = null;
       var params = new URLSearchParams(window.location.search);
       var configuredUrl = (window.IPAD_JV_CONFIG && window.IPAD_JV_CONFIG.GAS_WEB_APP_URL || '').trim();
       var gasUrl = (params.get('gas') || configuredUrl).trim();
@@ -204,6 +213,19 @@
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       var isAndroid = /Android/i.test(userAgent);
       var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+      function updateInstallButton() {
+        var btn = document.getElementById('install-app-btn');
+        if (!btn) return;
+        btn.style.display = (deferredInstallPrompt && isAndroid && !isStandalone) ? 'inline-flex' : 'none';
+      }
+
+      window.addEventListener('beforeinstallprompt', function (event) {
+        if (!isAndroid) return;
+        event.preventDefault();
+        deferredInstallPrompt = event;
+        updateInstallButton();
+      });
 
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
@@ -249,6 +271,7 @@
           '<h1>iPad JV</h1>' +
           '<p>เปิดระบบบริหารจัดการไอแพดผ่านเบราว์เซอร์หลักของเครื่อง เพื่อให้ Apps Script ทำงานเสถียรที่สุด</p>' +
           '<a class="launch-button" id="open-chrome-btn" href="' + primaryUrl.replace(/"/g, '&quot;') + '"' + primaryTarget + '>' + primaryText + '</a>' +
+          '<button class="launch-button install" id="install-app-btn" type="button">ติดตั้ง</button>' +
           helpText +
           '<div class="launch-note">' + noteText + '</div>' +
         '</section>';
@@ -261,6 +284,18 @@
           }, 250);
         });
       }
+      var installBtn = document.getElementById('install-app-btn');
+      if (installBtn) {
+        installBtn.addEventListener('click', function () {
+          if (!deferredInstallPrompt) return;
+          deferredInstallPrompt.prompt();
+          deferredInstallPrompt.userChoice.finally(function () {
+            deferredInstallPrompt = null;
+            updateInstallButton();
+          });
+        });
+      }
+      updateInstallButton();
     }());
   </script>
 </body>
