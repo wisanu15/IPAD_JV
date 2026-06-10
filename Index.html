@@ -2954,11 +2954,19 @@ function saveRememberedAdminToken(token) {
   try {
     if (token) localStorage.setItem(ADMIN_REMEMBER_KEY, token);
   } catch(e) {}
+  try {
+    if (token && window.parent !== window)
+      window.parent.postMessage({type:'IPAD_JV_SAVE_REMEMBER', token:token}, 'https://wisanu15.github.io');
+  } catch(e) {}
 }
 
 function clearRememberedAdminToken() {
   var tok = getRememberedAdminToken();
   try { localStorage.removeItem(ADMIN_REMEMBER_KEY); } catch(e) {}
+  try {
+    if (window.parent !== window)
+      window.parent.postMessage({type:'IPAD_JV_CLEAR_REMEMBER'}, 'https://wisanu15.github.io');
+  } catch(e) {}
   if (tok) {
     gsr.withFailureHandler(function(){}).forgetRememberToken(tok);
   }
@@ -2974,9 +2982,9 @@ function saveAdminRememberIfRequested() {
     .createRememberForCurrentSession();
 }
 
-function tryRememberedAdminLogin() {
-  var tok = getRememberedAdminToken();
-  if (!tok) return;
+function tryRememberedAdminLogin(tok) {
+  tok = tok || getRememberedAdminToken();
+  if (!tok || _authTok) return;
   gsr
     .withSuccessHandler(function(r) {
       if (!r || !r.success) {
@@ -2989,6 +2997,11 @@ function tryRememberedAdminLogin() {
     .withFailureHandler(function(){ clearRememberedAdminToken(); })
     .consumeRememberToken(tok);
 }
+
+window.addEventListener('message', function(e) {
+  if (!e.data || e.data.type !== 'IPAD_JV_SEND_REMEMBER' || !e.data.token) return;
+  if (!_authTok) tryRememberedAdminLogin(e.data.token);
+});
 
 var PAGE_TITLES = {
   dashboard:'แดชบอร์ด', ipads:'รายการไอแพด',

@@ -396,9 +396,17 @@
 
       window.addEventListener('message', function (event) {
         var data = event && event.data;
-        if (!data || data.type !== 'IPAD_JV_ADMIN_READY') return;
-        adminNotifyAllowed = true;
-        updateNotifyButton();
+        if (!data) return;
+        if (data.type === 'IPAD_JV_ADMIN_READY') {
+          adminNotifyAllowed = true;
+          updateNotifyButton();
+        }
+        if (data.type === 'IPAD_JV_SAVE_REMEMBER' && data.token) {
+          try { localStorage.setItem('ipad_jv_admin_remember', data.token); } catch(e) {}
+        }
+        if (data.type === 'IPAD_JV_CLEAR_REMEMBER') {
+          try { localStorage.removeItem('ipad_jv_admin_remember'); } catch(e) {}
+        }
       });
 
       function updateInstallButton() {
@@ -434,6 +442,12 @@
         iframe.src = platformGasUrl;
         iframe.referrerPolicy = 'no-referrer-when-downgrade';
         iframe.allow = 'clipboard-read; clipboard-write; fullscreen';
+        iframe.addEventListener('load', function () {
+          try {
+            var tok = localStorage.getItem('ipad_jv_admin_remember') || '';
+            if (tok) iframe.contentWindow.postMessage({ type: 'IPAD_JV_SEND_REMEMBER', token: tok }, 'https://script.google.com');
+          } catch (e) {}
+        });
         shell.appendChild(iframe);
         updateNotifyButton();
         return;
