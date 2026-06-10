@@ -141,6 +141,10 @@
       color: #fff;
       cursor: pointer;
     }
+    .launch-button.open-chrome {
+      display: none;
+      margin-top: 10px;
+    }
     .launch-note {
       margin-top: 14px;
       font-size: 13px;
@@ -224,6 +228,7 @@
       var isIOS = /iPad|iPhone|iPod/.test(userAgent) ||
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       var isAndroid = /Android/i.test(userAgent);
+      var isChrome = /Chrome|CriOS/i.test(userAgent) && !/Line|FBAN|FBAV|Instagram|wv/i.test(userAgent);
       var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
       function updateInstallButton() {
@@ -268,12 +273,21 @@
         return;
       }
 
+      var launcherUrl = new URL('./index.html?v=chrome-check-1', window.location.href).href;
+      var chromeIntentUrl = 'intent://' +
+        launcherUrl.replace(/^https?:\/\//, '') +
+        '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' +
+        encodeURIComponent(launcherUrl) +
+        ';end';
+      var showOpenChrome = isAndroid && !isChrome && !isStandalone;
       var helpText = isIOS ?
         '<div class="platform-steps"><strong>ติดตั้งบน iPhone/iPad:</strong><br>1. เปิดหน้านี้ด้วย Safari<br>2. กดปุ่มแชร์<br>3. เลือก Add to Home Screen หรือ เพิ่มไปยังหน้าจอโฮม<br>4. เปิดไอคอน iPad JV แล้วกดปุ่มเปิดระบบ</div>' :
-        '<div class="platform-steps"><strong>ติดตั้งบน Android:</strong><br>1. กดปุ่ม ติดตั้ง<br>2. ถ้าไม่ขึ้นหน้าต่างติดตั้ง ให้กดเมนู Chrome ⋮ แล้วเลือก Install app หรือ Add to Home screen<br>3. หลังติดตั้งเสร็จ ให้กลับไปเปิดจากไอคอน iPad JV ที่หน้าจอหลัก</div>';
+        (showOpenChrome ?
+          '<div class="platform-steps"><strong>เปิดด้วย Chrome ก่อน:</strong><br>กดปุ่ม เปิดใน Chrome เพื่อไปหน้าติดตั้งที่ถูกต้อง</div>' :
+          '<div class="platform-steps"><strong>ติดตั้งบน Android:</strong><br>1. กดปุ่ม ติดตั้ง<br>2. ถ้าไม่ขึ้นหน้าต่างติดตั้ง ให้กดเมนู Chrome ⋮ แล้วเลือก Install app หรือ Add to Home screen<br>3. หลังติดตั้งเสร็จ ให้กลับไปเปิดจากไอคอน iPad JV ที่หน้าจอหลัก</div>');
       var noteText = isIOS ?
         'ถ้าเปิดจาก LINE/Facebook แล้วไม่ทำงาน ให้คัดลอกลิงก์นี้ไปเปิดใน Safari โดยตรง' :
-        'หน้านี้ใช้สำหรับติดตั้งเท่านั้น หลังติดตั้งให้เข้าแอปจากไอคอนบนหน้าจอหลัก';
+        (showOpenChrome ? 'หน้านี้ยังไม่ได้เปิดใน Chrome จึงยังติดตั้งไม่ได้' : 'หน้านี้ใช้สำหรับติดตั้งเท่านั้น หลังติดตั้งให้เข้าแอปจากไอคอนบนหน้าจอหลัก');
 
       shell.innerHTML =
         '<section class="launch-card">' +
@@ -281,13 +295,17 @@
           '<h1>iPad JV</h1>' +
           '<p>ติดตั้ง iPad JV ไว้ที่หน้าจอหลัก แล้วเปิดใช้งานจากไอคอนแอป</p>' +
           '<button class="launch-button install" id="install-app-btn" type="button">ติดตั้ง</button>' +
+          '<a class="launch-button open-chrome" id="open-chrome-btn" href="' + chromeIntentUrl.replace(/"/g, '&quot;') + '">เปิดใน Chrome</a>' +
           helpText +
           '<div class="install-status" id="install-status"><strong>ติดตั้งแล้ว</strong><br>ให้ปิด Chrome แล้วเปิดแอปจากไอคอน iPad JV ที่หน้าจอหลัก</div>' +
           '<div class="launch-note">' + noteText + '</div>' +
         '</section>';
 
       var installBtn = document.getElementById('install-app-btn');
+      var openChromeBtn = document.getElementById('open-chrome-btn');
+      if (openChromeBtn) openChromeBtn.style.display = showOpenChrome ? 'inline-flex' : 'none';
       if (installBtn) {
+        if (showOpenChrome) installBtn.style.display = 'none';
         installBtn.addEventListener('click', function () {
           if (!deferredInstallPrompt) {
             var status = document.getElementById('install-status');
