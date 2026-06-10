@@ -365,31 +365,29 @@
           notifyToast('ยังไม่ได้ตั้งค่า OneSignal App ID');
           return;
         }
-        if (!oneSignalReady) {
+        if (!oneSignalReady || !window.OneSignal) {
           notifyToast('OneSignal กำลังโหลด กรุณารอสักครู่แล้วลองใหม่');
           return;
         }
-        window.OneSignalDeferred = window.OneSignalDeferred || [];
-        window.OneSignalDeferred.push(function (OneSignal) {
-          return Promise.resolve()
-            .then(function () {
-              if (OneSignal.Notifications && OneSignal.Notifications.requestPermission) {
-                return OneSignal.Notifications.requestPermission();
-              }
-            })
-            .then(function () {
-              if (OneSignal.User && OneSignal.User.addTag) {
-                return OneSignal.User.addTag('role', 'admin');
-              }
-            })
-            .then(function () {
-              updateNotifyButton();
-              notifyToast('เปิดแจ้งเตือนผู้ดูแลแล้ว');
-            })
-            .catch(function () {
-              notifyToast('เปิดแจ้งเตือนไม่สำเร็จ กรุณาตรวจสิทธิ์แจ้งเตือนของ Chrome');
-            });
-        });
+        var OS = window.OneSignal;
+        Promise.resolve()
+          .then(function () {
+            if (OS.Notifications && OS.Notifications.requestPermission) {
+              return OS.Notifications.requestPermission();
+            }
+          })
+          .then(function () {
+            if (OS.User && OS.User.addTag) {
+              return OS.User.addTag('role', 'admin');
+            }
+          })
+          .then(function () {
+            updateNotifyButton();
+            notifyToast('เปิดแจ้งเตือนผู้ดูแลแล้ว');
+          })
+          .catch(function () {
+            notifyToast('เปิดแจ้งเตือนไม่สำเร็จ กรุณาตรวจสิทธิ์แจ้งเตือนของ Chrome');
+          });
       }
 
       var notifyFab = document.getElementById('notifyFab');
