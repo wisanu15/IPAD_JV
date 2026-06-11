@@ -2879,6 +2879,7 @@ body.mode-register .modal-overlay .modal-header{border-radius:18px 18px 0 0}
 var CU = null;        // currentUser
 var _authTok = '';    // session token for non-Google admin logins
 var ADMIN_REMEMBER_KEY = 'ipad_jv_admin_remember_token';
+var _pendingNavSection = '';
 var allIPads = [];
 var selStatus = '';
 var searchTimer = null;
@@ -3000,8 +3001,14 @@ function tryRememberedAdminLogin(tok) {
 
 window.addEventListener('message', function(e) {
   if (!e.origin || e.origin.indexOf('wisanu15.github.io') === -1) return;
-  if (!e.data || e.data.type !== 'IPAD_JV_SEND_REMEMBER' || !e.data.token) return;
-  if (!_authTok) tryRememberedAdminLogin(e.data.token);
+  if (!e.data) return;
+  if (e.data.type === 'IPAD_JV_SEND_REMEMBER' && e.data.token) {
+    if (!_authTok) tryRememberedAdminLogin(e.data.token);
+  }
+  if (e.data.type === 'IPAD_JV_NAVIGATE' && e.data.section) {
+    if (_authTok) showPage(e.data.section);
+    else _pendingNavSection = e.data.section;
+  }
 });
 
 var PAGE_TITLES = {
@@ -3020,6 +3027,10 @@ window.onload = function() {
   initThemeAndLang();
   loadRegisterData();
   tryRememberedAdminLogin();
+  try {
+    if (window.parent !== window)
+      window.parent.postMessage({ type: 'IPAD_JV_READY' }, 'https://wisanu15.github.io');
+  } catch(e) {}
 };
 
 // ── Registration (หน้าแรก) ─────────────────────────────────────────────
@@ -6376,7 +6387,9 @@ function initAdminWithUser(u) {
     if (rl) { rl.textContent = u.role; rl.className = 'usr-prole ' + roleBadge(u.role).replace(/<[^>]+>/g,'').trim().replace(/[^a-z]/gi,''); rl.innerHTML = roleBadge(u.role); }
   }
   initThemeAndLang();
-  showPage('dashboard');
+  var _navTarget = _pendingNavSection || 'dashboard';
+  _pendingNavSection = '';
+  showPage(_navTarget);
   // Prompt first-time admin to link school email
   if (u.email && u.email.toLowerCase().endsWith('@admin.local')) {
     setTimeout(promptLinkEmail, 600);

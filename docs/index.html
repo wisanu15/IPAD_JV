@@ -269,6 +269,7 @@
       var configuredUrl = (window.IPAD_JV_CONFIG && window.IPAD_JV_CONFIG.GAS_WEB_APP_URL || '').trim();
       var gasUrl = (params.get('gas') || configuredUrl).trim();
       var oneSignalAppId = (window.IPAD_JV_CONFIG && window.IPAD_JV_CONFIG.ONESIGNAL_APP_ID || '').trim();
+      var sectionParam = params.get('section') || '';
       var shell = document.getElementById('appShell');
 
       if (!gasUrl) {
@@ -400,6 +401,15 @@
         if (data.type === 'IPAD_JV_ADMIN_READY') {
           adminNotifyAllowed = true;
           updateNotifyButton();
+        }
+        if (data.type === 'IPAD_JV_READY') {
+          var tok = localStorage.getItem('ipad_jv_admin_remember') || '';
+          if (tok && iframe) {
+            try { iframe.contentWindow.postMessage({ type: 'IPAD_JV_SEND_REMEMBER', token: tok }, '*'); } catch(e) {}
+          }
+          if (sectionParam && iframe) {
+            try { iframe.contentWindow.postMessage({ type: 'IPAD_JV_NAVIGATE', section: sectionParam }, '*'); } catch(e) {}
+          }
         }
         if (data.type === 'IPAD_JV_SAVE_REMEMBER' && data.token) {
           try { localStorage.setItem('ipad_jv_admin_remember', data.token); } catch(e) {}

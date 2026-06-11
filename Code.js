@@ -514,12 +514,17 @@ function testPushNotification() {
   notifyAdminPush_('🔔 ทดสอบ', 'ทดสอบการแจ้งเตือนจาก iPad JV', '', {});
 }
 
-function notifyAdminPush_(title, message, url, data) {
+function notifyAdminPush_(title, message, section, data) {
   try {
     const props = PropertiesService.getScriptProperties();
     const appId = String(props.getProperty('ONESIGNAL_APP_ID') || '').trim();
     const apiKey = String(props.getProperty('ONESIGNAL_REST_API_KEY') || '').trim();
     if (!appId || !apiKey) return;
+
+    const pwaBase = String(props.getProperty('IPAD_JV_PWA_URL') || 'https://wisanu15.github.io/IPAD_JV/');
+    const url = section
+      ? pwaBase + (pwaBase.includes('?') ? '&' : '?') + 'section=' + encodeURIComponent(section)
+      : pwaBase;
 
     const payload = {
       app_id: appId,
@@ -527,7 +532,7 @@ function notifyAdminPush_(title, message, url, data) {
       filters: [{ field: 'tag', key: 'role', relation: '=', value: 'admin' }],
       headings: { en: title || 'iPad JV', th: title || 'iPad JV' },
       contents: { en: message || '', th: message || '' },
-      url: url || String(props.getProperty('IPAD_JV_PWA_URL') || 'https://wisanu15.github.io/IPAD_JV/'),
+      url: url,
       data: data || {}
     };
 
@@ -1424,7 +1429,7 @@ function submitIssue(data) {
   notifyAdminPush_(
     'แจ้งปัญหา iPad ใหม่',
     `${studentName} ${lookup.student.grade}/${lookup.student.room} | Serial ${lookup.ipad.serial} | ${data.issueType || 'ไม่ระบุประเภท'}`,
-    '',
+    'issues',
     { issueId: newId, serial: lookup.ipad.serial, studentCode: data.studentCode }
   );
   log_(data.studentCode, 'แจ้งปัญหาไอแพด', `Serial: ${lookup.ipad.serial} | ${data.issueType}`);
