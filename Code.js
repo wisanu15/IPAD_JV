@@ -511,7 +511,70 @@ function notifyAdmins_(subject, body) {
 // ── Admin Auth ────────────────────────────────────────────────────────────────
 
 function testPushNotification() {
-  notifyAdminPush_('🔔 ทดสอบ', 'ทดสอบการแจ้งเตือนจาก iPad JV', '', {});
+  return debugPushNotification();
+}
+
+function debugPushNotification() {
+  const props = PropertiesService.getScriptProperties();
+  const appId  = String(props.getProperty('ONESIGNAL_APP_ID')       || '').trim();
+  const apiKey = String(props.getProperty('ONESIGNAL_REST_API_KEY') || '').trim();
+  const pwaUrl = String(props.getProperty('IPAD_JV_PWA_URL')        || '').trim();
+
+  const report = {
+    ONESIGNAL_APP_ID:       appId  ? appId.slice(0,8)+'...' : '❌ ไม่ได้ตั้งค่า',
+    ONESIGNAL_REST_API_KEY: apiKey ? apiKey.slice(0,8)+'...' : '❌ ไม่ได้ตั้งค่า',
+    IPAD_JV_PWA_URL:        pwaUrl || '(ใช้ค่า default)',
+  };
+
+  if (!appId || !apiKey) {
+    report.result = '❌ ไม่มี API key — หยุดที่นี่';
+    Logger.log(JSON.stringify(report, null, 2));
+    return report;
+  }
+
+  // ── ดู subscribers ──
+  try {
+    const subRes = UrlFetchApp.fetch(
+      'https://onesignal.com/api/v1/apps/' + appId,
+      { headers: { Authorization: 'Basic ' + apiKey }, muteHttpExceptions: true }
+    );
+    const subJson = JSON.parse(subRes.getContentText());
+    report.app_name          = subJson.name || '?';
+    report.subscribers_total = subJson.players || 0;
+  } catch(e) {
+    report.subscribers_error = e.message;
+  }
+
+  // ── ส่ง test notification ──
+  const payload = {
+    app_id: appId,
+    target_channel: 'push',
+    filters: [{ field: 'tag', key: 'role', relation: '=', value: 'admin' }],
+    headings: { en: '🔔 ทดสอบ', th: '🔔 ทดสอบ' },
+    contents: { en: 'ทดสอบการแจ้งเตือนจาก iPad JV', th: 'ทดสอบการแจ้งเตือนจาก iPad JV' },
+    url: pwaUrl || 'https://wisanu15.github.io/IPAD_JV/',
+    data: {}
+  };
+  try {
+    const res = UrlFetchApp.fetch('https://onesignal.com/api/v1/notifications', {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { Authorization: 'Basic ' + apiKey },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+    const json = JSON.parse(res.getContentText());
+    report.http_status  = res.getResponseCode();
+    report.recipients   = json.recipients;
+    report.notification_id = json.id || '?';
+    report.api_errors   = json.errors || null;
+    report.result = (json.recipients > 0) ? '✅ ส่งสำเร็จ' : '⚠️ ส่งแล้วแต่ไม่มี subscriber ตรงเงื่อนไข (role=admin)';
+  } catch(e) {
+    report.result = '❌ ส่งล้มเหลว: ' + e.message;
+  }
+
+  Logger.log(JSON.stringify(report, null, 2));
+  return report;
 }
 
 function notifyAdminPush_(title, message, section, data) {
