@@ -374,7 +374,7 @@
       function setCookie(name, value, days) {
         try {
           var exp = new Date(Date.now() + days * 864e5).toUTCString();
-          document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + exp + '; path=/; SameSite=Strict; Secure';
+          document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + exp + '; path=/';
         } catch(e) {}
       }
 
@@ -387,7 +387,7 @@
 
       function deleteCookie(name) {
         try {
-          document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Strict; Secure';
+          document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
         } catch(e) {}
       }
 
@@ -650,6 +650,8 @@
         }
         if (data.type === 'IPAD_JV_SAVE_REMEMBER' && data.token) {
           saveRememberedAdminToken(data.token);
+          var ck = getCookie(COOKIE_NAME);
+          notifyToast(ck ? '🍪 wrapper saved: ' + data.token.substring(0,6) + '...' : '❌ wrapper: cookie save failed');
         }
         if (data.type === 'IPAD_JV_CLEAR_REMEMBER') {
           clearRememberedAdminToken();
