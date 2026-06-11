@@ -3172,8 +3172,19 @@ function saveRememberedAdminToken(token) {
     if (token) localStorage.setItem(ADMIN_REMEMBER_KEY, token);
   } catch(e) {}
   try {
-    if (token && window.parent !== window)
+    if (token && window.parent !== window) {
       window.parent.postMessage({type:'IPAD_JV_SAVE_REMEMBER', token:token}, '*');
+      // iOS PWA: cross-origin iframe→parent postMessage is blocked.
+      // Navigate the top window to the wrapper with ?rmt= so it can save the token
+      // as first-party storage. Skip if already loaded via hash redirect (prevent loop).
+      var _isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      var _fromHash = !!(window.location.hash && window.location.hash.indexOf('rmt=') !== -1);
+      if (_isIOS && !_fromHash && window.top !== window) {
+        window.top.location.replace('https://wisanu15.github.io/IPAD_JV/?rmt=' +
+          encodeURIComponent(token) + '&app=1');
+      }
+    }
   } catch(e) {}
 }
 
@@ -3258,7 +3269,10 @@ window.onload = function() {
   document.body.classList.add('mode-register');
   initThemeAndLang();
   loadRegisterData();
-  tryRememberedAdminLogin();
+  // Read token from URL hash — wrapper sets #rmt=TOKEN in iframe src for iOS auto-login
+  var _hashToken = '';
+  try { _hashToken = new URLSearchParams(window.location.hash.slice(1)).get('rmt') || ''; } catch(e) {}
+  tryRememberedAdminLogin(_hashToken);
   try {
     if (window.parent !== window)
       window.parent.postMessage({ type: 'IPAD_JV_READY' }, '*');

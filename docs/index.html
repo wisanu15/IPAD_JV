@@ -419,6 +419,16 @@
         deleteCookie(COOKIE_NAME);
       }
 
+      // iOS token-save redirect: GAS navigates window.top to ?rmt=TOKEN after manual login
+      var pendingRmt = params.get('rmt') || '';
+      if (pendingRmt) {
+        saveRememberedAdminToken(pendingRmt);
+        var _cp = new URLSearchParams(params.toString());
+        _cp.delete('rmt');
+        var _cs = _cp.toString() ? '?' + _cp.toString() : '';
+        try { window.history.replaceState(null, '', './index.html' + _cs); } catch(e) {}
+      }
+
       function escapeHtml(value) {
         return String(value).replace(/[&<>"']/g, function (char) {
           return {
@@ -786,7 +796,9 @@
         })();
         var iframe = document.createElement('iframe');
         iframe.title = 'ระบบบริหารจัดการไอแพด';
-        iframe.src = platformGasUrl;
+        var _iframeTok = getRememberedAdminToken();
+        // Pass token via URL hash — postMessage from wrapper→iframe may not work on iOS PWA
+        iframe.src = _iframeTok ? platformGasUrl + '#rmt=' + encodeURIComponent(_iframeTok) : platformGasUrl;
         iframe.referrerPolicy = 'no-referrer-when-downgrade';
         iframe.allow = 'clipboard-read; clipboard-write; fullscreen';
         iframe.addEventListener('load', function () {
