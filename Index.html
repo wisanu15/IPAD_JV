@@ -1601,6 +1601,130 @@ html,body{overflow-x:hidden;max-width:100%}
   .pg-hd-actions .btn,.pg-hd-actions .btn-sm{flex:1 1 auto;justify-content:center;min-width:0}
 }
 /* ══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ROSTER CARDS  |  PAGE TRANSITIONS  |  BUTTON RIPPLE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Content: relative so .page-exiting can absolute-overlay */
+#main .content{position:relative}
+
+/* ── Enhanced page transition ──────────────────────────────────────── */
+@keyframes pageIn{
+  from{opacity:0;transform:translateX(22px) scale(.985)}
+  to{opacity:1;transform:none}
+}
+@keyframes pageOut{
+  from{opacity:1;transform:none}
+  to{opacity:0;transform:translateX(-18px) scale(.985)}
+}
+.page.active{animation:pageIn .26s cubic-bezier(.16,1,.3,1) both!important;will-change:transform,opacity}
+.page.page-exiting{
+  display:block!important;
+  position:absolute!important;top:0;left:0;right:0;
+  pointer-events:none!important;
+  animation:pageOut .2s ease both!important;
+  z-index:0;will-change:transform,opacity
+}
+
+/* ── Button / nav ripple ───────────────────────────────────────────── */
+.btn{position:relative;overflow:hidden}
+.bicon{position:relative;overflow:hidden}
+.mn-btn{position:relative;overflow:hidden}
+.room-card{position:relative;overflow:hidden}
+.rg-card-btn{position:relative;overflow:hidden}
+.btn-ripple{
+  position:absolute;border-radius:50%;
+  background:rgba(255,255,255,.3);
+  pointer-events:none;
+  transform:scale(0);
+  animation:rippleAnim .55s linear
+}
+@keyframes rippleAnim{to{transform:scale(4);opacity:0}}
+
+/* ── Student card grid ─────────────────────────────────────────────── */
+.stu-card-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(270px,1fr));
+  gap:10px;margin-bottom:4px
+}
+@keyframes cardEnter{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+.stu-card{
+  background:var(--card);border:1px solid rgba(0,0,0,.05);border-radius:14px;
+  box-shadow:var(--sh-sm);padding:12px 14px;
+  display:flex;align-items:center;gap:12px;
+  transition:transform .15s,box-shadow .15s;
+  animation:cardEnter .22s cubic-bezier(.16,1,.3,1) both;
+  overflow:hidden
+}
+.stu-card:hover{transform:translateY(-2px);box-shadow:var(--sh)}
+.stu-avatar{
+  width:40px;height:40px;border-radius:50%;
+  color:#fff;font-size:15px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-family:'Inter','Sarabun',sans-serif;letter-spacing:-.5px
+}
+.stu-info{flex:1;min-width:0}
+.stu-name{
+  font-size:13.5px;font-weight:700;line-height:1.3;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px
+}
+.stu-meta{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:3px}
+.stu-code{font-family:'Inter',monospace;font-size:11px;color:var(--muted);letter-spacing:.2px}
+.stu-actions{display:flex;gap:4px;flex-shrink:0;align-self:flex-start}
+body.dark-mode .stu-card{background:rgba(255,255,255,.058)!important;border-color:rgba(255,255,255,.09)!important;box-shadow:0 2px 10px rgba(0,0,0,.35)!important}
+body.dark-mode .stu-card:hover{background:rgba(255,255,255,.085)!important}
+body.dark-mode .stu-name{color:#F1F5F9!important}
+body.dark-mode .stu-code{color:rgba(255,255,255,.38)!important}
+
+/* ── Teacher card grid ─────────────────────────────────────────────── */
+.tch-card-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(270px,1fr));
+  gap:10px;margin-bottom:4px
+}
+.tch-card{
+  background:var(--card);border:1px solid rgba(0,0,0,.05);border-radius:14px;
+  box-shadow:var(--sh-sm);padding:13px 15px;
+  display:flex;align-items:center;gap:12px;
+  transition:transform .15s,box-shadow .15s;
+  animation:cardEnter .22s cubic-bezier(.16,1,.3,1) both;
+  overflow:hidden
+}
+.tch-card:hover{transform:translateY(-2px);box-shadow:var(--sh)}
+.tch-avatar{
+  width:42px;height:42px;border-radius:50%;
+  color:#fff;font-size:16px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-family:'Inter','Sarabun',sans-serif
+}
+.tch-info{flex:1;min-width:0}
+.tch-name{
+  font-size:13.5px;font-weight:700;line-height:1.3;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px
+}
+.tch-meta{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:2px}
+.tch-code{font-family:'Inter',monospace;font-size:11px;color:var(--muted);letter-spacing:.2px}
+.tch-actions{display:flex;gap:4px;flex-shrink:0;align-self:flex-start}
+body.dark-mode .tch-card{background:rgba(255,255,255,.058)!important;border-color:rgba(255,255,255,.09)!important;box-shadow:0 2px 10px rgba(0,0,0,.35)!important}
+body.dark-mode .tch-card:hover{background:rgba(255,255,255,.085)!important}
+body.dark-mode .tch-name{color:#F1F5F9!important}
+body.dark-mode .tch-code{color:rgba(255,255,255,.38)!important}
+
+/* ── Responsive card grids ─────────────────────────────────────────── */
+@media(max-width:480px){
+  .stu-card-grid,.tch-card-grid{grid-template-columns:1fr}
+  .stu-card,.tch-card{padding:10px 12px}
+  .stu-avatar{width:36px;height:36px;font-size:13px}
+  .tch-avatar{width:38px;height:38px;font-size:14px}
+}
+@media(min-width:481px) and (max-width:700px){
+  .stu-card-grid,.tch-card-grid{grid-template-columns:1fr 1fr}
+}
+@media(min-width:701px) and (max-width:1100px){
+  .stu-card-grid,.tch-card-grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+}
+/* ══════════════════════════════════════════════════════════════════════════ */
 </style>
 </head>
 <body class="mode-register">
@@ -2285,12 +2409,7 @@ html,body{overflow-x:hidden;max-width:100%}
         <button class="btn btn-outline btn-sm" onclick="resetStudentSearch()">รีเซ็ต</button>
       </div>
       <div id="student-class-summary" style="margin-bottom:16px"></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th data-i18n="id">ID</th><th data-i18n="studentCode">รหัสนักเรียน</th><th data-i18n="prefix">คำนำหน้า</th><th data-i18n="fname">ชื่อ</th><th data-i18n="lname">นามสกุล</th><th data-i18n="grade">ชั้น</th><th data-i18n="room">ห้อง</th><th id="std-action-head"></th></tr></thead>
-          <tbody id="students-tbody"><tr><td colspan="8" class="loading-cell">กำลังโหลด...</td></tr></tbody>
-        </table>
-      </div>
+      <div id="students-grid" class="stu-card-grid"></div>
       <div id="student-count" style="padding:10px 4px;font-size:13px;color:var(--muted)"></div>
     </div>
 
@@ -2988,7 +3107,7 @@ function saveRememberedAdminToken(token) {
   } catch(e) {}
   try {
     if (token && window.parent !== window)
-      window.parent.postMessage({type:'IPAD_JV_SAVE_REMEMBER', token:token}, 'https://wisanu15.github.io');
+      window.parent.postMessage({type:'IPAD_JV_SAVE_REMEMBER', token:token}, '*');
   } catch(e) {}
 }
 
@@ -2998,7 +3117,7 @@ function clearRememberedAdminToken() {
   try { localStorage.removeItem(ADMIN_REMEMBER_KEY); } catch(e) {}
   try {
     if (window.parent !== window)
-      window.parent.postMessage({type:'IPAD_JV_CLEAR_REMEMBER'}, 'https://wisanu15.github.io');
+      window.parent.postMessage({type:'IPAD_JV_CLEAR_REMEMBER'}, '*');
   } catch(e) {}
   if (revokeServer && tok) {
     gsr.withFailureHandler(function(){}).forgetRememberToken(tok);
@@ -3010,9 +3129,16 @@ function saveAdminRememberIfRequested() {
   var tok = _authTok;
   gsr
     .withSuccessHandler(function(r) {
-      if (r && r.success && r.rememberToken) saveRememberedAdminToken(r.rememberToken);
+      if (r && r.success && r.rememberToken) {
+        saveRememberedAdminToken(r.rememberToken);
+        showToast('✓ บันทึก auto-login แล้ว','success');
+      } else {
+        showToast('⚠ auto-login: ' + (r && r.message ? r.message : 'ไม่สำเร็จ'), 'error');
+      }
     })
-    .withFailureHandler(function(){})
+    .withFailureHandler(function(e){
+      showToast('⚠ auto-login error: ' + e, 'error');
+    })
     .createRememberForCurrentSession(tok);
 }
 
@@ -3022,6 +3148,7 @@ function tryRememberedAdminLogin(tok) {
   gsr
     .withSuccessHandler(function(r) {
       if (!r || !r.success) {
+        showToast('⚠ token หมดอายุ: ' + (r && r.message ? r.message : ''), 'error');
         clearRememberedAdminToken(false);
         return;
       }
@@ -3029,7 +3156,9 @@ function tryRememberedAdminLogin(tok) {
       saveAdminRememberIfRequested();
       showToast('เข้าสู่ระบบผู้ดูแลอัตโนมัติ','success');
     })
-    .withFailureHandler(function(){})
+    .withFailureHandler(function(e){
+      showToast('⚠ auto-login server error: ' + e, 'error');
+    })
     .consumeRememberToken(tok);
 }
 
@@ -3037,7 +3166,10 @@ window.addEventListener('message', function(e) {
   if (!e.origin || e.origin.indexOf('wisanu15.github.io') === -1) return;
   if (!e.data) return;
   if (e.data.type === 'IPAD_JV_SEND_REMEMBER' && e.data.token) {
-    if (!_authTok) tryRememberedAdminLogin(e.data.token);
+    if (!_authTok) {
+      showToast('🔑 กำลังลอง auto-login...', 'info');
+      tryRememberedAdminLogin(e.data.token);
+    }
   }
   if (e.data.type === 'IPAD_JV_NAVIGATE' && e.data.section) {
     if (_authTok) showPage(e.data.section);
@@ -3063,7 +3195,7 @@ window.onload = function() {
   tryRememberedAdminLogin();
   try {
     if (window.parent !== window)
-      window.parent.postMessage({ type: 'IPAD_JV_READY' }, 'https://wisanu15.github.io');
+      window.parent.postMessage({ type: 'IPAD_JV_READY' }, '*');
   } catch(e) {}
 };
 
@@ -3667,6 +3799,13 @@ function showPage(page) {
 
   var curActive = document.querySelector('.page.active');
   var isSamePage = curActive && curActive.id === 'page-' + page;
+
+  // Animate current page out before switching
+  if (curActive && !isSamePage) {
+    var _exitEl = curActive;
+    _exitEl.classList.add('page-exiting');
+    setTimeout(function() { _exitEl.classList.remove('page-exiting'); }, 220);
+  }
 
   document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
   document.querySelectorAll('#sidebar nav a').forEach(function(a){ a.classList.remove('active'); });
@@ -4464,11 +4603,8 @@ function showError(e) {
 
 // ── Students ───────────────────────────────────────────────────────────
 function loadStudents() {
-  document.getElementById('students-tbody').innerHTML = '<tr><td colspan="8">' + logoLoader() + '</td></tr>';
+  document.getElementById('students-grid').innerHTML = '<div style="grid-column:1/-1">' + logoLoader() + '</div>';
   document.getElementById('student-class-summary').innerHTML = '';
-
-  var isSuperAdmin = CU && CU.role === 'super admin';
-  document.getElementById('std-action-head').textContent = isSuperAdmin ? 'ลบ' : '';
 
   var filters = {
     query: document.getElementById('s-query').value,
@@ -4480,8 +4616,8 @@ function loadStudents() {
     .withSuccessHandler(function(data) {
       nprogDone(); hideLoading();
       if (data && data.success === false) {
-        document.getElementById('students-tbody').innerHTML =
-          '<tr><td colspan="8" class="loading-cell" style="color:var(--danger)">'+data.message+'</td></tr>';
+        document.getElementById('students-grid').innerHTML =
+          '<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">⚠️</div><div class="es-title">'+data.message+'</div></div>';
         return;
       }
       renderStudents(data);
@@ -4490,32 +4626,46 @@ function loadStudents() {
     .getStudents(filters);
 }
 
+var _stuAvatarColors = [
+  'linear-gradient(135deg,#4F7EF7,#8B5CF6)',
+  'linear-gradient(135deg,#10B981,#059669)',
+  'linear-gradient(135deg,#F59E0B,#EF4444)',
+  'linear-gradient(135deg,#06B6D4,#3B82F6)',
+  'linear-gradient(135deg,#8B5CF6,#EC4899)',
+  'linear-gradient(135deg,#EF4444,#F97316)',
+  'linear-gradient(135deg,#14B8A6,#0EA5E9)'
+];
+
 function renderStudents(data) {
   var isSuperAdmin = CU && CU.role === 'super admin';
-  var tbody = document.getElementById('students-tbody');
+  var grid = document.getElementById('students-grid');
 
   if (!data || !data.length) {
-    tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><div class="emoji">🎓</div>ไม่พบข้อมูลนักเรียน<br><small style="color:var(--muted)">ใช้ปุ่ม "นำเข้า CSV" เพื่อเพิ่มข้อมูล</small></div></td></tr>';
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">🎓</div><div class="es-title">ไม่พบข้อมูลนักเรียน</div><div class="es-text">ใช้ปุ่ม "นำเข้า CSV" เพื่อเพิ่มข้อมูล</div></div>';
     document.getElementById('student-count').textContent = '';
     buildClassSummary(data);
     return;
   }
 
-  tbody.innerHTML = data.map(function(s) {
-    return '<tr>' +
-      '<td style="text-align:center;color:var(--muted)">'+s.seq+'</td>' +
-      '<td style="font-family:monospace">'+s.code+'</td>' +
-      '<td>'+s.prefix+'</td>' +
-      '<td style="font-weight:500">'+s.firstName+'</td>' +
-      '<td>'+s.lastName+'</td>' +
-      '<td><span class="badge b-admin">'+s.grade+'</span></td>' +
-      '<td><span class="badge b-user">ห้อง '+s.room+'</span></td>' +
-      '<td>'+(isSuperAdmin ? '<button class="bicon" onclick="delStudentRow('+s.row+',\''+s.firstName+' '+s.lastName+'\')">🗑️</button>' : '')+'</td>' +
-    '</tr>';
+  grid.innerHTML = data.map(function(s, i) {
+    var initial = (s.firstName || '?').charAt(0).toUpperCase();
+    var color = _stuAvatarColors[i % _stuAvatarColors.length];
+    var delay = (Math.min(i, 20) * 0.028).toFixed(3) + 's';
+    return '<div class="stu-card" style="animation-delay:' + delay + '">' +
+      '<div class="stu-avatar" style="background:' + color + '">' + initial + '</div>' +
+      '<div class="stu-info">' +
+        '<div class="stu-name">' + s.prefix + ' ' + s.firstName + ' ' + s.lastName + '</div>' +
+        '<div class="stu-meta">' +
+          '<span class="badge b-admin">' + s.grade + '</span>' +
+          '<span class="badge b-user">ห้อง ' + s.room + '</span>' +
+        '</div>' +
+        '<div class="stu-code">🆔 ' + s.code + '</div>' +
+      '</div>' +
+      (isSuperAdmin ? '<div class="stu-actions"><button class="bicon btn-sm" onclick="delStudentRow(' + s.row + ',\'' + (s.firstName + ' ' + s.lastName).replace(/'/g,'\\\'') + '\')" title="ลบ">🗑️</button></div>' : '') +
+    '</div>';
   }).join('');
 
-  document.getElementById('student-count').textContent =
-    'แสดง '+data.length+' คน';
+  document.getElementById('student-count').textContent = 'แสดง ' + data.length + ' คน';
   buildClassSummary(data);
 }
 
@@ -5527,7 +5677,7 @@ function subscribeAdminNotify() {
   btn.disabled = true; btn.textContent = '⏳ รอการสมัคร...';
   box.textContent = '📲 รอหน้าต่างสมัครแจ้งเตือน...';
   box.style.background = '#eff6ff'; box.style.borderColor = '#bfdbfe'; box.style.display = 'block';
-  window.parent.postMessage({ type: 'IPAD_JV_REQUEST_NOTIFY' }, 'https://wisanu15.github.io');
+  window.parent.postMessage({ type: 'IPAD_JV_REQUEST_NOTIFY' }, '*');
   var replied = false;
   var overlayShown = false;
   function onMsg(e) {
@@ -5709,35 +5859,48 @@ function loadTeachers() {
     .getTeachers();
 }
 
+var _tchAvatarColors = [
+  'linear-gradient(135deg,#8B5CF6,#7C3AED)',
+  'linear-gradient(135deg,#06B6D4,#0EA5E9)',
+  'linear-gradient(135deg,#10B981,#059669)',
+  'linear-gradient(135deg,#F59E0B,#D97706)',
+  'linear-gradient(135deg,#EF4444,#DC2626)',
+  'linear-gradient(135deg,#4F7EF7,#3B82F6)',
+  'linear-gradient(135deg,#EC4899,#8B5CF6)'
+];
+
 function renderTeachers(data, q) {
   var filtered = q
-    ? data.filter(function(t){ var s=(t.code+t.firstName+t.lastName+t.subject+t.homeroom).toLowerCase(); return s.indexOf(q.toLowerCase())>=0; })
+    ? data.filter(function(tc){ var s=(tc.code+tc.firstName+tc.lastName+tc.subject+tc.homeroom).toLowerCase(); return s.indexOf(q.toLowerCase())>=0; })
     : data;
   var isAdmin = CU && CU.role !== 'user';
   var isSuperAdmin = CU && CU.role === 'super admin';
   if (!filtered.length) {
-    document.getElementById('teachers-content').innerHTML = '<div class="empty"><div class="emoji">👩‍🏫</div>ไม่พบข้อมูลครู</div>';
+    document.getElementById('teachers-content').innerHTML = '<div class="empty-state"><div class="es-icon">👩‍🏫</div><div class="es-title">ไม่พบข้อมูลครู</div></div>';
     return;
   }
-  var rows = filtered.map(function(t) {
-    return '<tr>' +
-      '<td style="color:var(--muted);text-align:center">'+t.seq+'</td>' +
-      '<td style="font-family:monospace;font-size:12px">'+t.code+'</td>' +
-      '<td>'+t.prefix+'</td>' +
-      '<td style="font-weight:600">'+t.firstName+'</td>' +
-      '<td>'+t.lastName+'</td>' +
-      '<td>'+t.subject+'</td>' +
-      '<td>'+t.room+'</td>' +
-      '<td style="white-space:nowrap">' +
-        (isAdmin ? '<button class="bicon" onclick=\'openEditTeacher('+JSON.stringify(t)+')\'>✏️</button> ' : '') +
-        (isSuperAdmin ? '<button class="bicon" onclick="delTeacher('+t.row+',\''+t.firstName+' '+t.lastName+'\')">🗑️</button>' : '') +
-      '</td>' +
-    '</tr>';
+  var cards = filtered.map(function(tc, i) {
+    var initial = (tc.firstName || '?').charAt(0).toUpperCase();
+    var color = _tchAvatarColors[i % _tchAvatarColors.length];
+    var delay = (Math.min(i, 20) * 0.028).toFixed(3) + 's';
+    return '<div class="tch-card" style="animation-delay:' + delay + '">' +
+      '<div class="tch-avatar" style="background:' + color + '">' + initial + '</div>' +
+      '<div class="tch-info">' +
+        '<div class="tch-name">' + tc.prefix + ' ' + tc.firstName + ' ' + tc.lastName + '</div>' +
+        '<div class="tch-meta">' +
+          (tc.subject ? '<span class="badge b-inspection">📚 ' + tc.subject + '</span>' : '') +
+          (tc.room ? '<span class="badge b-user">🏠 ' + tc.room + '</span>' : '') +
+        '</div>' +
+        (tc.code ? '<div class="tch-code">🆔 ' + tc.code + '</div>' : '') +
+      '</div>' +
+      '<div class="tch-actions">' +
+        (isAdmin ? '<button class="bicon btn-sm" onclick=\'openEditTeacher(' + JSON.stringify(tc) + ')\' title="แก้ไข">✏️</button> ' : '') +
+        (isSuperAdmin ? '<button class="bicon btn-sm" onclick="delTeacher(' + tc.row + ',\'' + (tc.firstName + ' ' + tc.lastName).replace(/'/g,'\\\'') + '\')" title="ลบ">🗑️</button>' : '') +
+      '</div>' +
+    '</div>';
   }).join('');
   document.getElementById('teachers-content').innerHTML =
-    '<div class="table-wrap">' +
-    '<table><thead><tr><th>'+t('tcSeq')+'</th><th>'+t('tcCode')+'</th><th>'+t('tcPrefix')+'</th><th>'+t('tcFirst')+'</th><th>'+t('tcLast')+'</th><th>'+t('tcSubject')+'</th><th>'+t('tcRoom')+'</th><th>'+t('tcAction')+'</th></tr></thead>' +
-    '<tbody>' + rows + '</tbody></table></div>' +
+    '<div class="tch-card-grid">' + cards + '</div>' +
     '<div style="padding:8px 4px;font-size:13px;color:var(--muted)">' + filtered.length + t('peopleSuffix') + '</div>';
 }
 
@@ -6476,7 +6639,7 @@ function initAdminWithUser(u) {
   _authTok = u.token || '';
   try {
     if (window.parent && window.parent !== window) {
-      window.parent.postMessage({ type: 'IPAD_JV_ADMIN_READY' }, 'https://wisanu15.github.io');
+      window.parent.postMessage({ type: 'IPAD_JV_ADMIN_READY' }, '*');
     }
   } catch(e) {}
   document.getElementById('uname').textContent  = u.name;
@@ -6508,10 +6671,6 @@ function initAdminWithUser(u) {
   var _navTarget = _pendingNavSection || 'dashboard';
   _pendingNavSection = '';
   showPage(_navTarget);
-  // Prompt first-time admin to link school email
-  if (u.email && u.email.toLowerCase().endsWith('@admin.local')) {
-    setTimeout(promptLinkEmail, 600);
-  }
 }
 
 // ── Export CSV ────────────────────────────────────────────────────────────────
@@ -7156,6 +7315,24 @@ function staStuPhotoHtml(s) {
     (safePhotoUrl ? '<img class="sta-stu-photo" src="' + escHtml(safePhotoUrl) + '" alt="" onerror="this.style.display=\'none\'">' : '') +
     '</div>';
 }
+
+/* ── Button / card ripple effect ──────────────────────────────────── */
+(function() {
+  var RIPPLE_SEL = '.btn,.bicon,.mn-btn,.room-card,.sta-grade-card,.sta-room-card,.rg-card-btn,.rg-link,.rg-ctrl-btn';
+  document.addEventListener('click', function(e) {
+    var el = e.target.closest(RIPPLE_SEL);
+    if (!el || el.disabled) return;
+    var r = document.createElement('span');
+    r.className = 'btn-ripple';
+    var rect = el.getBoundingClientRect();
+    var size = Math.max(rect.width, rect.height) * 2.4;
+    var x = e.clientX - rect.left - size / 2;
+    var y = e.clientY - rect.top - size / 2;
+    r.style.cssText = 'width:' + size + 'px;height:' + size + 'px;left:' + x + 'px;top:' + y + 'px';
+    el.appendChild(r);
+    setTimeout(function() { if (r.parentNode) r.parentNode.removeChild(r); }, 600);
+  }, true);
+})();
 
 </script>
 
