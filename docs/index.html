@@ -369,25 +369,46 @@
       var ADMIN_REMEMBER_KEY = 'ipad_jv_admin_remember_token';
       var ADMIN_REMEMBER_LEGACY_KEY = 'ipad_jv_admin_remember';
 
-      function getRememberedAdminToken() {
+      var COOKIE_NAME = 'ipad_jv_remember';
+
+      function setCookie(name, value, days) {
         try {
-          var tok = localStorage.getItem(ADMIN_REMEMBER_KEY) || localStorage.getItem(ADMIN_REMEMBER_LEGACY_KEY) || '';
-          if (tok && !localStorage.getItem(ADMIN_REMEMBER_KEY)) {
-            localStorage.setItem(ADMIN_REMEMBER_KEY, tok);
-          }
-          return tok;
-        } catch (e) {
-          return '';
+          var exp = new Date(Date.now() + days * 864e5).toUTCString();
+          document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + exp + '; path=/; SameSite=Strict; Secure';
+        } catch(e) {}
+      }
+
+      function getCookie(name) {
+        try {
+          var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+          return m ? decodeURIComponent(m[1]) : '';
+        } catch(e) { return ''; }
+      }
+
+      function deleteCookie(name) {
+        try {
+          document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Strict; Secure';
+        } catch(e) {}
+      }
+
+      function getRememberedAdminToken() {
+        var tok = '';
+        try { tok = localStorage.getItem(ADMIN_REMEMBER_KEY) || localStorage.getItem(ADMIN_REMEMBER_LEGACY_KEY) || ''; } catch(e) {}
+        if (!tok) tok = getCookie(COOKIE_NAME);
+        if (tok) {
+          try { localStorage.setItem(ADMIN_REMEMBER_KEY, tok); } catch(e) {}
+          setCookie(COOKIE_NAME, tok, 30);
         }
+        return tok;
       }
 
       function saveRememberedAdminToken(token) {
+        if (!token) return;
         try {
-          if (token) {
-            localStorage.setItem(ADMIN_REMEMBER_KEY, token);
-            localStorage.setItem(ADMIN_REMEMBER_LEGACY_KEY, token);
-          }
+          localStorage.setItem(ADMIN_REMEMBER_KEY, token);
+          localStorage.setItem(ADMIN_REMEMBER_LEGACY_KEY, token);
         } catch (e) {}
+        setCookie(COOKIE_NAME, token, 30);
       }
 
       function clearRememberedAdminToken() {
@@ -395,6 +416,7 @@
           localStorage.removeItem(ADMIN_REMEMBER_KEY);
           localStorage.removeItem(ADMIN_REMEMBER_LEGACY_KEY);
         } catch (e) {}
+        deleteCookie(COOKIE_NAME);
       }
 
       function escapeHtml(value) {
