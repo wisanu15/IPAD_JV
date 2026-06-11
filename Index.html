@@ -5495,30 +5495,41 @@ function subscribeAdminNotify() {
     return;
   }
   btn.disabled = true; btn.textContent = '⏳ รอการสมัคร...';
-  box.textContent = '📲 กรุณากด "สมัครแจ้งเตือน" ในหน้าต่างที่ปรากฏ แล้วอนุญาตการแจ้งเตือน';
+  box.textContent = '📲 รอหน้าต่างสมัครแจ้งเตือน...';
   box.style.background = '#eff6ff'; box.style.borderColor = '#bfdbfe'; box.style.display = 'block';
   window.parent.postMessage({ type: 'IPAD_JV_REQUEST_NOTIFY' }, 'https://wisanu15.github.io');
   var replied = false;
-  function onReply(e) {
-    if (!e.data || e.data.type !== 'IPAD_JV_NOTIFY_RESULT') return;
-    replied = true;
-    window.removeEventListener('message', onReply);
-    btn.disabled = false; btn.textContent = '🔔 สมัครแจ้งเตือน';
-    box.textContent = e.data.ok
-      ? '✅ สมัครสำเร็จ! ตอนนี้จะได้รับแจ้งเตือนเมื่อมีปัญหา iPad ใหม่'
-      : '❌ สมัครไม่สำเร็จ: ' + (e.data.msg || 'กรุณาอนุญาตการแจ้งเตือนในเบราว์เซอร์');
-    box.style.background = e.data.ok ? '#f0fdf4' : '#fef2f2';
-    box.style.borderColor = e.data.ok ? '#bbf7d0' : '#fecaca';
-  }
-  window.addEventListener('message', onReply);
-  setTimeout(function() {
-    if (!replied) {
-      window.removeEventListener('message', onReply);
-      btn.disabled = false; btn.textContent = '🔔 สมัครแจ้งเตือน';
-      box.textContent = '⚠️ ไม่ได้รับการตอบกลับ กรุณาปิดแอปแล้วเปิดใหม่ แล้วลองอีกครั้ง';
-      box.style.background = '#fffbeb'; box.style.borderColor = '#fde68a';
+  var overlayShown = false;
+  function onMsg(e) {
+    if (!e.data) return;
+    if (e.data.type === 'IPAD_JV_OVERLAY_SHOWN') {
+      overlayShown = true;
+      clearTimeout(fallbackTimer);
+      box.textContent = '📲 กรุณากด "สมัครแจ้งเตือน" ในหน้าต่างที่ปรากฏ';
     }
-  }, 45000);
+    if (e.data.type === 'IPAD_JV_NOTIFY_RESULT') {
+      replied = true;
+      clearTimeout(fallbackTimer);
+      window.removeEventListener('message', onMsg);
+      btn.disabled = false; btn.textContent = '🔔 สมัครแจ้งเตือน';
+      box.textContent = e.data.ok
+        ? '✅ สมัครสำเร็จ! ตอนนี้จะได้รับแจ้งเตือนเมื่อมีปัญหา iPad ใหม่'
+        : '❌ สมัครไม่สำเร็จ: ' + (e.data.msg || 'กรุณาอนุญาตการแจ้งเตือนในเบราว์เซอร์');
+      box.style.background = e.data.ok ? '#f0fdf4' : '#fef2f2';
+      box.style.borderColor = e.data.ok ? '#bbf7d0' : '#fecaca';
+    }
+  }
+  window.addEventListener('message', onMsg);
+  // Fallback: if overlay didn't appear within 3s (old app code), open subscribe page
+  var fallbackTimer = setTimeout(function() {
+    if (!overlayShown && !replied) {
+      window.removeEventListener('message', onMsg);
+      btn.disabled = false; btn.textContent = '🔔 สมัครแจ้งเตือน';
+      box.textContent = '↗️ เปิดหน้าสมัครแจ้งเตือน...';
+      box.style.background = '#eff6ff'; box.style.borderColor = '#bfdbfe';
+      window.open('https://wisanu15.github.io/IPAD_JV/?subscribe=1', '_blank');
+    }
+  }, 3000);
 }
 
 function runPushTest() {

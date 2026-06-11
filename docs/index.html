@@ -538,6 +538,10 @@
         subOverlayBtn.textContent = 'สมัครแจ้งเตือน';
         subOverlayResult.style.display = 'none';
         subOverlay.classList.add('show');
+        // Let GAS know the overlay is visible so it stops the fallback timer
+        if (replyTo) {
+          try { replyTo.postMessage({ type: 'IPAD_JV_OVERLAY_SHOWN' }, '*'); } catch(e) {}
+        }
       }
 
       if (subOverlayBtn) {
