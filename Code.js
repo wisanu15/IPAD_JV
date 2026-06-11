@@ -1801,16 +1801,39 @@ function removeDuplicates(sheetName, keyCol) {
 
 // ── OTP Login ─────────────────────────────────────────────────────────────────
 
-function requestOTP(email) {
-  if (!email) return err('กรุณากรอก email');
-  const emailLow = email.trim().toLowerCase();
+function requestOTP(emailOrName) {
+  if (!emailOrName) return err('กรุณากรอกชื่อหรือ email');
+  let email = emailOrName.trim();
 
-  // Check admin Users sheet
+  // If input has no @, treat as name — look up email in Users or Accounts sheets
+  if (!email.includes('@')) {
+    const nameLow = email.toLowerCase();
+    const usersData = sh(CONFIG.SHEETS.USERS).getDataRange().getValues().slice(1);
+    const adminRow = usersData.find(r => String(r[1]).trim().toLowerCase() === nameLow);
+    if (adminRow && String(adminRow[0]).includes('@')) {
+      email = String(adminRow[0]).trim();
+    } else {
+      const accSheet = sh(CONFIG.SHEETS.ACCOUNTS);
+      if (accSheet) {
+        const accData = accSheet.getDataRange().getValues().slice(1);
+        // col 1 = firstName, col 2 = lastName, col 4 = email
+        const accRow = accData.find(r => {
+          const full = (String(r[1]) + ' ' + String(r[2])).trim().toLowerCase();
+          return full === nameLow;
+        });
+        if (accRow && String(accRow[4]).includes('@')) email = String(accRow[4]).trim();
+      }
+    }
+    if (!email.includes('@')) return err('ไม่พบชื่อ "' + emailOrName.trim() + '" ในระบบ กรุณาตรวจสอบชื่อ-นามสกุล หรือใช้ email แทน');
+  }
+
+  const emailLow = email.toLowerCase();
+
+  // Verify email is registered
   let found = false;
   const usersData = sh(CONFIG.SHEETS.USERS).getDataRange().getValues().slice(1);
   if (usersData.find(r => String(r[0]).trim().toLowerCase() === emailLow)) found = true;
 
-  // Check Accounts sheet (teachers/students who registered an email)
   if (!found) {
     const accSheet = sh(CONFIG.SHEETS.ACCOUNTS);
     if (accSheet) {
@@ -1840,7 +1863,7 @@ function requestOTP(email) {
     });
   } catch(e) { return err('ส่ง email ไม่สำเร็จ: ' + e.message); }
   log_('system', 'ขอ OTP', emailLow);
-  return ok('ส่ง OTP ไปที่ ' + email.trim() + ' แล้ว');
+  return ok('ส่ง OTP ไปที่ ' + email.trim() + ' แล้ว', { resolvedEmail: email.trim() });
 }
 
 function verifyOTP(email, otp) {

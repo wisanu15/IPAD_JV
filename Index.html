@@ -1626,7 +1626,7 @@ html,body{overflow-x:hidden;max-width:100%}
         <img src="https://lh3.googleusercontent.com/d/1B6mdg5iZb3KvMmOg0lO87qw66yRKf-bt" alt="โลโก้" onerror="this.style.display='none'" style="width:52px;height:52px;object-fit:contain;border-radius:12px">
       </div>
       <div class="rg-badge-pill"><span data-i18n="homeBadge">📱 ระบบบริหารจัดการไอแพด</span></div>
-      <h1 class="rg-school-name">โรงเรียนจักราชวิทยา</h1>
+      <h1 class="rg-school-name" data-i18n="schoolName">โรงเรียนจักราชวิทยา</h1>
       <p class="rg-school-sub" data-i18n="homeSub">บริการนักเรียน ครู และผู้ดูแลระบบ</p>
     </div>
 
@@ -1841,8 +1841,8 @@ html,body{overflow-x:hidden;max-width:100%}
         <div id="otp-step1" class="login-step active">
           <p style="font-size:13px;color:var(--muted);margin-bottom:12px">เข้าสู่ระบบด้วย OTP ผ่าน Email สำหรับ <b>ครู, นักเรียน</b> และ <b>ผู้ดูแล</b></p>
           <div class="form-group">
-            <label class="form-label">Email *</label>
-            <input id="otp-email" class="form-ctrl" type="email" placeholder="กรอก email ของท่าน" onkeydown="if(event.key==='Enter')sendOTP()">
+            <label class="form-label">ชื่อ-นามสกุล หรือ Email *</label>
+            <input id="otp-email" class="form-ctrl" type="text" placeholder="ชื่อ-นามสกุล หรือ email" onkeydown="if(event.key==='Enter')sendOTP()">
           </div>
           <button class="btn btn-primary" style="width:100%;justify-content:center" id="btn-send-otp" onclick="sendOTP()">📧 ส่ง OTP</button>
         </div>
@@ -2109,7 +2109,7 @@ html,body{overflow-x:hidden;max-width:100%}
 <div id="sidebar">
   <div class="brand">
     <img src="https://lh3.googleusercontent.com/d/1B6mdg5iZb3KvMmOg0lO87qw66yRKf-bt" alt="โลโก้โรงเรียน" onerror="this.style.display='none'">
-    <div class="school-name">โรงเรียนจักราชวิทยา</div>
+    <div class="school-name" data-i18n="schoolName">โรงเรียนจักราชวิทยา</div>
     <div class="sys-name">📱 ระบบบริหารจัดการไอแพด</div>
   </div>
   <nav>
@@ -2339,7 +2339,7 @@ html,body{overflow-x:hidden;max-width:100%}
     <!-- Teachers -->
     <div id="page-teachers" class="page">
       <div class="pg-hd">
-        <div class="pg-hd-info"><h2>รายชื่อครู</h2><p>จัดการข้อมูลครูและสถานะการยืมไอแพด</p></div>
+        <div class="pg-hd-info"><h2 data-i18n="teachersPageTitle">รายชื่อครู</h2><p data-i18n="teachersPageSub">จัดการข้อมูลครูและสถานะการยืมไอแพด</p></div>
         <div class="pg-hd-actions" id="pg-teachers-actions"></div>
       </div>
       <div class="filter-bar">
@@ -3007,12 +3007,13 @@ function clearRememberedAdminToken() {
 
 function saveAdminRememberIfRequested() {
   if (!_authTok) return;
+  var tok = _authTok;
   gsr
     .withSuccessHandler(function(r) {
       if (r && r.success && r.rememberToken) saveRememberedAdminToken(r.rememberToken);
     })
     .withFailureHandler(function(){})
-    .createRememberForCurrentSession();
+    .createRememberForCurrentSession(tok);
 }
 
 function tryRememberedAdminLogin(tok) {
@@ -3025,6 +3026,7 @@ function tryRememberedAdminLogin(tok) {
         return;
       }
       initAdminWithUser(r);
+      saveAdminRememberIfRequested();
       showToast('เข้าสู่ระบบผู้ดูแลอัตโนมัติ','success');
     })
     .withFailureHandler(function(){})
@@ -3455,7 +3457,7 @@ function staRender(level) {
     var teacherSection = '';
     if (staData.teacherList && staData.teacherList.length) {
       teacherSection =
-        '<div class="sta-section-hd" style="margin-top:20px">📋 ' + t('staTeachers') + ' (' + staData.teacherList.length + ' คน)</div>' +
+        '<div class="sta-section-hd" style="margin-top:20px">📋 ' + t('staTeachers') + ' (' + staData.teacherList.length + t('peopleSuffix') + ')</div>' +
         '<div class="sta-grade-grid sta-teacher-grid">' +
           staTeacherCard(staData.teacherList) +
         '</div>';
@@ -3480,23 +3482,23 @@ function staRender(level) {
       teacherSection;
 
   } else if (level === 1) {
-    title.textContent = 'ม.' + staGrade;
+    title.textContent = gradePfx() + staGrade;
     bc.innerHTML = '<span class="sta-bc-link" onclick="staRender(0)">' + t('staBcOverview') + '</span>' +
-      '<span class="sta-bc-sep"> › </span><span>ม.' + staGrade + '</span>';
+      '<span class="sta-bc-sep"> › </span><span>' + gradePfx() + staGrade + '</span>';
     var rooms = staData.grades[staGrade];
     var roomKeys = Object.keys(rooms).sort(function(a,b){ return Number(a)-Number(b); });
     body.innerHTML =
-      '<div class="sta-section-hd">ม.' + staGrade + ' — ' + roomKeys.length + ' ' + t('staRoomList') + '</div>' +
+      '<div class="sta-section-hd">' + gradePfx() + staGrade + ' — ' + roomKeys.length + ' ' + t('staRoomList') + '</div>' +
       '<div class="sta-room-grid">' +
         roomKeys.map(function(rm){ return staRoomCard(staGrade, rm, rooms[rm]); }).join('') +
       '</div>';
 
   } else if (level === 2) {
     var rd = staData.grades[staGrade][staRoom];
-    title.textContent = 'ม.' + staGrade + '/' + staRoom;
+    title.textContent = gradePfx() + staGrade + '/' + staRoom;
     bc.innerHTML = '<span class="sta-bc-link" onclick="staRender(0)">' + t('staBcOverview') + '</span>' +
       '<span class="sta-bc-sep"> › </span>' +
-      '<span class="sta-bc-link" onclick="staRender(1)">ม.' + staGrade + '</span>' +
+      '<span class="sta-bc-link" onclick="staRender(1)">' + gradePfx() + staGrade + '</span>' +
       '<span class="sta-bc-sep"> › </span><span>' + t('staRooms') + ' ' + staRoom + '</span>';
     body.innerHTML =
       '<div class="sta-stat-grid">' +
@@ -3505,7 +3507,7 @@ function staRender(level) {
         staStatCard(t('staStuAvail'), rd.available, 'green') +
         staStatCard(t('staStuNoIpad'), rd.noIpad, 'red') +
       '</div>' +
-      '<div class="sta-section-hd">' + t('staStudentList') + ' (' + rd.students.length + ' คน)</div>' +
+      '<div class="sta-section-hd">' + t('staStudentList') + ' (' + rd.students.length + t('peopleSuffix') + ')</div>' +
       '<div class="sta-student-list">' +
         rd.students.map(function(s, i){ return staStuCard(s, i + 1); }).join('') +
       '</div>';
@@ -3530,8 +3532,8 @@ function staGradeCard(grade, rooms) {
   var rPct = withIpad ? Math.round(returned /withIpad*100) : 0;
   var cPct = withIpad ? Math.max(0, 100-bPct-aPct-rPct) : 0;
   return '<div class="sta-grade-card" onclick="staSelectGrade(\''+grade+'\')">' +
-    '<div class="gc-grade">ม.'+grade+'</div>' +
-    '<div class="gc-sub">'+roomKeys.length+' ห้อง · '+total+' คน</div>' +
+    '<div class="gc-grade">'+gradePfx()+grade+'</div>' +
+    '<div class="gc-sub">'+roomKeys.length+t('roomsSuffix')+' · '+total+t('peopleSuffix')+'</div>' +
     '<div class="gc-bar">' +
       (bPct?'<div class="gc-bar-b" style="flex:'+bPct+'"></div>':'')+
       (aPct?'<div class="gc-bar-a" style="flex:'+aPct+'"></div>':'')+
@@ -3553,7 +3555,7 @@ function staRoomCard(grade, room, data) {
   return '<div class="sta-room-card" style="--room-color:'+color+'" onclick="staSelectRoom(\''+grade+'\',\''+room+'\')">'+
     '<div class="rc-name">'+t('staRooms')+' '+room+'</div>' +
     '<div class="rc-stats">' +
-      '<div class="rc-row"><span>'+t('staStudents')+'</span><b>'+data.total+' คน</b></div>' +
+      '<div class="rc-row"><span>'+t('staStudents')+'</span><b>'+data.total+t('peopleSuffix')+'</b></div>' +
       '<div class="rc-row"><span>'+t('staStuBorrow')+'</span><b style="color:rgba(253,230,138,1)">'+data.borrowed+'</b></div>' +
       '<div class="rc-row"><span>'+t('staStuAvail')+'</span><b style="color:rgba(110,231,183,1)">'+data.available+'</b></div>' +
       (data.noIpad?'<div class="rc-row"><span>'+t('staStuNoIpad')+'</span><b style="color:rgba(255,255,255,.35)">'+data.noIpad+'</b></div>':'')+
@@ -5101,8 +5103,8 @@ function nprogDone() {
 function staTeacherCard(list) {
   return '<div class="sta-grade-card sta-teacher-card" onclick="staShowTeachers()">'+
     '<div class="tc-icon">🧑‍🏫</div>'+
-    '<div class="tc-label">ครู</div>'+
-    '<div class="tc-count">'+list.length+' คน</div>'+
+    '<div class="tc-label">'+t('staTeacher')+'</div>'+
+    '<div class="tc-count">'+list.length+t('peopleSuffix')+'</div>'+
   '</div>';
 }
 
@@ -5113,22 +5115,23 @@ function staShowTeachers() {
   staLevel  = 10;
   window.scrollTo(0, 0);
   document.getElementById('sta-back-btn').textContent = '‹';
-  title.textContent = 'ครู';
-  bc.innerHTML = '<span class="sta-bc-link" onclick="staRender(0)">ภาพรวม</span><span class="sta-bc-sep"> › </span><span>ครู</span>';
+  title.textContent = t('staTeachers');
+  bc.innerHTML = '<span class="sta-bc-link" onclick="staRender(0)">' + t('staBcOverview') + '</span><span class="sta-bc-sep"> › </span><span>' + t('staTeachers') + '</span>';
   var list = staData.teacherList || [];
   body.innerHTML =
-    '<div class="sta-section-hd">รายชื่อครู (' + list.length + ' คน)</div>' +
+    '<div class="sta-section-hd">' + t('navTeachers') + ' (' + list.length + t('peopleSuffix') + ')</div>' +
     '<div class="sta-student-list">' +
-      list.map(function(t, i){
-        var cls = t.serial ? 'sta-stu-card' : 'sta-stu-card sta-no-ipad';
-        var badge = t.serial
-          ? '<span class="badge b-borrowed">ยืมแล้ว</span>'
-          : '<span class="badge b-available">ว่างอยู่</span>';
-        var meta = t.serial ? 'S/N: ' + t.serial : '<span style="color:#94a3b8">ยังไม่ยืม</span>';
+      list.map(function(tc, i){
+        var cls = tc.serial ? 'sta-stu-card' : 'sta-stu-card sta-no-ipad';
+        var badge = tc.serial
+          ? '<span class="badge b-borrowed">' + t('staStuBorrow') + '</span>'
+          : '<span class="badge b-available">' + t('staStuAvail') + '</span>';
+        var idPart = tc.personCode ? '<span style="font-family:monospace;font-size:11px;color:var(--muted)">ID: ' + tc.personCode + '</span> · ' : '';
+        var meta = tc.serial ? idPart + 'S/N: ' + tc.serial : idPart + '<span style="color:#94a3b8">' + t('staNoIpad') + '</span>';
         return '<div class="' + cls + '">' +
           '<div class="sta-stu-num">' + (i+1) + '</div>' +
           '<div class="sta-stu-info">' +
-            '<div class="sta-stu-name">' + t.prefix + t.firstName + ' ' + t.lastName + '</div>' +
+            '<div class="sta-stu-name">' + tc.prefix + tc.firstName + ' ' + tc.lastName + '</div>' +
             '<div class="sta-stu-meta">' + meta + '</div>' +
           '</div>' + badge + '</div>';
       }).join('') +
@@ -5733,9 +5736,9 @@ function renderTeachers(data, q) {
   }).join('');
   document.getElementById('teachers-content').innerHTML =
     '<div class="table-wrap">' +
-    '<table><thead><tr><th>ลำดับ</th><th>รหัส</th><th>คำนำหน้า</th><th>ชื่อ</th><th>นามสกุล</th><th>วิชา</th><th>ห้อง</th><th>จัดการ</th></tr></thead>' +
+    '<table><thead><tr><th>'+t('tcSeq')+'</th><th>'+t('tcCode')+'</th><th>'+t('tcPrefix')+'</th><th>'+t('tcFirst')+'</th><th>'+t('tcLast')+'</th><th>'+t('tcSubject')+'</th><th>'+t('tcRoom')+'</th><th>'+t('tcAction')+'</th></tr></thead>' +
     '<tbody>' + rows + '</tbody></table></div>' +
-    '<div style="padding:8px 4px;font-size:13px;color:var(--muted)">' + filtered.length + ' คน</div>';
+    '<div style="padding:8px 4px;font-size:13px;color:var(--muted)">' + filtered.length + t('peopleSuffix') + '</div>';
 }
 
 function debounceTeacherSearch() {
@@ -6406,7 +6409,7 @@ function adminPasswordLogin() {
 }
 function sendOTP(resend) {
   var email = (resend ? document.getElementById('otp-sent-email').textContent : document.getElementById('otp-email').value).trim();
-  if (!email) { showToast('กรุณากรอก email','error'); return; }
+  if (!email) { showToast('กรุณากรอกชื่อหรือ email','error'); return; }
   var btn = document.getElementById(resend ? 'btn-resend-otp' : 'btn-send-otp');
   btn.disabled = true;
   gsr
@@ -6414,7 +6417,7 @@ function sendOTP(resend) {
       btn.disabled = false;
       if (!r.success) { showToast(r.message,'error'); return; }
       showToast(r.message,'success');
-      document.getElementById('otp-sent-email').textContent = email;
+      document.getElementById('otp-sent-email').textContent = (r.resolvedEmail || email);
       document.getElementById('otp-step1').classList.remove('active');
       document.getElementById('otp-step2').classList.add('active');
       startOTPCountdown();
@@ -6647,7 +6650,7 @@ function renderGradeChart(gradeCount) {
   var data   = grades.map(function(k){ return gradeCount[k]; });
   dashChartGrade = new Chart(ctx, {
     type:'bar',
-    data:{ labels:grades.map(function(g){ return 'ม.'+g; }), datasets:[{
+    data:{ labels:grades.map(function(g){ return gradePfx()+g; }), datasets:[{
       label:'จำนวนที่ยืม', data:data,
       backgroundColor:'rgba(79,126,247,.8)', borderRadius:6, borderSkipped:false
     }]},
@@ -6814,6 +6817,7 @@ var I18N = {
     navTeachers:'รายชื่อครู', navManual:'คู่มือการใช้งาน',
     navPhoto:'อัพโหลดรูปนักเรียน', navResetPw:'รีเซ็ต Password',
     navDedup:'ลบรายชื่อซ้ำ', navGrade:'จัดการสายชั้น',
+    schoolName:'โรงเรียนจักราชวิทยา',
     homeBadge:'📱 ระบบบริหารจัดการไอแพด',
     homeSub:'บริการนักเรียน ครู และผู้ดูแลระบบ',
     homeBtn1:'ตรวจสอบสถานะ',homeBtn1Sub:'ดูข้อมูลห้องเรียนและไอแพด',
@@ -6823,15 +6827,20 @@ var I18N = {
     homeManual:'📖 คู่มือการใช้งาน',homeAdmin:'🔐 ผู้ดูแลระบบ',
     id:'ID', studentCode:'รหัสนักเรียน', prefix:'คำนำหน้า',
     fname:'ชื่อ', lname:'นามสกุล', grade:'ชั้น', room:'ห้อง',
+    peopleSuffix:' คน', roomsSuffix:' ห้อง',
     // Status app
     staTitle:'🔍 ตรวจสอบสถานะ', staRefresh:'🔄 รีเฟรช', staBcOverview:'ภาพรวม',
     staStatTotal:'เครื่องทั้งหมด', staStatBorrowed:'กำลังยืม', staStatAvailable:'ว่าง/พร้อมยืม',
     staStatSpecial:'สถานะพิเศษ', staSelectGrade:'เลือกระดับชั้น',
-    staTeachers:'ครู', staRooms:'ห้อง', staStudents:'นักเรียน',
+    staTeachers:'ครู', staTeacher:'ครู', staRooms:'ห้อง', staStudents:'นักเรียน',
     staBorrow:'ยืม', staAvail:'ว่าง', staNoIpad:'ยังไม่ลง',
     staRoomList:'ห้องเรียน', staStudentList:'รายชื่อนักเรียน',
     staStuBorrow:'ยืมแล้ว', staStuAvail:'ว่างอยู่', staStuNoIpad:'ไม่ยืม',
     staStatusLabel:'สถานะ', staSerial:'Serial',
+    // Teacher table headers
+    tcSeq:'ลำดับ', tcCode:'รหัส', tcPrefix:'คำนำหน้า', tcFirst:'ชื่อ', tcLast:'นามสกุล',
+    tcSubject:'วิชา', tcRoom:'ห้อง', tcAction:'จัดการ',
+    teachersPageTitle:'รายชื่อครู', teachersPageSub:'จัดการข้อมูลครูและสถานะการยืมไอแพด',
     // Issue modal
     issueTitle:'⚠️ แจ้งปัญหาไอแพด',
     issueLblCode:'รหัสนักเรียน *', issueBtnSearch:'ค้นหา',
@@ -6864,6 +6873,7 @@ var I18N = {
     navTeachers:'Teachers', navManual:'User Manual',
     navPhoto:'Upload Photos', navResetPw:'Reset Password',
     navDedup:'Remove Duplicates', navGrade:'Manage Grades',
+    schoolName:'Chakkarat Wittaya School',
     homeBadge:'📱 iPad Management System',
     homeSub:'For students, teachers and administrators',
     homeBtn1:'Check Status',homeBtn1Sub:'View classroom and iPad info',
@@ -6873,15 +6883,20 @@ var I18N = {
     homeManual:'📖 User Manual',homeAdmin:'🔐 Administrator',
     id:'ID', studentCode:'Student Code', prefix:'Title',
     fname:'First Name', lname:'Last Name', grade:'Grade', room:'Room',
+    peopleSuffix:'', roomsSuffix:' rooms',
     // Status app
     staTitle:'🔍 Check Status', staRefresh:'🔄 Refresh', staBcOverview:'Overview',
     staStatTotal:'Total iPads', staStatBorrowed:'In Use', staStatAvailable:'Available',
     staStatSpecial:'Special Status', staSelectGrade:'Select Grade Level',
-    staTeachers:'Teachers', staRooms:'rooms', staStudents:'students',
+    staTeachers:'Teachers', staTeacher:'Teacher', staRooms:'Room', staStudents:'students',
     staBorrow:'In Use', staAvail:'Available', staNoIpad:'No iPad',
     staRoomList:'Classrooms', staStudentList:'Student List',
     staStuBorrow:'Borrowed', staStuAvail:'Available', staStuNoIpad:'No iPad',
     staStatusLabel:'Status', staSerial:'Serial',
+    // Teacher table headers
+    tcSeq:'#', tcCode:'ID', tcPrefix:'Title', tcFirst:'First Name', tcLast:'Last Name',
+    tcSubject:'Subject', tcRoom:'Room', tcAction:'Actions',
+    teachersPageTitle:'Teachers', teachersPageSub:'Manage teacher data and iPad borrowing status',
     // Issue modal
     issueTitle:'⚠️ Report iPad Issue',
     issueLblCode:'Student Code *', issueBtnSearch:'Search',
@@ -6912,6 +6927,7 @@ var I18N = {
 function t(key) {
   return (I18N[_lang] && I18N[_lang][key]) || (I18N.th && I18N.th[key]) || key;
 }
+function gradePfx() { return _lang === 'en' ? 'M.' : 'ม.'; }
 var PAGE_TITLES_EN = {
   dashboard:'Dashboard', ipads:'iPad List', overview:'Classroom Overview',
   students:'Students', users:'Manage Users', log:'Activity Log',
@@ -6951,6 +6967,10 @@ function applyLang(lang) {
   // re-render status if open
   if (staData && document.getElementById('status-app').classList.contains('show')) {
     staRender(staLevel);
+  }
+  // re-render teachers table if on teachers page
+  if (typeof allTeachers !== 'undefined' && allTeachers && document.getElementById('page-teachers') && document.getElementById('page-teachers').classList.contains('active')) {
+    renderTeachers(allTeachers, (document.getElementById('t-query') || {}).value || '');
   }
 }
 
@@ -7064,7 +7084,7 @@ function staDoSearch(q) {
         var haystack = [
           s.firstName, s.lastName, s.prefix,
           s.serial, s.assetCode, s.status,
-          'ม.' + g, 'ม.' + g + '/' + rm,
+          'ม.' + g, 'ม.' + g + '/' + rm, 'M.' + g, 'M.' + g + '/' + rm,
           String(g), String(rm)
         ].join(' ').toLowerCase();
         if (haystack.indexOf(ql) !== -1) {
@@ -7105,7 +7125,7 @@ function staDoSearch(q) {
     var fullName = escHtml((s.prefix||'') + (s.firstName||'') + ' ' + (s.lastName||''));
     var hlName = hl((s.prefix||'') + (s.firstName||'') + ' ' + (s.lastName||''));
     var sub = [];
-    if (r.type === 'stu') sub.push('ม.' + r.grade + '/' + r.room);
+    if (r.type === 'stu') sub.push(gradePfx() + r.grade + '/' + r.room);
     if (s.serial) sub.push('S/N: ' + escHtml(s.serial));
     if (s.assetCode) sub.push(escHtml(s.assetCode));
     var statusBadge = s.status ? ' · <span style="color:' + (s.status==='ยืม'?'var(--warning)':s.status==='ยังไม่ยืม'?'var(--success)':'var(--muted-l)') + '">' + escHtml(s.status) + '</span>' : '';

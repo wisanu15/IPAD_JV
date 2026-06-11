@@ -500,7 +500,8 @@
 
       var notifyFab = document.getElementById('notifyFab');
       if (notifyFab) notifyFab.addEventListener('click', enableAdminNotifications);
-      initOneSignal();
+      // initOneSignal() is called only after admin login (IPAD_JV_ADMIN_READY)
+      // to prevent OneSignal from prompting non-admin users
 
       // ── Subscribe overlay ──────────────────────────────────────────────────
       var subOverlaySrc = null;
@@ -610,6 +611,7 @@
         if (!data) return;
         if (data.type === 'IPAD_JV_ADMIN_READY') {
           adminNotifyAllowed = true;
+          initOneSignal();
           updateNotifyButton();
         }
         if (data.type === 'IPAD_JV_REQUEST_NOTIFY') {
@@ -657,6 +659,7 @@
       }
 
       if (isSubscribeMode) {
+        initOneSignal();
         shell.innerHTML =
           '<section style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:65vh;padding:24px;text-align:center;">' +
             '<img src="./icons/icon-192.png" alt="" style="width:80px;height:80px;border-radius:18px;margin-bottom:20px;">' +
