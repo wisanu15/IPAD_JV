@@ -270,6 +270,7 @@
       var gasUrl = (params.get('gas') || configuredUrl).trim();
       var oneSignalAppId = (window.IPAD_JV_CONFIG && window.IPAD_JV_CONFIG.ONESIGNAL_APP_ID || '').trim();
       var sectionParam = params.get('section') || '';
+      var isSubscribeMode = params.get('subscribe') === '1';
       var shell = document.getElementById('appShell');
 
       if (!gasUrl) {
@@ -449,6 +450,87 @@
         window.addEventListener('load', function () {
           navigator.serviceWorker.register('./sw.js').catch(function () {});
         });
+      }
+
+      if (isSubscribeMode) {
+        shell.innerHTML =
+          '<section style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:65vh;padding:24px;text-align:center;">' +
+            '<img src="./icons/icon-192.png" alt="" style="width:80px;height:80px;border-radius:18px;margin-bottom:20px;">' +
+            '<h1 style="font-size:20px;margin:0 0 8px;font-family:sans-serif;">สมัครรับการแจ้งเตือน</h1>' +
+            '<p style="color:#666;margin:0 0 28px;font-family:sans-serif;">สำหรับผู้ดูแลระบบ iPad JV</p>' +
+            '<button id="sub-btn" type="button" style="background:#4F7EF7;color:#fff;border:none;border-radius:12px;padding:14px 32px;font-size:17px;cursor:pointer;min-width:220px;font-family:sans-serif;">🔔 สมัครแจ้งเตือน</button>' +
+            '<div id="sub-result" style="margin-top:20px;padding:12px 18px;border-radius:10px;display:none;font-size:15px;font-family:sans-serif;max-width:320px;line-height:1.5;white-space:pre-wrap;"></div>' +
+          '</section>';
+
+        initOneSignal();
+
+        var subBtn = document.getElementById('sub-btn');
+        var subResult = document.getElementById('sub-result');
+
+        function showSubResult(ok, msg) {
+          if (!subResult) return;
+          subResult.style.display = 'block';
+          subResult.style.background = ok ? '#E8F5E9' : '#FFEBEE';
+          subResult.style.color = ok ? '#1B5E20' : '#B71C1C';
+          subResult.textContent = msg;
+        }
+
+        function doOSSubscribe() {
+          var OS = window.OneSignal;
+          if (!OS) {
+            showSubResult(false, 'OneSignal ไม่พร้อม กรุณารีเฟรชหน้าแล้วลองใหม่');
+            subBtn.disabled = false; subBtn.textContent = '🔔 สมัครแจ้งเตือน';
+            return;
+          }
+          Promise.resolve()
+            .then(function () {
+              if (OS.Notifications && OS.Notifications.requestPermission) {
+                return OS.Notifications.requestPermission();
+              }
+            })
+            .then(function () {
+              if (OS.User && OS.User.addTag) {
+                return OS.User.addTag('role', 'admin');
+              }
+            })
+            .then(function () {
+              subBtn.textContent = '✓ สมัครแล้ว';
+              showSubResult(true, '✅ สมัครสำเร็จ\nตอนนี้จะได้รับแจ้งเตือนเมื่อนักเรียนแจ้งปัญหา iPad ใหม่');
+            })
+            .catch(function (err) {
+              showSubResult(false, '❌ ไม่สำเร็จ: ' + (err && err.message ? err.message : 'กรุณาอนุญาตการแจ้งเตือนใน Chrome'));
+              subBtn.disabled = false; subBtn.textContent = '🔔 สมัครแจ้งเตือน';
+            });
+        }
+
+        if (subBtn) {
+          subBtn.addEventListener('click', function () {
+            subBtn.disabled = true; subBtn.textContent = '⏳ กำลังสมัคร...';
+            subResult.style.display = 'none';
+            if (!oneSignalAppId) {
+              showSubResult(false, 'ยังไม่ได้ตั้งค่า OneSignal App ID');
+              subBtn.disabled = false; subBtn.textContent = '🔔 สมัครแจ้งเตือน';
+              return;
+            }
+            if (oneSignalReady && window.OneSignal) {
+              doOSSubscribe();
+            } else {
+              var waitedMs = 0;
+              var tid = setInterval(function () {
+                waitedMs += 250;
+                if (oneSignalReady && window.OneSignal) {
+                  clearInterval(tid);
+                  doOSSubscribe();
+                } else if (waitedMs >= 12000) {
+                  clearInterval(tid);
+                  showSubResult(false, 'OneSignal ไม่พร้อม กรุณารีเฟรชหน้าแล้วลองใหม่');
+                  subBtn.disabled = false; subBtn.textContent = '🔔 สมัครแจ้งเตือน';
+                }
+              }, 250);
+            }
+          });
+        }
+        return;
       }
 
       if (forceOpen) {
