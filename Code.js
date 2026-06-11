@@ -585,9 +585,10 @@ function notifyAdminPush_(title, message, section, data) {
     if (!appId || !apiKey) return;
 
     const pwaBase = String(props.getProperty('IPAD_JV_PWA_URL') || 'https://wisanu15.github.io/IPAD_JV/');
+    const sep = pwaBase.includes('?') ? '&' : '?';
     const url = section
-      ? pwaBase + (pwaBase.includes('?') ? '&' : '?') + 'section=' + encodeURIComponent(section)
-      : pwaBase;
+      ? pwaBase + sep + 'embed=1&section=' + encodeURIComponent(section)
+      : pwaBase + sep + 'embed=1';
 
     const payload = {
       app_id: appId,
