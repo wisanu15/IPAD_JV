@@ -1575,6 +1575,32 @@ body.mode-register .modal-overlay .modal,
 body.mode-register .modal-overlay .modal-box{max-width:100%!important;width:100%!important;min-height:auto!important;border-radius:18px!important;box-shadow:none!important;border:none!important;animation:none!important;flex:1}
 body.mode-register .modal-overlay .modal-header{border-radius:18px 18px 0 0}
 
+/* ═══ Mobile width fix ═══════════════════════════════════════════════════ */
+html,body{overflow-x:hidden;max-width:100%}
+#main{min-width:0;overflow-x:hidden}
+.content{min-width:0}
+/* On mobile: topbar-right has too many items → overflow */
+@media(max-width:639px){
+  /* Hide non-essential topbar items */
+  .usr-pill{display:none!important}
+  #lang-toggle{display:none!important}
+  #top-actions{display:none!important}
+  /* Compact topbar */
+  .topbar{padding:0 10px!important;gap:8px}
+  .topbar-right{gap:4px}
+  .topbar-left{flex:1;min-width:0;overflow:hidden}
+  .topbar h1{font-size:14px}
+  /* Theme + logout still visible, but smaller gap */
+  #theme-toggle{min-width:30px;height:30px;font-size:13px}
+  .ctrl-btn.danger{min-width:30px;height:30px;font-size:14px!important}
+  /* filter-bar inputs must not overflow */
+  .filter-bar{overflow-x:hidden}
+  .filter-bar input,.filter-bar select{min-width:0}
+  /* pg-hd-actions: wrap & fill width */
+  .pg-hd-actions{width:100%;flex-wrap:wrap;gap:6px}
+  .pg-hd-actions .btn,.pg-hd-actions .btn-sm{flex:1 1 auto;justify-content:center;min-width:0}
+}
+/* ══════════════════════════════════════════════════════════════════════════ */
 </style>
 </head>
 <body class="mode-register">
