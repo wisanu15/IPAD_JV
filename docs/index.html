@@ -628,9 +628,14 @@
       }
       // ── End subscribe overlay ─────────────────────────────────────────────
 
+      // DEBUG: verify notifyToast works on iOS
+      setTimeout(function() { notifyToast('🔧 wrapper ready'); }, 2000);
+
       window.addEventListener('message', function (event) {
         var data = event && event.data;
         if (!data) return;
+        // DEBUG: log every message type received
+        notifyToast('📨 msg: ' + (data.type || '?'));
         if (data.type === 'IPAD_JV_ADMIN_READY') {
           adminNotifyAllowed = true;
           initOneSignal();
