@@ -2967,13 +2967,14 @@ function saveRememberedAdminToken(token) {
 }
 
 function clearRememberedAdminToken() {
+  var revokeServer = arguments.length ? !!arguments[0] : true;
   var tok = getRememberedAdminToken();
   try { localStorage.removeItem(ADMIN_REMEMBER_KEY); } catch(e) {}
   try {
     if (window.parent !== window)
       window.parent.postMessage({type:'IPAD_JV_CLEAR_REMEMBER'}, 'https://wisanu15.github.io');
   } catch(e) {}
-  if (tok) {
+  if (revokeServer && tok) {
     gsr.withFailureHandler(function(){}).forgetRememberToken(tok);
   }
 }
@@ -2994,13 +2995,13 @@ function tryRememberedAdminLogin(tok) {
   gsr
     .withSuccessHandler(function(r) {
       if (!r || !r.success) {
-        clearRememberedAdminToken();
+        clearRememberedAdminToken(false);
         return;
       }
       initAdminWithUser(r);
       showToast('เข้าสู่ระบบผู้ดูแลอัตโนมัติ','success');
     })
-    .withFailureHandler(function(){ clearRememberedAdminToken(); })
+    .withFailureHandler(function(){})
     .consumeRememberToken(tok);
 }
 

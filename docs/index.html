@@ -366,6 +366,36 @@
       var platformGasUrl = isIOS ? gasUrl.replace('/a/*/macros/', '/macros/') : gasUrl;
       var oneSignalReady = false;
       var adminNotifyAllowed = false;
+      var ADMIN_REMEMBER_KEY = 'ipad_jv_admin_remember_token';
+      var ADMIN_REMEMBER_LEGACY_KEY = 'ipad_jv_admin_remember';
+
+      function getRememberedAdminToken() {
+        try {
+          var tok = localStorage.getItem(ADMIN_REMEMBER_KEY) || localStorage.getItem(ADMIN_REMEMBER_LEGACY_KEY) || '';
+          if (tok && !localStorage.getItem(ADMIN_REMEMBER_KEY)) {
+            localStorage.setItem(ADMIN_REMEMBER_KEY, tok);
+          }
+          return tok;
+        } catch (e) {
+          return '';
+        }
+      }
+
+      function saveRememberedAdminToken(token) {
+        try {
+          if (token) {
+            localStorage.setItem(ADMIN_REMEMBER_KEY, token);
+            localStorage.setItem(ADMIN_REMEMBER_LEGACY_KEY, token);
+          }
+        } catch (e) {}
+      }
+
+      function clearRememberedAdminToken() {
+        try {
+          localStorage.removeItem(ADMIN_REMEMBER_KEY);
+          localStorage.removeItem(ADMIN_REMEMBER_LEGACY_KEY);
+        } catch (e) {}
+      }
 
       function escapeHtml(value) {
         return String(value).replace(/[&<>"']/g, function (char) {
@@ -586,7 +616,7 @@
           showSubscribeOverlay(event.source);
         }
         if (data.type === 'IPAD_JV_READY') {
-          var tok = localStorage.getItem('ipad_jv_admin_remember') || '';
+          var tok = getRememberedAdminToken();
           if (tok && iframe) {
             try { iframe.contentWindow.postMessage({ type: 'IPAD_JV_SEND_REMEMBER', token: tok }, '*'); } catch(e) {}
           }
@@ -595,10 +625,10 @@
           }
         }
         if (data.type === 'IPAD_JV_SAVE_REMEMBER' && data.token) {
-          try { localStorage.setItem('ipad_jv_admin_remember', data.token); } catch(e) {}
+          saveRememberedAdminToken(data.token);
         }
         if (data.type === 'IPAD_JV_CLEAR_REMEMBER') {
-          try { localStorage.removeItem('ipad_jv_admin_remember'); } catch(e) {}
+          clearRememberedAdminToken();
         }
       });
 
@@ -720,7 +750,7 @@
         iframe.allow = 'clipboard-read; clipboard-write; fullscreen';
         iframe.addEventListener('load', function () {
           try {
-            var tok = localStorage.getItem('ipad_jv_admin_remember') || '';
+            var tok = getRememberedAdminToken();
             if (tok) iframe.contentWindow.postMessage({ type: 'IPAD_JV_SEND_REMEMBER', token: tok }, '*');
           } catch (e) {}
         });
