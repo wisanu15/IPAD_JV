@@ -2285,7 +2285,11 @@ body.mode-register .modal-overlay .modal-header{border-radius:18px 18px 0 0}
     <div id="page-issues" class="page">
       <div class="pg-hd">
         <div class="pg-hd-info"><h2>ปัญหาไอแพด</h2><p>ติดตามและจัดการรายงานปัญหาไอแพด</p></div>
+        <div class="pg-hd-actions">
+          <button class="btn btn-outline btn-sm" onclick="runPushTest()" id="push-test-btn">🔔 ทดสอบแจ้งเตือน</button>
+        </div>
       </div>
+      <div id="push-test-result" style="display:none;margin:0 0 14px;padding:12px 16px;border-radius:8px;font-size:13px;background:#f8fafc;border:1px solid #e2e8f0;white-space:pre-wrap;word-break:break-all"></div>
       <div class="filter-bar">
         <select id="issue-filter-status" onchange="loadIssues()" class="form-ctrl" style="width:auto">
           <option value="all">ทุกสถานะ</option>
@@ -5479,6 +5483,42 @@ function tchForgotPassword() {
 
 // ── Issues Admin Page ──────────────────────────────────────────────────
 var allIssues = [];
+
+function runPushTest() {
+  var btn = document.getElementById('push-test-btn');
+  var box = document.getElementById('push-test-result');
+  btn.disabled = true;
+  btn.textContent = '⏳ กำลังทดสอบ...';
+  box.style.display = 'none';
+  gsr
+    .withSuccessHandler(function(r) {
+      btn.disabled = false;
+      btn.textContent = '🔔 ทดสอบแจ้งเตือน';
+      var lines = [];
+      if (r.ONESIGNAL_APP_ID)       lines.push('App ID: ' + r.ONESIGNAL_APP_ID);
+      if (r.ONESIGNAL_REST_API_KEY) lines.push('REST Key: ' + r.ONESIGNAL_REST_API_KEY);
+      if (r.app_name)               lines.push('OneSignal App: ' + r.app_name);
+      if (r.subscribers_total !== undefined) lines.push('Subscribers ทั้งหมด: ' + r.subscribers_total);
+      if (r.http_status)            lines.push('HTTP: ' + r.http_status);
+      if (r.recipients !== undefined) lines.push('Recipients (role=admin): ' + r.recipients);
+      if (r.api_errors)             lines.push('Errors: ' + JSON.stringify(r.api_errors));
+      lines.push('');
+      lines.push(r.result || '?');
+      box.textContent = lines.join('\n');
+      box.style.background = (r.result||'').startsWith('✅') ? '#f0fdf4' : (r.result||'').startsWith('❌') ? '#fef2f2' : '#fffbeb';
+      box.style.borderColor = (r.result||'').startsWith('✅') ? '#bbf7d0' : (r.result||'').startsWith('❌') ? '#fecaca' : '#fde68a';
+      box.style.display = 'block';
+    })
+    .withFailureHandler(function(e) {
+      btn.disabled = false;
+      btn.textContent = '🔔 ทดสอบแจ้งเตือน';
+      box.textContent = '❌ เรียก server ไม่ได้: ' + e;
+      box.style.background = '#fef2f2';
+      box.style.borderColor = '#fecaca';
+      box.style.display = 'block';
+    })
+    .debugPushNotification();
+}
 
 function loadIssues() {
   document.getElementById('issues-tbody').innerHTML =
