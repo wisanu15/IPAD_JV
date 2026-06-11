@@ -214,6 +214,63 @@
     }
     .notify-fab.show { display: inline-flex; }
     .notify-fab.ready { background: #4F7EF7; }
+    .sub-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15,23,42,.6);
+      backdrop-filter: blur(4px);
+      padding: 24px;
+    }
+    .sub-overlay.show { display: flex; }
+    .sub-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 28px 22px 22px;
+      width: min(340px, 100%);
+      text-align: center;
+      box-shadow: 0 24px 48px rgba(15,23,42,.28);
+    }
+    .sub-card .sub-icon { font-size: 44px; margin-bottom: 10px; }
+    .sub-card h2 { margin: 0 0 6px; font-size: 18px; }
+    .sub-card p { margin: 0 0 22px; font-size: 14px; color: #64748b; }
+    .sub-action-btn {
+      display: block;
+      width: 100%;
+      padding: 13px 0;
+      border: 0;
+      border-radius: 12px;
+      background: #4F7EF7;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .sub-action-btn:disabled { opacity: .55; cursor: default; }
+    .sub-result-box {
+      display: none;
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    .sub-close-btn {
+      display: block;
+      width: 100%;
+      margin-top: 12px;
+      padding: 9px 0;
+      border: 0;
+      border-radius: 10px;
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 14px;
+      cursor: pointer;
+    }
     .notify-toast {
       position: fixed;
       left: max(14px, env(safe-area-inset-left));
@@ -259,6 +316,16 @@
   <main class="app-shell" id="appShell" aria-label="iPad JV"></main>
   <button class="notify-fab" id="notifyFab" type="button" aria-label="เปิดแจ้งเตือนผู้ดูแล">🔔</button>
   <div class="notify-toast" id="notifyToast"></div>
+  <div class="sub-overlay" id="subOverlay">
+    <div class="sub-card">
+      <div class="sub-icon">🔔</div>
+      <h2>สมัครรับการแจ้งเตือน</h2>
+      <p>เมื่อนักเรียนแจ้งปัญหา iPad ใหม่</p>
+      <button class="sub-action-btn" id="subOverlayBtn" type="button">สมัครแจ้งเตือน</button>
+      <div class="sub-result-box" id="subOverlayResult"></div>
+      <button class="sub-close-btn" id="subOverlayClose" type="button">ปิด</button>
+    </div>
+  </div>
 
   <script src="./config.js"></script>
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
@@ -405,6 +472,105 @@
       if (notifyFab) notifyFab.addEventListener('click', enableAdminNotifications);
       initOneSignal();
 
+      // ── Subscribe overlay ──────────────────────────────────────────────────
+      var subOverlaySrc = null;
+      var subOverlay = document.getElementById('subOverlay');
+      var subOverlayBtn = document.getElementById('subOverlayBtn');
+      var subOverlayResult = document.getElementById('subOverlayResult');
+      var subOverlayClose = document.getElementById('subOverlayClose');
+
+      function showSubResult(ok, msg) {
+        if (!subOverlayResult) return;
+        subOverlayResult.style.display = 'block';
+        subOverlayResult.style.background = ok ? '#E8F5E9' : '#FFEBEE';
+        subOverlayResult.style.color = ok ? '#1B5E20' : '#B71C1C';
+        subOverlayResult.textContent = msg;
+      }
+
+      function sendSubResult(ok, msg) {
+        if (subOverlaySrc) {
+          try { subOverlaySrc.postMessage({ type: 'IPAD_JV_NOTIFY_RESULT', ok: ok, msg: msg || '' }, '*'); } catch(e) {}
+        }
+        subOverlaySrc = null;
+      }
+
+      function closeSubOverlay() {
+        if (subOverlay) subOverlay.classList.remove('show');
+      }
+
+      function doOSSubscribeInOverlay() {
+        var OS = window.OneSignal;
+        if (!OS) {
+          showSubResult(false, '❌ OneSignal ไม่พร้อม\nกรุณาปิดแอปแล้วเปิดใหม่');
+          sendSubResult(false, 'OneSignal not ready');
+          subOverlayBtn.disabled = false; subOverlayBtn.textContent = 'สมัครแจ้งเตือน';
+          return;
+        }
+        Promise.resolve()
+          .then(function () {
+            if (OS.Notifications && OS.Notifications.requestPermission) {
+              return OS.Notifications.requestPermission();
+            }
+          })
+          .then(function () {
+            if (OS.User && OS.User.addTag) {
+              return OS.User.addTag('role', 'admin');
+            }
+          })
+          .then(function () {
+            updateNotifyButton();
+            subOverlayBtn.textContent = '✓ สมัครแล้ว';
+            showSubResult(true, '✅ สมัครสำเร็จ\nตอนนี้จะได้รับแจ้งเตือนเมื่อมีปัญหา iPad ใหม่');
+            sendSubResult(true, '');
+            setTimeout(closeSubOverlay, 3000);
+          })
+          .catch(function (err) {
+            showSubResult(false, '❌ ไม่สำเร็จ\n' + (err && err.message ? err.message : 'กรุณาอนุญาตการแจ้งเตือนใน Chrome'));
+            sendSubResult(false, err && err.message ? err.message : 'permission denied');
+            subOverlayBtn.disabled = false; subOverlayBtn.textContent = 'สมัครแจ้งเตือน';
+          });
+      }
+
+      function showSubscribeOverlay(replyTo) {
+        if (!subOverlay) return;
+        subOverlaySrc = replyTo || null;
+        subOverlayBtn.disabled = false;
+        subOverlayBtn.textContent = 'สมัครแจ้งเตือน';
+        subOverlayResult.style.display = 'none';
+        subOverlay.classList.add('show');
+      }
+
+      if (subOverlayBtn) {
+        subOverlayBtn.addEventListener('click', function () {
+          subOverlayBtn.disabled = true; subOverlayBtn.textContent = '⏳ กำลังสมัคร...';
+          subOverlayResult.style.display = 'none';
+          if (oneSignalReady && window.OneSignal) {
+            doOSSubscribeInOverlay();
+          } else {
+            var waitedMs = 0;
+            var tid = setInterval(function () {
+              waitedMs += 250;
+              if (oneSignalReady && window.OneSignal) {
+                clearInterval(tid);
+                doOSSubscribeInOverlay();
+              } else if (waitedMs >= 12000) {
+                clearInterval(tid);
+                showSubResult(false, '❌ OneSignal ไม่พร้อม\nกรุณาปิดแอปแล้วเปิดใหม่');
+                sendSubResult(false, 'OneSignal timeout');
+                subOverlayBtn.disabled = false; subOverlayBtn.textContent = 'สมัครแจ้งเตือน';
+              }
+            }, 250);
+          }
+        });
+      }
+      if (subOverlayClose) {
+        subOverlayClose.addEventListener('click', function () {
+          sendSubResult(false, 'ปิดโดยผู้ใช้');
+          closeSubOverlay();
+        });
+      }
+      // ── End subscribe overlay ─────────────────────────────────────────────
+
       window.addEventListener('message', function (event) {
         var data = event && event.data;
         if (!data) return;
@@ -413,7 +579,7 @@
           updateNotifyButton();
         }
         if (data.type === 'IPAD_JV_REQUEST_NOTIFY') {
-          enableAdminNotifications(event.source);
+          showSubscribeOverlay(event.source);
         }
         if (data.type === 'IPAD_JV_READY') {
           var tok = localStorage.getItem('ipad_jv_admin_remember') || '';
@@ -461,8 +627,6 @@
             '<button id="sub-btn" type="button" style="background:#4F7EF7;color:#fff;border:none;border-radius:12px;padding:14px 32px;font-size:17px;cursor:pointer;min-width:220px;font-family:sans-serif;">🔔 สมัครแจ้งเตือน</button>' +
             '<div id="sub-result" style="margin-top:20px;padding:12px 18px;border-radius:10px;display:none;font-size:15px;font-family:sans-serif;max-width:320px;line-height:1.5;white-space:pre-wrap;"></div>' +
           '</section>';
-
-        initOneSignal();
 
         var subBtn = document.getElementById('sub-btn');
         var subResult = document.getElementById('sub-result');

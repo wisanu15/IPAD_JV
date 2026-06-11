@@ -5486,7 +5486,39 @@ function tchForgotPassword() {
 var allIssues = [];
 
 function subscribeAdminNotify() {
-  window.open('https://wisanu15.github.io/IPAD_JV/?subscribe=1', '_blank');
+  var box = document.getElementById('push-test-result');
+  var btn = document.getElementById('notify-subscribe-btn');
+  var inIframe = (window.parent !== window);
+  if (!inIframe) {
+    box.textContent = '⚠️ กรุณาเปิดแอปจากไอคอน iPad JV บนหน้าจอหลัก';
+    box.style.background = '#fffbeb'; box.style.borderColor = '#fde68a'; box.style.display = 'block';
+    return;
+  }
+  btn.disabled = true; btn.textContent = '⏳ รอการสมัคร...';
+  box.textContent = '📲 กรุณากด "สมัครแจ้งเตือน" ในหน้าต่างที่ปรากฏ แล้วอนุญาตการแจ้งเตือน';
+  box.style.background = '#eff6ff'; box.style.borderColor = '#bfdbfe'; box.style.display = 'block';
+  window.parent.postMessage({ type: 'IPAD_JV_REQUEST_NOTIFY' }, 'https://wisanu15.github.io');
+  var replied = false;
+  function onReply(e) {
+    if (!e.data || e.data.type !== 'IPAD_JV_NOTIFY_RESULT') return;
+    replied = true;
+    window.removeEventListener('message', onReply);
+    btn.disabled = false; btn.textContent = '🔔 สมัครแจ้งเตือน';
+    box.textContent = e.data.ok
+      ? '✅ สมัครสำเร็จ! ตอนนี้จะได้รับแจ้งเตือนเมื่อมีปัญหา iPad ใหม่'
+      : '❌ สมัครไม่สำเร็จ: ' + (e.data.msg || 'กรุณาอนุญาตการแจ้งเตือนในเบราว์เซอร์');
+    box.style.background = e.data.ok ? '#f0fdf4' : '#fef2f2';
+    box.style.borderColor = e.data.ok ? '#bbf7d0' : '#fecaca';
+  }
+  window.addEventListener('message', onReply);
+  setTimeout(function() {
+    if (!replied) {
+      window.removeEventListener('message', onReply);
+      btn.disabled = false; btn.textContent = '🔔 สมัครแจ้งเตือน';
+      box.textContent = '⚠️ ไม่ได้รับการตอบกลับ กรุณาปิดแอปแล้วเปิดใหม่ แล้วลองอีกครั้ง';
+      box.style.background = '#fffbeb'; box.style.borderColor = '#fde68a';
+    }
+  }, 45000);
 }
 
 function runPushTest() {
