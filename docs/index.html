@@ -361,13 +361,20 @@
         });
       }
 
-      function enableAdminNotifications() {
+      function enableAdminNotifications(replyTo) {
+        function reply(ok, msg) {
+          if (replyTo) {
+            try { replyTo.postMessage({ type: 'IPAD_JV_NOTIFY_RESULT', ok: ok, msg: msg || '' }, '*'); } catch(e) {}
+          }
+        }
         if (!oneSignalAppId) {
           notifyToast('ยังไม่ได้ตั้งค่า OneSignal App ID');
+          reply(false, 'ยังไม่ได้ตั้งค่า OneSignal App ID');
           return;
         }
         if (!oneSignalReady || !window.OneSignal) {
           notifyToast('OneSignal กำลังโหลด กรุณารอสักครู่แล้วลองใหม่');
+          reply(false, 'OneSignal ยังไม่พร้อม กรุณารอแล้วลองใหม่');
           return;
         }
         var OS = window.OneSignal;
@@ -385,9 +392,11 @@
           .then(function () {
             updateNotifyButton();
             notifyToast('เปิดแจ้งเตือนผู้ดูแลแล้ว');
+            reply(true, '');
           })
-          .catch(function () {
+          .catch(function (err) {
             notifyToast('เปิดแจ้งเตือนไม่สำเร็จ กรุณาตรวจสิทธิ์แจ้งเตือนของ Chrome');
+            reply(false, err && err.message ? err.message : 'กรุณาอนุญาตการแจ้งเตือนในเบราว์เซอร์');
           });
       }
 
@@ -401,6 +410,9 @@
         if (data.type === 'IPAD_JV_ADMIN_READY') {
           adminNotifyAllowed = true;
           updateNotifyButton();
+        }
+        if (data.type === 'IPAD_JV_REQUEST_NOTIFY') {
+          enableAdminNotifications(event.source);
         }
         if (data.type === 'IPAD_JV_READY') {
           var tok = localStorage.getItem('ipad_jv_admin_remember') || '';

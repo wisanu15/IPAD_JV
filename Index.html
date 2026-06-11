@@ -2286,7 +2286,8 @@ body.mode-register .modal-overlay .modal-header{border-radius:18px 18px 0 0}
       <div class="pg-hd">
         <div class="pg-hd-info"><h2>ปัญหาไอแพด</h2><p>ติดตามและจัดการรายงานปัญหาไอแพด</p></div>
         <div class="pg-hd-actions">
-          <button class="btn btn-outline btn-sm" onclick="runPushTest()" id="push-test-btn">🔔 ทดสอบแจ้งเตือน</button>
+          <button class="btn btn-outline btn-sm" onclick="subscribeAdminNotify()" id="notify-subscribe-btn">🔔 สมัครแจ้งเตือน</button>
+          <button class="btn btn-outline btn-sm" onclick="runPushTest()" id="push-test-btn">📡 ทดสอบส่ง</button>
         </div>
       </div>
       <div id="push-test-result" style="display:none;margin:0 0 14px;padding:12px 16px;border-radius:8px;font-size:13px;background:#f8fafc;border:1px solid #e2e8f0;white-space:pre-wrap;word-break:break-all"></div>
@@ -5483,6 +5484,40 @@ function tchForgotPassword() {
 
 // ── Issues Admin Page ──────────────────────────────────────────────────
 var allIssues = [];
+
+function subscribeAdminNotify() {
+  var box = document.getElementById('push-test-result');
+  var btn = document.getElementById('notify-subscribe-btn');
+  var inIframe = (window.parent !== window);
+  if (!inIframe) {
+    box.textContent = '⚠️ ต้องเปิดผ่านไอคอน "iPad JV" บนหน้าจอหลัก (Home Screen) เท่านั้น\nถ้ายังไม่ได้ติดตั้ง ให้เปิด https://wisanu15.github.io/IPAD_JV/ แล้วกด Add to Home Screen';
+    box.style.background = '#fffbeb'; box.style.borderColor = '#fde68a'; box.style.display = 'block';
+    return;
+  }
+  btn.disabled = true; btn.textContent = '⏳ กำลังสมัคร...';
+  box.style.display = 'none';
+  window.parent.postMessage({ type: 'IPAD_JV_REQUEST_NOTIFY' }, 'https://wisanu15.github.io');
+  var replied = false;
+  function onReply(e) {
+    if (!e.data || e.data.type !== 'IPAD_JV_NOTIFY_RESULT') return;
+    replied = true;
+    window.removeEventListener('message', onReply);
+    btn.disabled = false; btn.textContent = '🔔 สมัครแจ้งเตือน';
+    box.textContent = e.data.ok ? '✅ สมัครสำเร็จ! ตอนนี้จะได้รับแจ้งเตือนเมื่อมีปัญหา iPad ใหม่' : '❌ สมัครไม่สำเร็จ: ' + (e.data.msg || 'กรุณาอนุญาตการแจ้งเตือนในเบราว์เซอร์');
+    box.style.background = e.data.ok ? '#f0fdf4' : '#fef2f2';
+    box.style.borderColor = e.data.ok ? '#bbf7d0' : '#fecaca';
+    box.style.display = 'block';
+  }
+  window.addEventListener('message', onReply);
+  setTimeout(function() {
+    if (!replied) {
+      window.removeEventListener('message', onReply);
+      btn.disabled = false; btn.textContent = '🔔 สมัครแจ้งเตือน';
+      box.textContent = '⚠️ ไม่ได้รับการตอบกลับ — ตรวจสอบว่าเปิดผ่านไอคอนบน Home Screen';
+      box.style.background = '#fffbeb'; box.style.borderColor = '#fde68a'; box.style.display = 'block';
+    }
+  }, 15000);
+}
 
 function runPushTest() {
   var btn = document.getElementById('push-test-btn');
