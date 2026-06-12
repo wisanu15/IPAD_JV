@@ -1546,7 +1546,8 @@ function submitIssue(data) {
 function analyzeIssue(description) {
   if (!description || !description.trim()) return keywordClassify_('');
   try {
-    const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+    const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY')
+                || PropertiesService.getUserProperties().getProperty('GEMINI_API_KEY');
     if (!apiKey) return keywordClassify_(description);
     const prompt =
       'คุณเป็นผู้ช่วยวิเคราะห์ปัญหาไอแพดในโรงเรียน ' +
