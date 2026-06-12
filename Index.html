@@ -395,6 +395,19 @@ body.mode-register #register-app{display:flex}
 
 /* ─── Issue modal ────────────────────────────────── */
 .issue-step{display:none}.issue-step.active{display:block}
+.issue-menu-grid{display:flex;flex-direction:column;gap:10px;padding:4px 0 8px}
+.issue-menu-card{display:flex;align-items:center;gap:14px;padding:16px 18px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all var(--dur) var(--ease);text-align:left;width:100%}
+.issue-menu-card:hover,.issue-menu-card:active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.issue-menu-card:hover .issue-menu-sub,.issue-menu-card:active .issue-menu-sub{color:rgba(255,255,255,.8)}
+.issue-menu-icon{font-size:28px;min-width:36px;text-align:center;line-height:1}
+.issue-menu-title{font-size:15px;font-weight:700;margin-bottom:3px}
+.issue-menu-sub{font-size:12px;color:var(--muted);line-height:1.4}
+.issue-status-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px}
+.issue-status-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:6px}
+.badge-pending{background:#FFF3CD;color:#856404}
+.badge-progress{background:#CCE5FF;color:#004085}
+.badge-done{background:#D4EDDA;color:#155724}
+.badge-other{background:#E2E3E5;color:#383d41}
 .stu-info-box{background:#EEF2FF;border:1.5px solid #C7D7FD;border-radius:var(--r-sm);padding:12px 14px;margin-bottom:14px;font-size:13px;line-height:1.6}
 .stu-info-box .si-name{font-size:15px;font-weight:700;margin-bottom:4px;color:var(--primary)}
 .file-drop-zone{border:2px dashed var(--border);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;transition:all var(--dur) var(--ease)}
@@ -3096,6 +3109,7 @@ var CU = null;        // currentUser
 var _authTok = '';    // session token for non-Google admin logins
 var ADMIN_REMEMBER_KEY = 'ipad_jv_admin_remember_token';
 var _pendingNavSection = '';
+var _loadedWithToken = false; // true when loaded with ?_rmt= to prevent iOS redirect loop
 var allIPads = [];
 var selStatus = '';
 var searchTimer = null;
@@ -3179,8 +3193,7 @@ function saveRememberedAdminToken(token) {
       // as first-party storage. Skip if already loaded via hash redirect (prevent loop).
       var _isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      var _fromHash = !!(window.location.hash && window.location.hash.indexOf('rmt=') !== -1);
-      if (_isIOS && !_fromHash && window.top !== window) {
+      if (_isIOS && !_loadedWithToken && window.top !== window) {
         window.top.location.replace('https://wisanu15.github.io/IPAD_JV/?rmt=' +
           encodeURIComponent(token) + '&app=1');
       }
@@ -3269,10 +3282,14 @@ window.onload = function() {
   document.body.classList.add('mode-register');
   initThemeAndLang();
   loadRegisterData();
-  // Read token from URL hash — wrapper sets #rmt=TOKEN in iframe src for iOS auto-login
-  var _hashToken = '';
-  try { _hashToken = new URLSearchParams(window.location.hash.slice(1)).get('rmt') || ''; } catch(e) {}
-  tryRememberedAdminLogin(_hashToken);
+  // Template variable set by doGet when wrapper loads iframe with ?_rmt=TOKEN
+  var _initToken = '<?= initRmt ?>';
+  if (_initToken) {
+    _loadedWithToken = true; // prevent iOS redirect loop on saveAdminRememberIfRequested
+    tryRememberedAdminLogin(_initToken);
+  } else {
+    tryRememberedAdminLogin();
+  }
   try {
     if (window.parent !== window)
       window.parent.postMessage({ type: 'IPAD_JV_READY' }, '*');

@@ -797,8 +797,9 @@
         var iframe = document.createElement('iframe');
         iframe.title = 'ระบบบริหารจัดการไอแพด';
         var _iframeTok = getRememberedAdminToken();
-        // Pass token via URL hash — postMessage from wrapper→iframe may not work on iOS PWA
-        iframe.src = _iframeTok ? platformGasUrl + '#rmt=' + encodeURIComponent(_iframeTok) : platformGasUrl;
+        // Pass token via query param so GAS doGet receives it as template variable
+        // (hash on iframe.src is lost when GAS sandboxes to googleusercontent.com)
+        iframe.src = _iframeTok ? platformGasUrl + '?_rmt=' + encodeURIComponent(_iframeTok) : platformGasUrl;
         iframe.referrerPolicy = 'no-referrer-when-downgrade';
         iframe.allow = 'clipboard-read; clipboard-write; fullscreen';
         iframe.addEventListener('load', function () {

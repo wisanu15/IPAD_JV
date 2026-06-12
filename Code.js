@@ -6,7 +6,7 @@ const CONFIG = {
   SHEETS: {
     IPAD: 'iPad_Data', USERS: 'Users', LOG: 'Log', STUDENTS: 'Students',
     ADMIN: 'Admin', DATABASE: 'Database', ISSUES: 'Issues', ACCOUNTS: 'Accounts',
-    TEACHERS: 'Teachers'
+    TEACHERS: 'Teachers', APP_REQUESTS: 'AppRequests'
   },
   STATUS: {
     AVAILABLE: 'ยังไม่ยืม', BORROWED: 'ยืม', RETURNED: 'คืน', CLAIMED: 'เคลม',
@@ -70,8 +70,10 @@ function doGet(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
   }
-  return HtmlService.createTemplateFromFile('Index')
-    .evaluate()
+  var tmpl = HtmlService.createTemplateFromFile('Index');
+  // Pass remember token from wrapper (iOS auto-login via URL param, since postMessage is blocked)
+  tmpl.initRmt = (e && e.parameter && e.parameter._rmt) ? String(e.parameter._rmt) : '';
+  return tmpl.evaluate()
     .setTitle('ระบบบริหารจัดการไอแพด')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1.0');
@@ -1562,6 +1564,53 @@ function updateIssueStatus(issueRow, newIssueStatus, adminNotes, roomDeadline) {
 
   log_(u.email, `อัพเดทปัญหา #${issueId}`, `${studentName} → ${newIssueStatus}`);
   return ok('อัพเดทสำเร็จ');
+}
+
+function getMyIssues(studentCode) {
+  if (!studentCode) return { success: false, issues: [] };
+  const sheet = sh(CONFIG.SHEETS.ISSUES);
+  if (!sheet) return { success: true, issues: [] };
+  const data = sheet.getDataRange().getValues();
+  const issues = [];
+  for (let i = 1; i < data.length; i++) {
+    const r = data[i];
+    if (!r[0]) continue;
+    if (String(r[1]).trim() !== String(studentCode).trim()) continue;
+    issues.push({
+      id: r[0], issueType: r[4], description: r[5],
+      status: r[8], reportedAt: r[9] ? fmtTs(r[9]) : '',
+      adminNotes: r[10] || '', roomDeadline: r[12] || ''
+    });
+  }
+  return { success: true, issues: issues.reverse() };
+}
+
+function submitAppRequest(data) {
+  if (!data || !data.studentCode) return err('กรุณาระบุรหัสนักเรียน');
+  if (!data.appName || !data.appName.trim()) return err('กรุณาระบุชื่อแอพ');
+  if (!data.reason || !data.reason.trim()) return err('กรุณาระบุเหตุผล');
+  const lookup = lookupStudentByCode(data.studentCode);
+  if (!lookup.found) return err('ไม่พบข้อมูลนักเรียนรหัส ' + data.studentCode);
+  let sheet = sh(CONFIG.SHEETS.APP_REQUESTS);
+  if (!sheet) {
+    sheet = ss().insertSheet(CONFIG.SHEETS.APP_REQUESTS);
+    sheet.appendRow(['ID','รหัสนักเรียน','ชื่อ','ชั้น','ห้อง','ชื่อแอพ','เหตุผล','สถานะ','วันที่ยื่น','หมายเหตุAdmin']);
+    sheet.getRange(1,1,1,10).setBackground('#3F51B5').setFontColor('#fff').setFontWeight('bold');
+  }
+  const newId = 'AR' + new Date().getTime();
+  const studentName = lookup.student.prefix + lookup.student.firstName + ' ' + lookup.student.lastName;
+  sheet.appendRow([
+    newId, data.studentCode, studentName,
+    lookup.student.grade || '', lookup.student.room || '',
+    data.appName.trim(), data.reason.trim(),
+    'รอดำเนินการ', new Date(), ''
+  ]);
+  notifyAdmins_(`[คำร้องขอแอพ] ${studentName} — ${data.appName}`,
+    `นักเรียน: ${studentName} (${data.studentCode})\n` +
+    `ชั้น/ห้อง: ${lookup.student.grade}/${lookup.student.room}\n` +
+    `แอพที่ขอ: ${data.appName}\nเหตุผล: ${data.reason}\n\nกรุณาเข้าระบบเพื่อดำเนินการ`);
+  log_(data.studentCode, 'ส่งคำร้องขอแอพ', `แอพ: ${data.appName}`);
+  return ok('ส่งคำร้องสำเร็จ ผู้ดูแลจะตรวจสอบและแจ้งผลโดยเร็ว');
 }
 
 // ── Accounts (Student/Teacher Login) ─────────────────────────────────────────
