@@ -1543,6 +1543,72 @@ function submitIssue(data) {
   return ok('แจ้งปัญหาสำเร็จ เจ้าหน้าที่จะดำเนินการโดยเร็ว');
 }
 
+function analyzeIssue(description) {
+  if (!description || !description.trim()) return keywordClassify_('');
+  try {
+    const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+    if (!apiKey) return keywordClassify_(description);
+    const prompt =
+      'คุณเป็นผู้ช่วยวิเคราะห์ปัญหาไอแพดในโรงเรียน ' +
+      'วิเคราะห์คำอธิบายปัญหาต่อไปนี้แล้วตอบกลับเป็น JSON เท่านั้น (ไม่มีข้อความอื่น)\n\n' +
+      'รูปแบบ JSON ที่ต้องการ:\n' +
+      '{"issueType":"<ประเภท>","suggestions":["<คำแนะนำ1>","<คำแนะนำ2>","<คำแนะนำ3>"]}\n\n' +
+      'ประเภทที่เลือกได้เท่านั้น:\n' +
+      'หน้าจอแตก/แตกร้าว, แบตเตอรี่เสีย, ปุ่มเสีย, ลำโพงเสีย, กล้องเสีย, ชาร์จไม่ได้, ซอฟต์แวร์มีปัญหา, อื่นๆ\n\n' +
+      'คำแนะนำต้องเป็นภาษาไทย สั้นกระชับ และทำได้จริงด้วยตนเอง\n\n' +
+      'คำอธิบายปัญหา: ' + description;
+    const resp = UrlFetchApp.fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey,
+      {
+        method: 'post',
+        contentType: 'application/json',
+        muteHttpExceptions: true,
+        payload: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseMimeType: 'application/json', maxOutputTokens: 300 }
+        })
+      }
+    );
+    const json = JSON.parse(resp.getContentText());
+    const text = json.candidates[0].content.parts[0].text;
+    const parsed = JSON.parse(text);
+    const validTypes = ['หน้าจอแตก/แตกร้าว','แบตเตอรี่เสีย','ปุ่มเสีย','ลำโพงเสีย','กล้องเสีย','ชาร์จไม่ได้','ซอฟต์แวร์มีปัญหา','อื่นๆ'];
+    const issueType = validTypes.includes(parsed.issueType) ? parsed.issueType : 'อื่นๆ';
+    const suggestions = Array.isArray(parsed.suggestions) ? parsed.suggestions.slice(0, 4) : getSuggestionsForType_(issueType);
+    return { success: true, issueType: issueType, suggestions: suggestions, source: 'ai' };
+  } catch(e) {
+    return keywordClassify_(description);
+  }
+}
+
+function keywordClassify_(description) {
+  const d = (description || '').toLowerCase();
+  let type;
+  if      (d.match(/จอ|แตก|ร้าว|กระจก|screen/))                      type = 'หน้าจอแตก/แตกร้าว';
+  else if (d.match(/แบต|battery|หมดเร็ว|ไม่ชาร์จ|ชาร์จแล้วหมดเร็ว/)) type = 'แบตเตอรี่เสีย';
+  else if (d.match(/ปุ่ม|โฮม|home|power|volume|เปิดไม่ติด/))           type = 'ปุ่มเสีย';
+  else if (d.match(/ลำโพง|เสียง|speaker|audio|ได้ยิน/))               type = 'ลำโพงเสีย';
+  else if (d.match(/กล้อง|ถ่าย|camera/))                               type = 'กล้องเสีย';
+  else if (d.match(/ชาร์จ|สายชาร์จ|หัวชาร์จ|charge/))                 type = 'ชาร์จไม่ได้';
+  else if (d.match(/แอพ|แอป|app|ค้าง|crash|อัพเดท|update|ระบบ|ios/))  type = 'ซอฟต์แวร์มีปัญหา';
+  else                                                                    type = 'อื่นๆ';
+  return { success: true, issueType: type, suggestions: getSuggestionsForType_(type), source: 'keyword' };
+}
+
+function getSuggestionsForType_(type) {
+  const map = {
+    'หน้าจอแตก/แตกร้าว': ['ระวังอย่าให้กระจกสัมผัสมือโดยตรง','หลีกเลี่ยงการกดบนหน้าจอ','งดใช้ไอแพดจนกว่าแอดมินจะตรวจสอบ'],
+    'แบตเตอรี่เสีย': ['ลองชาร์จด้วยสายและหัวชาร์จอื่น','ตรวจสอบว่าพอร์ตชาร์จสะอาด','หากแบตหมดเร็วผิดปกติให้แจ้งแอดมิน'],
+    'ปุ่มเสีย': ['ลองรีสตาร์ทไอแพดโดยกดปุ่มข้างเครื่องค้างไว้','ตรวจดูว่าปุ่มไม่ติดขัดหรือมีสิ่งสกปรก','หากไม่ดีขึ้นให้แจ้งแอดมิน'],
+    'ลำโพงเสีย': ['ตรวจสอบว่าไม่ได้เปิด Silent Mode','ลองปรับระดับเสียงขึ้น','ลองรีสตาร์ทเครื่อง','หากยังไม่มีเสียงให้แจ้งแอดมิน'],
+    'กล้องเสีย': ['ปิดแอพกล้องแล้วเปิดใหม่','รีสตาร์ทเครื่อง','ตรวจสอบว่าเลนส์กล้องสะอาด','หากยังมีปัญหาแจ้งแอดมิน'],
+    'ชาร์จไม่ได้': ['ลองเปลี่ยนสายชาร์จ','ทำความสะอาดพอร์ตชาร์จด้วยลมเป่า','ตรวจสอบว่าหัวชาร์จทำงานปกติ','หากยังไม่ชาร์จแจ้งแอดมิน'],
+    'ซอฟต์แวร์มีปัญหา': ['ปิดแอพที่มีปัญหาแล้วเปิดใหม่','รีสตาร์ทเครื่อง','ตรวจสอบว่า iOS อัพเดทล่าสุด','หากยังมีปัญหาแจ้งแอดมิน'],
+    'อื่นๆ': ['ลองรีสตาร์ทเครื่องก่อน','บันทึกอาการปัญหาให้ละเอียด','แจ้งแอดมินเพื่อตรวจสอบเพิ่มเติม']
+  };
+  return map[type] || map['อื่นๆ'];
+}
+
 function getIssues(filters) {
   const u = getCurrentUser(arguments[arguments.length - 1]);
   if (u.role === CONFIG.ROLES.USER) return err('ไม่มีสิทธิ์');

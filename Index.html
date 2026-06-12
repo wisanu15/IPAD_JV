@@ -397,6 +397,29 @@ body.mode-register #register-app{display:flex}
 /* ─── Issue modal ────────────────────────────────── */
 .issue-step{display:none}.issue-step.active{display:block}
 
+/* AI Analysis step */
+.ai-loading-box{text-align:center;padding:48px 20px}
+.ai-loading-ico{font-size:52px;margin-bottom:14px}
+.ai-loading-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:6px}
+.ai-loading-sub{font-size:13px;color:var(--muted);line-height:1.5}
+.ai-result-card{background:var(--surface);border-radius:var(--r-md);border:1.5px solid var(--border);padding:18px;margin-bottom:12px}
+.ai-result-header{display:flex;align-items:center;gap:10px;margin-bottom:2px}
+.ai-result-title{font-size:16px;font-weight:800;color:var(--text)}
+.ai-badge{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;white-space:nowrap}
+.ai-badge.from-ai{background:rgba(79,126,247,.12);color:#4f7ef7}
+body.dark-mode .ai-badge.from-ai{background:rgba(79,126,247,.22);color:#7ba3ff}
+.ai-badge.from-kw{background:rgba(245,158,11,.12);color:#d97706}
+body.dark-mode .ai-badge.from-kw{background:rgba(245,158,11,.22);color:#fbbf24}
+.ai-sugg-box{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.22);border-radius:var(--r-sm);padding:14px;margin:14px 0}
+body.dark-mode .ai-sugg-box{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.28)}
+.ai-sugg-title{font-size:13px;font-weight:700;color:#059669;margin-bottom:8px}
+body.dark-mode .ai-sugg-title{color:#34d399}
+.ai-sugg-list{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.ai-sugg-list li{font-size:13px;color:var(--text);line-height:1.5}
+.ai-result-note{font-size:12px;color:var(--muted);text-align:center;margin:4px 0 16px;line-height:1.5;padding:0 8px}
+.ai-actions{display:flex;flex-direction:column;gap:10px}
+.ai-action-btn{padding:14px 20px!important;font-size:14px!important;font-weight:700!important;line-height:1.2!important;border-radius:var(--r-md)!important;text-align:center!important}
+
 /* Menu intro */
 .im-intro{text-align:center;padding:10px 0 18px}
 .im-intro-title{font-size:17px;font-weight:800;color:var(--text);margin-bottom:4px}
@@ -2019,22 +2042,9 @@ body.dark-mode .sta-stu-chevron{background:rgba(255,255,255,.07)!important;color
       <div id="issue-step2" class="issue-step">
         <div class="stu-info-box" id="issue-stu-info"></div>
         <div class="form-group">
-          <label class="form-label" data-i18n="issueLblType">ประเภทปัญหา *</label>
-          <select id="issue-type" class="form-ctrl">
-            <option value="" data-i18n="issueTypeSelect">— เลือกประเภท —</option>
-            <option value="หน้าจอแตก/แตกร้าว" data-i18n="issueType1">หน้าจอแตก/แตกร้าว</option>
-            <option value="แบตเตอรี่เสีย" data-i18n="issueType2">แบตเตอรี่เสีย</option>
-            <option value="ปุ่มเสีย" data-i18n="issueType3">ปุ่มเสีย</option>
-            <option value="ลำโพงเสีย" data-i18n="issueType4">ลำโพงเสีย</option>
-            <option value="กล้องเสีย" data-i18n="issueType5">กล้องเสีย</option>
-            <option value="ชาร์จไม่ได้" data-i18n="issueType6">ชาร์จไม่ได้</option>
-            <option value="ซอฟต์แวร์มีปัญหา" data-i18n="issueType7">ซอฟต์แวร์มีปัญหา</option>
-            <option value="อื่นๆ" data-i18n="issueType8">อื่นๆ</option>
-          </select>
-        </div>
-        <div class="form-group">
           <label class="form-label" data-i18n="issueLblDesc">รายละเอียดปัญหา *</label>
-          <textarea id="issue-description" class="form-ctrl" rows="3" placeholder="อธิบายอาการปัญหาโดยละเอียด..."></textarea>
+          <textarea id="issue-description" class="form-ctrl" rows="4" placeholder="อธิบายอาการปัญหาโดยละเอียด เช่น หน้าจอแตก ชาร์จไม่ติด แบตหมดเร็ว..."></textarea>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px">AI จะวิเคราะห์และจัดประเภทปัญหาให้อัตโนมัติ</div>
         </div>
         <div class="form-group">
           <label class="form-label" data-i18n="issueLblFiles">ไฟล์แนบ (รูปภาพ/วิดีโอ สูงสุด 10 ไฟล์)</label>
@@ -2050,6 +2060,57 @@ body.dark-mode .sta-stu-chevron{background:rgba(255,255,255,.07)!important;color
           <div class="file-list" id="issue-file-list"></div>
           <div id="issue-upload-status" class="upload-status"></div>
         </div>
+      </div>
+
+      <!-- Step AI: Analysis loading + result -->
+      <div id="issue-step-ai" class="issue-step">
+
+        <!-- Loading view -->
+        <div id="ai-loading-view" class="ai-loading-box">
+          <div class="ai-loading-ico">🤖</div>
+          <div class="ai-loading-title">กำลังวิเคราะห์ปัญหา...</div>
+          <div class="ai-loading-sub">AI กำลังอ่านคำอธิบายของคุณ<br>กรุณารอสักครู่</div>
+          <div class="spinner" style="width:32px;height:32px;margin:20px auto 0;border-width:3px"></div>
+        </div>
+
+        <!-- Result view -->
+        <div id="ai-result-view" style="display:none">
+          <div class="ai-result-card">
+            <div class="ai-result-header">
+              <span class="ai-badge from-ai" id="ai-source-badge">🤖 AI วิเคราะห์</span>
+              <div class="ai-result-title">ผลการวิเคราะห์ปัญหา</div>
+            </div>
+            <div class="form-group" style="margin-top:14px">
+              <label class="form-label">ประเภทปัญหาที่ตรวจพบ</label>
+              <select id="ai-type-confirm" class="form-ctrl">
+                <option value="หน้าจอแตก/แตกร้าว">หน้าจอแตก/แตกร้าว</option>
+                <option value="แบตเตอรี่เสีย">แบตเตอรี่เสีย</option>
+                <option value="ปุ่มเสีย">ปุ่มเสีย</option>
+                <option value="ลำโพงเสีย">ลำโพงเสีย</option>
+                <option value="กล้องเสีย">กล้องเสีย</option>
+                <option value="ชาร์จไม่ได้">ชาร์จไม่ได้</option>
+                <option value="ซอฟต์แวร์มีปัญหา">ซอฟต์แวร์มีปัญหา</option>
+                <option value="อื่นๆ">อื่นๆ</option>
+              </select>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px">เปลี่ยนได้หากไม่ตรงกับปัญหาของคุณ</div>
+            </div>
+            <div class="ai-sugg-box">
+              <div class="ai-sugg-title">💡 คำแนะนำเบื้องต้น</div>
+              <ul class="ai-sugg-list" id="ai-sugg-list"></ul>
+            </div>
+            <div class="ai-result-note">ลองทำตามคำแนะนำข้างต้น หากยังไม่ดีขึ้นให้ส่งเรื่องให้แอดมินตรวจสอบ</div>
+            <div class="ai-actions">
+              <button class="btn btn-success ai-action-btn" onclick="issueResolveSelf()">
+                ✅ แก้ไขได้เองแล้ว ขอบคุณ!
+              </button>
+              <button class="btn btn-warning ai-action-btn" id="btn-submit-to-admin" onclick="issueSubmitToAdmin()">
+                📤 ยังแก้ไม่ได้ — ส่งให้แอดมิน
+              </button>
+            </div>
+            <div id="ai-submit-status" style="font-size:13px;color:var(--muted);text-align:center;margin-top:8px;min-height:18px"></div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Step S1: Enter student code (status check) -->
@@ -5349,11 +5410,11 @@ var issueModalState = 'menu';
 var appReqStudentData = null;
 
 var ISSUE_BACK_MAP = {
-  'report-1':'menu','report-2':'report-1',
+  'report-1':'menu','report-2':'report-1','report-ai':'report-2',
   'status-1':'menu','status-2':'status-1',
   'appreq-1':'menu','appreq-2':'appreq-1'
 };
-var ISSUE_ALL_STEPS = ['issue-step0','issue-step1','issue-step2','issue-step-s1','issue-step-s2','issue-step-a1','issue-step-a2'];
+var ISSUE_ALL_STEPS = ['issue-step0','issue-step1','issue-step2','issue-step-ai','issue-step-s1','issue-step-s2','issue-step-a1','issue-step-a2'];
 
 function setIssueState(state) {
   ISSUE_ALL_STEPS.forEach(function(id){ document.getElementById(id).classList.remove('active'); });
@@ -5374,8 +5435,13 @@ function setIssueState(state) {
     title.textContent = '⚠️ แจ้งปัญหาไอแพด';
     backBtn.style.display = '';
     subBtn.style.display = '';
-    subBtn.innerHTML = '📤 ส่งเรื่อง';
-    subBtn.onclick = submitIssueForm;
+    subBtn.innerHTML = '🤖 วิเคราะห์ปัญหา';
+    subBtn.onclick = analyzeIssueWithAI;
+  } else if (state === 'report-ai') {
+    document.getElementById('issue-step-ai').classList.add('active');
+    title.textContent = '⚠️ แจ้งปัญหาไอแพด';
+    backBtn.style.display = 'none';
+    subBtn.style.display = 'none';
   } else if (state === 'status-1') {
     document.getElementById('issue-step-s1').classList.add('active');
     title.textContent = '🔍 ตรวจสอบสถานะ';
@@ -5406,7 +5472,6 @@ function openIssueModal() {
   issueFiles = [];
   document.getElementById('issue-student-code').value = '';
   document.getElementById('issue-lookup-msg').style.display = 'none';
-  document.getElementById('issue-type').value = '';
   document.getElementById('issue-description').value = '';
   document.getElementById('issue-file-list').innerHTML = '';
   document.getElementById('issue-upload-status').textContent = '';
@@ -5680,6 +5745,128 @@ function doFinalSubmitIssue(type, desc, btn, statusEl) {
       }
     })
     .withFailureHandler(function(e) { btn.disabled=false; btn.innerHTML='📤 ส่งเรื่อง'; statusEl.textContent=''; showError(e); })
+    .submitIssue({ studentCode: issueStudentData.student.code, issueType: type, description: desc, fileUrls: urls });
+}
+
+// ── AI Issue Analysis ──────────────────────────────────────────────────
+var aiAnalysisResult = null;
+
+function analyzeIssueWithAI() {
+  if (!issueStudentData) return;
+  var desc = document.getElementById('issue-description').value.trim();
+  if (!desc) { showToast('กรุณากรอกรายละเอียดปัญหาก่อน', 'error'); return; }
+
+  document.getElementById('ai-loading-view').style.display = '';
+  document.getElementById('ai-result-view').style.display = 'none';
+  setIssueState('report-ai');
+
+  gsr
+    .withSuccessHandler(function(r) {
+      aiAnalysisResult = r;
+      showAIResult(r);
+    })
+    .withFailureHandler(function() {
+      showToast('เกิดข้อผิดพลาด กรุณาลองใหม่', 'error');
+      setIssueState('report-2');
+    })
+    .analyzeIssue(desc);
+}
+
+function showAIResult(data) {
+  document.getElementById('ai-loading-view').style.display = 'none';
+  document.getElementById('ai-result-view').style.display = '';
+
+  var badge = document.getElementById('ai-source-badge');
+  if (data.source === 'ai') {
+    badge.textContent = '🤖 AI วิเคราะห์';
+    badge.className = 'ai-badge from-ai';
+  } else {
+    badge.textContent = '🔤 วิเคราะห์จากข้อความ';
+    badge.className = 'ai-badge from-kw';
+  }
+
+  var sel = document.getElementById('ai-type-confirm');
+  sel.value = data.issueType || 'อื่นๆ';
+  if (!sel.value) sel.value = 'อื่นๆ';
+
+  var list = document.getElementById('ai-sugg-list');
+  list.innerHTML = (data.suggestions || []).map(function(s) {
+    return '<li>' + escHtml(s) + '</li>';
+  }).join('');
+
+  document.getElementById('btn-issue-back').style.display = '';
+  document.getElementById('ai-submit-status').textContent = '';
+}
+
+function issueResolveSelf() {
+  showToast('ยินดีที่แก้ไขได้เอง! หากมีปัญหาอื่นแจ้งได้เสมอ', 'success');
+  closeModal('modal-issue');
+}
+
+function issueSubmitToAdmin() {
+  if (!issueStudentData) return;
+  var type = document.getElementById('ai-type-confirm').value;
+  var desc = document.getElementById('issue-description').value.trim();
+  if (!type) { showToast('กรุณาเลือกประเภทปัญหา', 'error'); return; }
+
+  var btn = document.getElementById('btn-submit-to-admin');
+  var origHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> กำลังส่ง...';
+  var statusEl = document.getElementById('ai-submit-status');
+
+  var pendingFiles = issueFiles.filter(function(f){ return !f.done && !f.error; });
+  if (!pendingFiles.length) {
+    doAIFinalSubmit(type, desc, btn, origHTML, statusEl);
+    return;
+  }
+
+  var total = pendingFiles.length, done = 0;
+  statusEl.textContent = 'กำลังอัพโหลดไฟล์ 0/' + total + '...';
+
+  function uploadNext(idx) {
+    if (idx >= issueFiles.length) { doAIFinalSubmit(type, desc, btn, origHTML, statusEl); return; }
+    var item = issueFiles[idx];
+    if (item.done || item.error) { uploadNext(idx + 1); return; }
+    item.uploading = true;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      gsr
+        .withSuccessHandler(function(r) {
+          item.uploading = false;
+          if (r && r.success) { item.done = true; item.url = r.url; }
+          else { item.error = true; }
+          done++;
+          statusEl.textContent = 'อัพโหลดแล้ว ' + done + '/' + total + '...';
+          uploadNext(idx + 1);
+        })
+        .withFailureHandler(function() { item.uploading = false; item.error = true; done++; uploadNext(idx + 1); })
+        .uploadIssueFile(ev.target.result.split(',')[1], item.file.name, item.file.type);
+    };
+    reader.readAsDataURL(item.file);
+  }
+  uploadNext(0);
+}
+
+function doAIFinalSubmit(type, desc, btn, origHTML, statusEl) {
+  statusEl.textContent = 'กำลังส่งเรื่อง...';
+  var urls = issueFiles.filter(function(f){ return f.done && f.url; }).map(function(f){ return f.url; });
+  gsr
+    .withSuccessHandler(function(r) {
+      btn.disabled = false;
+      btn.innerHTML = origHTML;
+      statusEl.textContent = '';
+      if (r && r.success) {
+        showToast('ส่งเรื่องสำเร็จ — แจ้ง Admin แล้ว', 'success');
+        closeModal('modal-issue');
+      } else {
+        showToast((r && r.message) || 'เกิดข้อผิดพลาด', 'error');
+      }
+    })
+    .withFailureHandler(function(e) {
+      btn.disabled = false; btn.innerHTML = origHTML; statusEl.textContent = '';
+      showError(e);
+    })
     .submitIssue({ studentCode: issueStudentData.student.code, issueType: type, description: desc, fileUrls: urls });
 }
 
