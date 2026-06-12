@@ -80,6 +80,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);dis
 .stat-card.red{border-top:3px solid var(--danger)}.stat-card.red .value{color:var(--danger)}
 .stat-card.purple{border-top:3px solid var(--purple)}.stat-card.purple .value{color:var(--purple)}
 .stat-card.cyan{border-top:3px solid var(--cyan)}.stat-card.cyan .value{color:var(--cyan)}
+.stat-card.teal{border-top:3px solid #0891b2}.stat-card.teal .value{color:#0891b2}
 
 /* ─── Badges ─────────────────────────────────────── */
 .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;letter-spacing:.1px}
@@ -832,6 +833,18 @@ body.dark-mode:not(.mode-register) .file-drop-zone{border-color:rgba(255,255,255
 body.dark-mode:not(.mode-register) .file-drop-zone:hover{border-color:var(--primary)!important;background:rgba(79,126,247,.1)!important}
 body.dark-mode:not(.mode-register) .file-item{background:rgba(255,255,255,.05)!important;border-color:rgba(255,255,255,.09)!important;color:rgba(255,255,255,.8)!important}
 body.dark-mode:not(.mode-register) .stu-info-box{background:rgba(79,126,247,.12)!important;border-color:rgba(79,126,247,.28)!important}
+/* Dashboard grade header row */
+.dash-grade-hd td{font-weight:700;color:var(--primary)!important;padding:10px 14px!important}
+body:not(.dark-mode) .dash-grade-hd{background:#f0f6ff!important}
+body.dark-mode .dash-grade-hd{background:rgba(79,126,247,.1)!important}
+/* Dashboard room rows */
+.dash-room-row{cursor:pointer}
+.dash-room-row:hover{background:rgba(79,126,247,.05)!important}
+body.dark-mode .dash-room-row:hover{background:rgba(79,126,247,.1)!important}
+/* Progress bar in dashboard table */
+.dash-prog-wrap{background:rgba(0,0,0,.08);border-radius:4px;height:6px;margin-bottom:3px;overflow:hidden;min-width:60px}
+body.dark-mode .dash-prog-wrap{background:rgba(255,255,255,.1)}
+.dash-prog-fill{height:100%;border-radius:4px;background:var(--primary);transition:width .3s}
 body.dark-mode:not(.mode-register) .stu-info-box .si-name{color:rgba(165,180,252,1)!important}
 body.dark-mode:not(.mode-register) .photo-prev-item{background:rgba(255,255,255,.05)!important;border-color:rgba(255,255,255,.1)!important;color:rgba(255,255,255,.8)!important}
 body.dark-mode:not(.mode-register) .photo-prev-item.matched{border-color:rgba(16,185,129,.5)!important;background:rgba(16,185,129,.08)!important}
@@ -992,6 +1005,20 @@ tbody tr{transition:background .1s}
 /* Sidebar improved */
 #sidebar .brand{padding:22px 16px 18px}
 #sidebar nav a{font-size:13.5px;padding:9px 14px}
+/* Sidebar nav section separator */
+.nav-sep{
+  margin:8px 8px 4px;padding:0 8px;
+  display:flex;align-items:center;gap:8px
+}
+.nav-sep span{
+  font-size:10px;font-weight:700;letter-spacing:.6px;
+  text-transform:uppercase;color:rgba(255,255,255,.32);
+  white-space:nowrap
+}
+.nav-sep::after{
+  content:'';flex:1;height:1px;
+  background:rgba(255,255,255,.08)
+}
 
 /* Content padding */
 .content{padding:22px 24px!important}
@@ -2437,16 +2464,15 @@ body.dark-mode .sta-stu-chevron{background:rgba(255,255,255,.07)!important;color
     <a class="active" onclick="showPage('dashboard')"><span class="icon">🏠</span> <span class="nl" data-i18n="navDash">แดชบอร์ด</span></a>
     <a onclick="showPage('ipads')"><span class="icon">📋</span> <span class="nl" data-i18n="navIpads">รายการไอแพด</span></a>
     <a onclick="showPage('overview')"><span class="icon">🏫</span> <span class="nl" data-i18n="navOverview">ภาพรวมห้องเรียน</span></a>
+    <div class="nav-sep" id="nav-sep-manage" style="display:none"><span>จัดการ</span></div>
     <a id="nav-students" onclick="showPage('students')" style="display:none"><span class="icon">🎓</span> <span class="nl" data-i18n="navStudents">รายชื่อนักเรียน</span></a>
-    <a id="nav-users" onclick="showPage('users')" style="display:none"><span class="icon">👥</span> <span class="nl" data-i18n="navUsers">จัดการผู้ใช้</span></a>
     <a id="nav-admin-accounts" onclick="showPage('admin-accounts')" style="display:none"><span class="icon">🔑</span> <span class="nl">บัญชีแอดมิน</span></a>
     <a id="nav-log"      onclick="showPage('log')"     style="display:none"><span class="icon">📜</span> <span class="nl" data-i18n="navLog">ประวัติ</span></a>
     <a id="nav-issues"   onclick="showPage('issues')"  style="display:none"><span class="icon">🔧</span> <span class="nl" data-i18n="navIssues">ปัญหาไอแพด</span></a>
     <a id="nav-teachers" onclick="showPage('teachers')" style="display:none"><span class="icon">👩‍🏫</span> <span class="nl" data-i18n="navTeachers">รายชื่อครู</span></a>
+    <div class="nav-sep" id="nav-sep-tools" style="display:none"><span>เครื่องมือ</span></div>
     <a onclick="openManual()"><span class="icon">📖</span> <span class="nl" data-i18n="navManual">คู่มือการใช้งาน</span></a>
     <a id="nav-photo-upload" onclick="openPhotoUpload()" style="display:none"><span class="icon">📷</span> <span class="nl" data-i18n="navPhoto">อัพโหลดรูปนักเรียน</span></a>
-    <a id="nav-reset-pw" onclick="openAdminResetPw()" style="display:none"><span class="icon">🔑</span> <span class="nl" data-i18n="navResetPw">รีเซ็ต Password</span></a>
-    <a id="nav-dedup" onclick="openDedup()" style="display:none"><span class="icon">🧹</span> <span class="nl" data-i18n="navDedup">ลบรายชื่อซ้ำ</span></a>
     <a id="nav-grade-mgmt" onclick="openGradeMgmt()" style="display:none"><span class="icon">🎓</span> <span class="nl" data-i18n="navGrade">จัดการสายชั้น</span></a>
   </nav>
   <div class="user-info">
@@ -2523,7 +2549,6 @@ body.dark-mode .sta-stu-chevron{background:rgba(255,255,255,.07)!important;color
         </select>
         <select id="q-grade" onchange="applySearch()">
           <option value="all">ทุกชั้น</option>
-          <option>ม.1</option><option>ม.2</option><option>ม.3</option>
           <option>ม.4</option><option>ม.5</option><option>ม.6</option>
         </select>
         <select id="q-room" onchange="applySearch()">
@@ -2555,20 +2580,6 @@ body.dark-mode .sta-stu-chevron{background:rgba(255,255,255,.07)!important;color
       <div id="overview-content"><div class="loading-cell">กำลังโหลด...</div></div>
     </div>
 
-    <!-- Users -->
-    <div id="page-users" class="page">
-      <div class="pg-hd">
-        <div class="pg-hd-info"><h2>จัดการผู้ใช้</h2><p>สิทธิ์การเข้าถึงระบบสำหรับครูและผู้ดูแล</p></div>
-        <div class="pg-hd-actions" id="pg-users-actions"></div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Email</th><th>ชื่อ-นามสกุล</th><th>รหัส</th><th>ตำแหน่ง</th><th>Role</th><th>จัดการ</th></tr></thead>
-          <tbody id="users-tbody"><tr><td colspan="6" class="loading-cell">กำลังโหลด...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
     <!-- Admin Accounts -->
     <div id="page-admin-accounts" class="page">
       <div class="pg-hd">
@@ -2593,7 +2604,6 @@ body.dark-mode .sta-stu-chevron{background:rgba(255,255,255,.07)!important;color
         <input id="s-query" type="text" placeholder="🔍 รหัส, ชื่อ, นามสกุล..." oninput="debounceStudentSearch()">
         <select id="s-grade" onchange="applyStudentSearch()">
           <option value="all">ทุกชั้น</option>
-          <option>ม.1</option><option>ม.2</option><option>ม.3</option>
           <option>ม.4</option><option>ม.5</option><option>ม.6</option>
         </select>
         <select id="s-room" onchange="applyStudentSearch()">
@@ -2627,11 +2637,13 @@ body.dark-mode .sta-stu-chevron{background:rgba(255,255,255,.07)!important;color
       <div class="pg-hd">
         <div class="pg-hd-info"><h2>ปัญหาไอแพด</h2><p>ติดตามและจัดการรายงานปัญหาไอแพด</p></div>
         <div class="pg-hd-actions">
-          <button class="btn btn-outline btn-sm" onclick="subscribeAdminNotify()" id="notify-subscribe-btn">🔔 สมัครแจ้งเตือน</button>
-          <button class="btn btn-outline btn-sm" onclick="runPushTest()" id="push-test-btn">📡 ทดสอบส่ง</button>
+          <button class="btn btn-outline btn-sm" onclick="loadIssues()">🔄 รีเฟรช</button>
+          <button class="btn btn-outline btn-sm" onclick="subscribeAdminNotify()" id="notify-subscribe-btn">🔔 แจ้งเตือน</button>
+          <button class="btn btn-outline btn-sm" onclick="runPushTest()" id="push-test-btn">📡 ทดสอบ</button>
         </div>
       </div>
       <div id="push-test-result" style="display:none;margin:0 0 14px;padding:12px 16px;border-radius:8px;font-size:13px;background:#f8fafc;border:1px solid #e2e8f0;white-space:pre-wrap;word-break:break-all"></div>
+      <div id="issues-summary" style="margin-bottom:14px"></div>
       <div class="filter-bar">
         <select id="issue-filter-status" onchange="loadIssues()" class="form-ctrl" style="width:auto">
           <option value="all">ทุกสถานะ</option>
@@ -2641,11 +2653,21 @@ body.dark-mode .sta-stu-chevron{background:rgba(255,255,255,.07)!important;color
           <option value="ใช้งานไม่ได้">ใช้งานไม่ได้</option>
           <option value="อยู่ระหว่างการเคลม">อยู่ระหว่างการเคลม</option>
         </select>
-        <button class="btn btn-outline btn-sm" onclick="loadIssues()">🔄 รีเฟรช</button>
+        <select id="issue-filter-type" onchange="applyIssueTypeFilter()" class="form-ctrl" style="width:auto">
+          <option value="all">ทุกประเภท</option>
+          <option value="หน้าจอแตก/แตกร้าว">หน้าจอแตก/แตกร้าว</option>
+          <option value="แบตเตอรี่เสีย">แบตเตอรี่เสีย</option>
+          <option value="ปุ่มเสีย">ปุ่มเสีย</option>
+          <option value="ลำโพงเสีย">ลำโพงเสีย</option>
+          <option value="กล้องเสีย">กล้องเสีย</option>
+          <option value="ชาร์จไม่ได้">ชาร์จไม่ได้</option>
+          <option value="ซอฟต์แวร์มีปัญหา">ซอฟต์แวร์มีปัญหา</option>
+          <option value="อื่นๆ">อื่นๆ</option>
+        </select>
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>#</th><th>รหัส/ชื่อ</th><th>Serial</th><th>ประเภท</th><th>สถานะ</th><th>วันที่แจ้ง</th><th>กำหนดส่งห้อง441</th><th>จัดการ</th></tr></thead>
+          <thead><tr><th>#</th><th>รหัส/ชื่อ</th><th>Serial</th><th>ประเภท</th><th>สถานะ</th><th>วันที่แจ้ง</th><th>กำหนดวัน</th><th>จัดการ</th></tr></thead>
           <tbody id="issues-tbody"><tr><td colspan="8" class="loading-cell">กำลังโหลด...</td></tr></tbody>
         </table>
       </div>
@@ -2721,7 +2743,6 @@ body.dark-mode .sta-stu-chevron{background:rgba(255,255,255,.07)!important;color
           <label class="form-label">ระดับชั้น</label>
           <select id="f-grade" class="form-ctrl">
             <option value="">-- เลือก --</option>
-            <option>ม.1</option><option>ม.2</option><option>ม.3</option>
             <option>ม.4</option><option>ม.5</option><option>ม.6</option>
           </select>
         </div>
@@ -2788,50 +2809,6 @@ body.dark-mode .sta-stu-chevron{background:rgba(255,255,255,.07)!important;color
 </div>
 
 <!-- Modal: User -->
-<div id="modal-user" class="modal-overlay">
-  <div class="modal" style="max-width:440px">
-    <div class="modal-header">
-      <h3 id="modal-user-title">เพิ่มผู้ใช้งาน</h3>
-      <button class="close-btn" onclick="closeModal('modal-user')">×</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="user-row">
-      <div class="form-group">
-        <label class="form-label">Email (Google) *</label>
-        <input id="u-email" class="form-ctrl" type="email" placeholder="example@gmail.com">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">ชื่อ-นามสกุล</label>
-          <input id="u-name" class="form-ctrl">
-        </div>
-        <div class="form-group">
-          <label class="form-label">รหัส</label>
-          <input id="u-code" class="form-ctrl">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">ตำแหน่ง</label>
-          <input id="u-position" class="form-ctrl" placeholder="ครู / ผู้ดูแล / ...">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Role *</label>
-          <select id="u-role" class="form-ctrl">
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
-            <option value="super admin">Super Admin</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-user')">ยกเลิก</button>
-      <button class="btn btn-primary" id="btn-save-user" onclick="saveUser()">💾 บันทึก</button>
-    </div>
-  </div>
-</div>
-
 <!-- Modal: Admin Account -->
 <div id="modal-admin-account" class="modal-overlay">
   <div class="modal" style="max-width:400px">
@@ -3165,7 +3142,6 @@ body.dark-mode .sta-stu-chevron{background:rgba(255,255,255,.07)!important;color
         <div class="form-group">
           <label class="form-label">ระดับชั้น *</label>
           <select id="as-grade" class="form-ctrl">
-            <option>ม.1</option><option>ม.2</option><option>ม.3</option>
             <option>ม.4</option><option>ม.5</option><option>ม.6</option>
           </select>
         </div>
@@ -3186,38 +3162,6 @@ body.dark-mode .sta-stu-chevron{background:rgba(255,255,255,.07)!important;color
 </div>
 
 <!-- Modal: Admin Reset Password -->
-<div id="modal-reset-pw" class="modal-overlay">
-  <div class="modal" style="max-width:420px">
-    <div class="modal-header">
-      <h3>🔑 รีเซ็ต Password</h3>
-      <button class="close-btn" onclick="closeModal('modal-reset-pw')">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">ประเภทบัญชี *</label>
-        <select id="rp-type" class="form-ctrl" onchange="onResetTypeChange()">
-          <option value="student">นักเรียน</option>
-          <option value="teacher">ครู</option>
-        </select>
-      </div>
-      <div class="form-group" id="rp-code-group">
-        <label class="form-label" id="rp-code-label">รหัสนักเรียน *</label>
-        <input id="rp-code" class="form-ctrl" placeholder="กรอกรหัส">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Password ใหม่ *</label>
-        <input id="rp-password" class="form-ctrl" type="text" placeholder="อย่างน้อย 6 ตัวอักษร">
-        <div style="font-size:11px;color:var(--muted);margin-top:4px">Password จะแสดงเป็นตัวอักษรธรรมดาเพื่อให้ Admin เห็นก่อนแจ้งผู้ใช้</div>
-      </div>
-      <div id="rp-msg" style="font-size:13px;margin-top:8px;display:none"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-reset-pw')">ยกเลิก</button>
-      <button class="btn btn-primary" id="btn-do-reset-pw" onclick="doAdminResetPw()">🔑 รีเซ็ต</button>
-    </div>
-  </div>
-</div>
-
 <div id="toast"><span class="t-icon"></span><span class="t-msg"></span></div>
 
 <script>
@@ -3395,7 +3339,8 @@ window.addEventListener('message', function(e) {
 var PAGE_TITLES = {
   dashboard:'แดชบอร์ด', ipads:'รายการไอแพด',
   overview:'ภาพรวมห้องเรียน', students:'รายชื่อนักเรียน',
-  users:'จัดการผู้ใช้', log:'ประวัติการใช้งาน',
+  'admin-accounts':'บัญชีแอดมิน',
+  log:'ประวัติการใช้งาน',
   issues:'ปัญหาไอแพด', teachers:'รายชื่อครู'
 };
 
@@ -4059,14 +4004,12 @@ function showPage(page) {
     var syncBtn = CU.role === 'super admin' ? ' <button class="btn btn-outline" onclick="runSyncIpad()" title="ซิงค์ personCode/ชั้น/ห้อง ใน iPad_Data ให้ตรงกับ Students sheet">🔄 Sync iPad↔นักเรียน</button>' : '';
     actions.innerHTML = '<button class="btn btn-outline" onclick="openAddStudentModal()">＋ เพิ่มรายคน</button> <button class="btn btn-primary" onclick="openImport()">📂 นำเข้า CSV</button>' + syncBtn;
   }
-  if (page === 'users' && CU && CU.role === 'super admin')
-    actions.innerHTML = '<button class="btn btn-primary" onclick="openAddUser()">＋ เพิ่มผู้ใช้</button>';
   if (page === 'admin-accounts' && CU && CU.role === 'super admin')
     actions.innerHTML = '<button class="btn btn-primary" onclick="openAddAdminAccount()">＋ เพิ่มบัญชีแอดมิน</button>';
   if (page === 'teachers' && CU && CU.role !== 'user')
     actions.innerHTML = '<button class="btn btn-primary" onclick="openAddTeacher()">＋ เพิ่มครู</button>';
 
-  var loaders = { dashboard:loadDashboard, ipads:loadIPads, overview:loadOverview, students:loadStudents, users:loadUsers, log:loadLog, issues:loadIssues, teachers:loadTeachers, 'admin-accounts':loadAdminAccounts };
+  var loaders = { dashboard:loadDashboard, ipads:loadIPads, overview:loadOverview, students:loadStudents, log:loadLog, issues:loadIssues, teachers:loadTeachers, 'admin-accounts':loadAdminAccounts };
   if (loaders[page]) { showLoading(); nprogStart(); loaders[page](); }
 
   // Sync mobile bottom nav active state
@@ -4113,9 +4056,7 @@ function loadDashboard() {
         statCard('cyan','📥','คืนแล้ว', s.returned) +
         statCard('red','⚠️','เคลม', s.claimed) +
         statCard('purple','👩‍🏫','ครู', s.teachers) +
-        '<div class="stat-card" style="border-left:4px solid #0891b2">' +
-          '<span class="icon">🎓</span><span class="label">นักเรียน</span>' +
-          '<span class="value" style="color:#0891b2">'+s.students+'</span></div>';
+        statCard('teal','🎓','นักเรียน', s.students);
 
       // Grade summary table
       var grades = Object.keys(s.gradeMap).sort(function(a,b){
@@ -4125,28 +4066,52 @@ function loadDashboard() {
 
       var rows = '';
       grades.forEach(function(g) {
-        rows += '<tr style="background:#f0f6ff"><td colspan="7" style="padding:10px 14px;font-weight:700;color:var(--primary)">'+g+'</td></tr>';
-        Object.keys(s.gradeMap[g]).sort(function(a,b){ return Number(a)-Number(b); }).forEach(function(r) {
+        var gTotal=0,gAvail=0,gBorrow=0,gReturn=0,gClaim=0;
+        var rooms = Object.keys(s.gradeMap[g]).sort(function(a,b){ return Number(a)-Number(b); });
+        rooms.forEach(function(r){
+          var d=s.gradeMap[g][r];
+          gTotal+=d.total; gAvail+=d.available; gBorrow+=d.borrowed;
+          gReturn+=d.returned; gClaim+=d.claimed;
+        });
+        var gPct = gTotal ? Math.round(gBorrow/gTotal*100) : 0;
+        rows += '<tr class="dash-grade-hd">' +
+          '<td>'+g+'</td>' +
+          '<td style="text-align:center">'+gTotal+'</td>' +
+          '<td style="text-align:center"><span class="badge b-available">'+gAvail+'</span></td>' +
+          '<td style="text-align:center"><span class="badge b-borrowed">'+gBorrow+'</span></td>' +
+          '<td style="text-align:center"><span class="badge b-returned">'+gReturn+'</span></td>' +
+          '<td style="text-align:center"><span class="badge b-claimed">'+gClaim+'</span></td>' +
+          '<td>' +
+            '<div class="dash-prog-wrap"><div class="dash-prog-fill" style="width:'+gPct+'%"></div></div>' +
+            '<span style="font-size:11px;color:var(--muted)">'+gPct+'%</span>' +
+          '</td>' +
+        '</tr>';
+        rooms.forEach(function(r) {
           var d = s.gradeMap[g][r];
           var pct = d.total ? Math.round(d.borrowed/d.total*100) : 0;
-          rows += '<tr style="cursor:pointer" onclick="filterByRoom(\''+g+'\',\''+r+'\')">' +
-            '<td>'+g+' ห้อง '+r+'</td>' +
-            '<td style="text-align:center;font-weight:700">'+d.total+'</td>' +
+          rows += '<tr class="dash-room-row" onclick="filterByRoom(\''+g+'\',\''+r+'\')">' +
+            '<td style="padding-left:24px">ห้อง '+r+'</td>' +
+            '<td style="text-align:center;font-weight:600">'+d.total+'</td>' +
             '<td style="text-align:center"><span class="badge b-available">'+d.available+'</span></td>' +
             '<td style="text-align:center"><span class="badge b-borrowed">'+d.borrowed+'</span></td>' +
             '<td style="text-align:center"><span class="badge b-returned">'+d.returned+'</span></td>' +
             '<td style="text-align:center"><span class="badge b-claimed">'+d.claimed+'</span></td>' +
-            '<td><div style="background:#e2e8f0;border-radius:4px;height:8px"><div style="background:var(--warning);height:8px;border-radius:4px;width:'+pct+'%"></div></div>' +
-              '<span style="font-size:11px;color:var(--muted)">'+pct+'% ยืม</span></td>' +
+            '<td>' +
+              '<div class="dash-prog-wrap"><div class="dash-prog-fill" style="width:'+pct+'%;background:var(--warning)"></div></div>' +
+              '<span style="font-size:11px;color:var(--muted)">'+pct+'%</span>' +
+            '</td>' +
           '</tr>';
         });
       });
 
       document.getElementById('dash-table').innerHTML =
-        '<div class="card"><div class="card-body">' +
-        '<h3 style="margin-bottom:14px;font-size:15px">📊 สรุปตามระดับชั้น <span style="font-size:12px;color:var(--muted);font-weight:400">(คลิกเพื่อกรองรายการ)</span></h3>' +
+        '<div class="card"><div class="card-body" style="padding-bottom:4px">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px">' +
+          '<h3 style="font-size:15px;margin:0">📊 สรุปตามระดับชั้น</h3>' +
+          '<span style="font-size:12px;color:var(--muted)">คลิกแถวห้องเพื่อกรองรายการ</span>' +
+        '</div>' +
         '<div class="table-wrap"><table>' +
-        '<thead><tr><th>ชั้น/ห้อง</th><th>รวม</th><th>ว่าง</th><th>ยืม</th><th>คืน</th><th>เคลม</th><th>สัดส่วน</th></tr></thead>' +
+        '<thead><tr><th>ชั้น / ห้อง</th><th style="text-align:center">รวม</th><th style="text-align:center">ว่าง</th><th style="text-align:center">ยืม</th><th style="text-align:center">คืน</th><th style="text-align:center">เคลม</th><th>สัดส่วนยืม</th></tr></thead>' +
         '<tbody>'+rows+'</tbody></table></div></div></div>';
     })
     .withFailureHandler(function(e){ nprogDone(); hideLoading(); showError(e); })
@@ -4452,90 +4417,6 @@ function showRoomDetail(grade, room) {
 }
 
 // ── Users ──────────────────────────────────────────────────────────────
-function loadUsers() {
-  document.getElementById('users-tbody').innerHTML =
-    '<tr><td colspan="6">' + logoLoader() + '</td></tr>';
-
-  gsr
-    .withSuccessHandler(function(data) {
-      nprogDone(); hideLoading();
-      if (!data.length) {
-        document.getElementById('users-tbody').innerHTML =
-          '<tr><td colspan="6" class="loading-cell">ไม่มีข้อมูล</td></tr>';
-        return;
-      }
-      document.getElementById('users-tbody').innerHTML = data.map(function(u) {
-        var isSuper = CU && CU.role === 'super admin';
-        return '<tr>' +
-          '<td>'+u.email+'</td><td>'+u.name+'</td><td>'+u.code+'</td><td>'+u.position+'</td>' +
-          '<td>'+roleBadge(u.role)+'</td>' +
-          '<td>'+(isSuper ?
-            '<button class="bicon" title="แก้ไข" onclick=\'openEditUser('+JSON.stringify(u)+')\'>✏️</button> '+
-            '<button class="bicon" title="ลบ"    onclick="delUser('+u.row+','+JSON.stringify(u.email)+')">🗑️</button>'
-            : '-')+'</td></tr>';
-      }).join('');
-    })
-    .withFailureHandler(function(e){ nprogDone(); hideLoading(); showError(e); })
-    .getAllUsers();
-}
-
-function openAddUser() {
-  document.getElementById('modal-user-title').textContent = 'เพิ่มผู้ใช้งาน';
-  document.getElementById('user-row').value = '';
-  ['u-email','u-name','u-code','u-position'].forEach(function(id){ document.getElementById(id).value=''; });
-  document.getElementById('u-role').value = 'user';
-  openModal('modal-user');
-}
-
-function openEditUser(u) {
-  document.getElementById('modal-user-title').textContent = 'แก้ไขผู้ใช้';
-  document.getElementById('user-row').value     = u.row;
-  document.getElementById('u-email').value      = u.email;
-  document.getElementById('u-name').value       = u.name;
-  document.getElementById('u-code').value       = u.code;
-  document.getElementById('u-position').value   = u.position;
-  document.getElementById('u-role').value       = u.role;
-  openModal('modal-user');
-}
-
-function saveUser() {
-  var d = {
-    email:    document.getElementById('u-email').value.trim(),
-    name:     document.getElementById('u-name').value.trim(),
-    code:     document.getElementById('u-code').value.trim(),
-    position: document.getElementById('u-position').value.trim(),
-    role:     document.getElementById('u-role').value
-  };
-  if (!d.email) { showToast('กรุณากรอก Email','error'); return; }
-
-  var row = document.getElementById('user-row').value;
-  var btn = document.getElementById('btn-save-user');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
-
-  function handler(r) {
-    btn.disabled=false; btn.innerHTML='💾 บันทึก';
-    if (r.success) { showToast(r.message,'success'); closeModal('modal-user'); loadUsers(); }
-    else             showToast(r.message,'error');
-  }
-  function errHandler(e){ btn.disabled=false; btn.innerHTML='💾 บันทึก'; showError(e); }
-
-  if (row)
-    gsr.withSuccessHandler(handler).withFailureHandler(errHandler).updateUser(Number(row), d);
-  else
-    gsr.withSuccessHandler(handler).withFailureHandler(errHandler).addUser(d);
-}
-
-function delUser(row, email) {
-  if (!confirm('ยืนยันลบผู้ใช้: '+email)) return;
-  gsr
-    .withSuccessHandler(function(r){
-      showToast(r.message, r.success?'success':'error');
-      if (r.success) loadUsers();
-    })
-    .withFailureHandler(showError)
-    .deleteUser(row);
-}
-
 // ── Admin Accounts ────────────────────────────────────────────────────
 function loadAdminAccounts() {
   document.getElementById('admin-accounts-tbody').innerHTML =
@@ -5060,11 +4941,11 @@ function renderImportPreview(errors) {
       '<td>' +
         (c.grade
           ? '<select class="form-ctrl" style="width:80px;padding:4px 6px;font-size:12px" onchange="parsedClasses['+idx+'].grade=this.value" onclick="event.stopPropagation()">' +
-              ['ม.1','ม.2','ม.3','ม.4','ม.5','ม.6'].map(function(g){ return '<option'+(g===c.grade?' selected':'')+'>'+g+'</option>'; }).join('') +
+              ['ม.4','ม.5','ม.6'].map(function(g){ return '<option'+(g===c.grade?' selected':'')+'>'+g+'</option>'; }).join('') +
             '</select>'
           : '<select class="form-ctrl" style="width:80px;padding:4px 6px;font-size:12px" onchange="parsedClasses['+idx+'].grade=this.value" onclick="event.stopPropagation()">' +
               '<option value="">?</option>' +
-              ['ม.1','ม.2','ม.3','ม.4','ม.5','ม.6'].map(function(g){ return '<option>'+g+'</option>'; }).join('') +
+              ['ม.4','ม.5','ม.6'].map(function(g){ return '<option>'+g+'</option>'; }).join('') +
             '</select>') +
       '</td>' +
     '</tr>';
@@ -5371,54 +5252,6 @@ function toggleManual(hd) {
 }
 
 // ── Admin Reset Password ───────────────────────────────────────────────
-function openAdminResetPw() {
-  document.getElementById('rp-type').value     = 'student';
-  document.getElementById('rp-code').value     = '';
-  document.getElementById('rp-password').value = '';
-  document.getElementById('rp-msg').style.display = 'none';
-  onResetTypeChange();
-  openModal('modal-reset-pw');
-}
-
-function onResetTypeChange() {
-  var type = document.getElementById('rp-type').value;
-  document.getElementById('rp-code-label').textContent =
-    type === 'student' ? 'รหัสนักเรียน *' : 'รหัสครู *';
-  document.getElementById('rp-code').placeholder =
-    type === 'student' ? 'กรอกรหัสนักเรียน' : 'กรอกรหัสครู';
-}
-
-function doAdminResetPw() {
-  var type = document.getElementById('rp-type').value;
-  var code = document.getElementById('rp-code').value.trim();
-  var pw   = document.getElementById('rp-password').value.trim();
-  var msg  = document.getElementById('rp-msg');
-  if (!code) { showToast('กรุณากรอกรหัส','error'); return; }
-  if (!pw || pw.length < 6) { showToast('Password ต้องมีอย่างน้อย 6 ตัวอักษร','error'); return; }
-  var btn = document.getElementById('btn-do-reset-pw');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> กำลังรีเซ็ต...';
-  msg.style.display = 'none';
-  gsr
-    .withSuccessHandler(function(r) {
-      btn.disabled = false;
-      btn.innerHTML = '🔑 รีเซ็ต';
-      if (r && r.success) {
-        msg.style.cssText = 'display:block;color:var(--success);background:#f0fdf4;padding:10px;border-radius:8px;font-size:13px';
-        msg.textContent = '✅ ' + r.message + ' — Password ใหม่: ' + pw;
-      } else {
-        msg.style.cssText = 'display:block;color:var(--danger);background:#fef2f2;padding:10px;border-radius:8px;font-size:13px';
-        msg.textContent = '❌ ' + ((r && r.message) || 'เกิดข้อผิดพลาด');
-      }
-    })
-    .withFailureHandler(function(e) {
-      btn.disabled = false;
-      btn.innerHTML = '🔑 รีเซ็ต';
-      showError(e);
-    })
-    .adminResetPassword(type, code, pw);
-}
-
 // Close modal on overlay click
 document.querySelectorAll('.modal-overlay').forEach(function(el) {
   el.addEventListener('click', function(e) {
@@ -6139,10 +5972,21 @@ function loadIssues() {
         return;
       }
       allIssues = data || [];
+      var tf = document.getElementById('issue-filter-type');
+      if (tf) tf.value = 'all';
       renderIssues(allIssues);
     })
     .withFailureHandler(function(e){ nprogDone(); hideLoading(); showError(e); })
     .getIssues(filters);
+}
+
+function applyIssueTypeFilter() {
+  var typeFilter = document.getElementById('issue-filter-type').value;
+  if (typeFilter === 'all') {
+    renderIssues(allIssues);
+  } else {
+    renderIssues(allIssues.filter(function(i){ return i.issueType === typeFilter; }));
+  }
 }
 
 function issueBadge(s) {
@@ -6157,28 +6001,55 @@ function issueBadge(s) {
 }
 
 function renderIssues(data) {
+  var summaryEl = document.getElementById('issues-summary');
+
   if (!data.length) {
+    if (summaryEl) summaryEl.innerHTML = '';
     document.getElementById('issues-tbody').innerHTML =
       '<tr><td colspan="8"><div class="empty"><div class="emoji">✅</div>ไม่มีปัญหาที่ต้องจัดการ</div></td></tr>';
     return;
   }
+
+  // Build status summary
+  var counts = {};
+  data.forEach(function(i){ counts[i.status] = (counts[i.status]||0)+1; });
+  if (summaryEl) {
+    var pills = [
+      ['อยู่ระหว่างการส่งเรื่อง','รอรับเรื่อง','issue-badge-pending'],
+      ['อยู่ระหว่างการตรวจสอบ','กำลังตรวจสอบ','issue-badge-inspect'],
+      ['อยู่ระหว่างการเคลม','เคลม','issue-badge-claim'],
+      ['ใช้งานไม่ได้','ใช้งานไม่ได้','issue-badge-defect'],
+      ['แก้ไขแล้ว','แก้ไขแล้ว','issue-badge-fixed']
+    ].filter(function(p){ return counts[p[0]]; })
+     .map(function(p){
+       return '<span class="'+p[2]+'" style="margin-right:6px">'+p[1]+' <b>'+counts[p[0]]+'</b></span>';
+     }).join('');
+    summaryEl.innerHTML = pills
+      ? '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:4px">'+pills+'<span style="font-size:12px;color:var(--muted);margin-left:4px">รวม '+data.length+' รายการ</span></div>'
+      : '';
+  }
+
   document.getElementById('issues-tbody').innerHTML = data.map(function(issue) {
     var fileLinks = (issue.fileUrls && issue.fileUrls.length)
       ? issue.fileUrls.map(function(u,i){
           if (!u || !/^https:\/\//.test(u)) return '';
-          return '<a href="'+escHtml(u)+'" target="_blank" rel="noopener noreferrer" style="font-size:11px">['+(i+1)+']</a>';
+          return '<a href="'+escHtml(u)+'" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:var(--primary)">📎'+(i+1)+'</a>';
         }).filter(Boolean).join(' ')
       : '';
+    var deadlineTxt = issue.roomDeadline || '-';
+    var deadlineStyle = (issue.roomDeadline && issue.status !== 'แก้ไขแล้ว')
+      ? 'font-size:12px;font-weight:600;color:var(--warning)'
+      : 'font-size:12px;color:var(--muted)';
     return '<tr>' +
-      '<td style="font-weight:600;font-size:12px">#'+issue.id+'</td>' +
-      '<td><div style="font-weight:600;font-size:13px">'+escHtml(issue.studentName||'')+'</div>' +
-           '<div style="font-size:11px;color:var(--muted)">'+escHtml(issue.studentCode||'')+'</div></td>' +
-      '<td style="font-family:monospace;font-size:12px">'+escHtml(issue.serial||'')+'</td>' +
-      '<td style="font-size:13px">'+escHtml(issue.issueType||'')+'<br>'+fileLinks+'</td>' +
+      '<td style="font-weight:700;font-size:12px;color:var(--muted)">#'+issue.id+'</td>' +
+      '<td><div style="font-weight:600;font-size:13px;line-height:1.3">'+escHtml(issue.studentName||'')+'</div>' +
+           '<div style="font-size:11px;color:var(--muted);font-family:monospace">'+escHtml(issue.studentCode||'')+'</div></td>' +
+      '<td style="font-family:monospace;font-size:12px;color:var(--muted)">'+escHtml(issue.serial||'')+'</td>' +
+      '<td style="font-size:13px">'+escHtml(issue.issueType||'')+(fileLinks?' <span style="margin-left:4px">'+fileLinks+'</span>':'')+'</td>' +
       '<td>'+issueBadge(issue.status)+'</td>' +
-      '<td style="font-size:12px;color:var(--muted)">'+escHtml(issue.reportedAt||'')+'</td>' +
-      '<td style="font-size:12px;color:var(--muted)">'+escHtml(issue.roomDeadline||'-')+'</td>' +
-      '<td><button class="bicon" onclick=\'openIssueUpdate('+JSON.stringify(issue)+')\'>✏️</button></td>' +
+      '<td style="font-size:12px;color:var(--muted);white-space:nowrap">'+escHtml(issue.reportedAt||'')+'</td>' +
+      '<td style="'+deadlineStyle+';white-space:nowrap">'+escHtml(deadlineTxt)+'</td>' +
+      '<td><button class="bicon" title="แก้ไข / อัพเดตสถานะ" onclick=\'openIssueUpdate('+JSON.stringify(issue)+')\'>✏️</button></td>' +
     '</tr>';
   }).join('');
 }
@@ -6347,7 +6218,7 @@ function openAddStudentModal() {
   document.getElementById('add-stu-row').value = '';
   ['as-firstName','as-lastName','as-code'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('as-prefix').value = 'นาย';
-  document.getElementById('as-grade').value  = 'ม.1';
+  document.getElementById('as-grade').value  = 'ม.4';
   document.getElementById('as-room').value   = '1';
   openModal('modal-add-student');
 }
@@ -6590,7 +6461,6 @@ function doUploadPhotos() {
           <label class="form-label">ชั้น</label>
           <select id="br-grade" class="form-ctrl">
             <option value="">ทุกชั้น</option>
-            <option>ม.1</option><option>ม.2</option><option>ม.3</option>
             <option>ม.4</option><option>ม.5</option><option>ม.6</option>
           </select>
         </div>
@@ -6672,7 +6542,7 @@ function doUploadPhotos() {
         </div>
         <div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:var(--r-sm);padding:12px 14px;font-size:13px;margin-bottom:14px">
           <b>⚠ การเลื่อนชั้นจะเปลี่ยนชั้นในข้อมูลนักเรียนทั้งหมด</b><br>
-          ม.1→ม.2, ม.2→ม.3, ..., ม.5→ม.6, ม.6→จบการศึกษา
+          ม.4→ม.5, ม.5→ม.6, ม.6→จบการศึกษา
         </div>
         <label style="display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:8px;cursor:pointer">
           <input type="checkbox" id="gm-delete-grad" checked> ลบนักเรียนที่จบ ม.6 ออกจากระบบ
@@ -6708,192 +6578,6 @@ function doUploadPhotos() {
 </div>
 
 <!-- ── Dedup Modal ───────────────────────────────────────────────────────── -->
-<div id="modal-dedup" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-dedup')">
-  <div class="modal-box" style="max-width:680px">
-    <div class="modal-header">
-      <span class="modal-title">🧹 ลบรายชื่อซ้ำ</span>
-      <button class="modal-close" onclick="closeModal('modal-dedup')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px">
-        <div class="form-group" style="flex:1;min-width:160px;margin-bottom:0">
-          <label class="form-label">Sheet</label>
-          <select id="dedup-sheet" class="form-ctrl" onchange="onDedupSheetChange()">
-            <option value="Students">Students (นักเรียน)</option>
-            <option value="iPad_Data">iPad_Data (ไอแพด)</option>
-            <option value="Teachers">Teachers (ครู)</option>
-          </select>
-        </div>
-        <div class="form-group" style="flex:1;min-width:160px;margin-bottom:0">
-          <label class="form-label">ตรวจซ้ำโดย</label>
-          <select id="dedup-keycol" class="form-ctrl"></select>
-        </div>
-        <button class="btn btn-primary" onclick="runFindDuplicates()" id="btn-dedup-scan">🔍 สแกน</button>
-      </div>
-      <div id="dedup-result" style="min-height:80px"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-dedup')">ปิด</button>
-      <button class="btn" id="btn-dedup-remove" style="display:none;background:var(--danger);color:#fff;box-shadow:0 4px 12px rgba(239,68,68,.3)" onclick="runRemoveDuplicates()">🗑 ลบรายซ้ำ (เก็บแถวแรก)</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// ── Dedup ────────────────────────────────────────────────────────────────────
-var DEDUP_KEY_COLS = {
-  Students:  [{ label: 'รหัสนักเรียน (คอลัมน์ 2)', col: 2 }, { label: 'ชื่อ+นามสกุล (คอลัมน์ 4+5)', col: -1 }],
-  iPad_Data: [{ label: 'Serial (คอลัมน์ 2)', col: 2 }, { label: 'Asset Code (คอลัมน์ 3)', col: 3 }],
-  Teachers:  [{ label: 'รหัสครู (คอลัมน์ 2)', col: 2 }, { label: 'ชื่อ+นามสกุล (คอลัมน์ 4+5)', col: -1 }]
-};
-var dedupCurrentGroups = null;
-
-function openDedup() {
-  dedupCurrentGroups = null;
-  document.getElementById('dedup-result').innerHTML = '<p style="color:var(--muted);font-size:13px">เลือก Sheet และคอลัมน์ที่ต้องการตรวจซ้ำ แล้วกด สแกน</p>';
-  document.getElementById('btn-dedup-remove').style.display = 'none';
-  onDedupSheetChange();
-  openModal('modal-dedup');
-}
-
-function onDedupSheetChange() {
-  var sheet = document.getElementById('dedup-sheet').value;
-  var sel = document.getElementById('dedup-keycol');
-  sel.innerHTML = '';
-  (DEDUP_KEY_COLS[sheet] || []).forEach(function(opt) {
-    var o = document.createElement('option');
-    o.value = opt.col;
-    o.textContent = opt.label;
-    sel.appendChild(o);
-  });
-  dedupCurrentGroups = null;
-  document.getElementById('btn-dedup-remove').style.display = 'none';
-  document.getElementById('dedup-result').innerHTML = '';
-}
-
-function runFindDuplicates() {
-  var sheet = document.getElementById('dedup-sheet').value;
-  var keyCol = parseInt(document.getElementById('dedup-keycol').value);
-  var btn = document.getElementById('btn-dedup-scan');
-  var res = document.getElementById('dedup-result');
-
-  if (keyCol === -1) {
-    showToast('ตรวจซ้ำแบบ ชื่อ+นามสกุล ยังไม่รองรับ กรุณาใช้รหัส', 'error');
-    return;
-  }
-
-  btn.disabled = true;
-  res.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">กำลังสแกน...</div>';
-  document.getElementById('btn-dedup-remove').style.display = 'none';
-  dedupCurrentGroups = null;
-
-  gsr
-    .withSuccessHandler(function(r) {
-      btn.disabled = false;
-      if (!r.success) { res.innerHTML = '<p style="color:var(--danger)">'+r.message+'</p>'; return; }
-      dedupCurrentGroups = r.groups;
-      renderDedupResult(r);
-    })
-    .withFailureHandler(function(e) {
-      btn.disabled = false;
-      res.innerHTML = '<p style="color:var(--danger)">เกิดข้อผิดพลาด: '+e+'</p>';
-    })
-    .findDuplicates(sheet, keyCol);
-}
-
-function renderDedupResult(data) {
-  var res = document.getElementById('dedup-result');
-  if (data.total === 0) {
-    res.innerHTML = '<div style="text-align:center;padding:20px"><div style="font-size:28px">✅</div><div style="font-size:14px;color:var(--success);font-weight:600;margin-top:8px">ไม่พบรายชื่อซ้ำ</div></div>';
-    document.getElementById('btn-dedup-remove').style.display = 'none';
-    return;
-  }
-
-  var sheet = document.getElementById('dedup-sheet').value;
-  var keyCol = parseInt(document.getElementById('dedup-keycol').value);
-
-  // Column labels per sheet
-  var colLabels = {
-    Students:  ['ลำดับ','รหัส','คำนำหน้า','ชื่อ','นามสกุล','ชั้น','ห้อง'],
-    iPad_Data: ['ID','Serial','AssetCode','คำนำหน้า','ชื่อ','นามสกุล','รหัส','ตำแหน่ง','ชั้น','ห้อง','สถานะ'],
-    Teachers:  ['ลำดับ','รหัส','คำนำหน้า','ชื่อ','นามสกุล','วิชา','ห้อง']
-  };
-  var showCols = {
-    Students:  [1,2,3,4,5,6],
-    iPad_Data: [1,2,3,4,5,10],
-    Teachers:  [1,2,3,4,5]
-  };
-  var labels = colLabels[sheet] || [];
-  var cols = showCols[sheet] || [0,1,2,3];
-
-  var html = '<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--danger)">พบ <b>'+data.total+' แถวซ้ำ</b> ใน '+data.groups.length+' กลุ่ม</div>';
-  html += '<div style="max-height:340px;overflow-y:auto">';
-
-  data.groups.forEach(function(g, gi) {
-    html += '<div style="margin-bottom:12px;border:1px solid var(--border);border-radius:8px;overflow:hidden">';
-    html += '<div style="background:#F1F5F9;padding:7px 12px;font-size:12px;font-weight:700;color:var(--muted)">กลุ่ม '+(gi+1)+': <span style="color:var(--text)">'+g.key+'</span> — '+g.rows.length+' แถว (จะเก็บแถวที่ '+g.rows[0].rowNum+', ลบ '+(g.rows.length-1)+' แถว)</div>';
-    html += '<table style="width:100%;font-size:12px;border-collapse:collapse">';
-    html += '<thead><tr style="background:#F8FAFC">';
-    html += '<th style="padding:5px 10px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">แถว</th>';
-    cols.forEach(function(c) {
-      html += '<th style="padding:5px 10px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">'+(labels[c]||'คอล '+(c+1))+'</th>';
-    });
-    html += '<th style="padding:5px 10px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">การกระทำ</th>';
-    html += '</tr></thead><tbody>';
-
-    g.rows.forEach(function(row, ri) {
-      var isKeep = ri === 0;
-      var bg = isKeep ? '' : 'background:#FFF5F5';
-      html += '<tr style="'+bg+';border-bottom:1px solid var(--border)">';
-      html += '<td style="padding:5px 10px;font-family:monospace;color:var(--muted)">'+row.rowNum+'</td>';
-      cols.forEach(function(c) {
-        html += '<td style="padding:5px 10px">'+escHtml(String(row.rowData[c]||''))+'</td>';
-      });
-      html += '<td style="padding:5px 10px">';
-      if (isKeep) html += '<span style="background:#D1FAE5;color:#065F46;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600">เก็บไว้</span>';
-      else html += '<span style="background:#FEE2E2;color:#991B1B;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600">ลบ</span>';
-      html += '</td></tr>';
-    });
-    html += '</tbody></table></div>';
-  });
-
-  html += '</div>';
-  res.innerHTML = html;
-  document.getElementById('btn-dedup-remove').style.display = '';
-}
-
-function runRemoveDuplicates() {
-  if (!dedupCurrentGroups || dedupCurrentGroups.length === 0) return;
-  var sheet = document.getElementById('dedup-sheet').value;
-  var keyCol = parseInt(document.getElementById('dedup-keycol').value);
-  var totalDel = dedupCurrentGroups.reduce(function(s,g){ return s + g.rows.length - 1; }, 0);
-
-  if (!confirm('ยืนยันลบ ' + totalDel + ' แถวซ้ำจาก ' + sheet + '?\n(จะเก็บเฉพาะแถวแรกของแต่ละกลุ่ม)')) return;
-
-  var btn = document.getElementById('btn-dedup-remove');
-  var scanBtn = document.getElementById('btn-dedup-scan');
-  btn.disabled = true;
-  scanBtn.disabled = true;
-
-  gsr
-    .withSuccessHandler(function(r) {
-      btn.disabled = false;
-      scanBtn.disabled = false;
-      if (!r.success) { showToast(r.message, 'error'); return; }
-      showToast(r.message, 'success');
-      dedupCurrentGroups = null;
-      btn.style.display = 'none';
-      document.getElementById('dedup-result').innerHTML =
-        '<div style="text-align:center;padding:20px"><div style="font-size:28px">✅</div><div style="font-size:14px;color:var(--success);font-weight:600;margin-top:8px">'+r.message+'</div></div>';
-    })
-    .withFailureHandler(function(e) {
-      btn.disabled = false;
-      scanBtn.disabled = false;
-      showToast('เกิดข้อผิดพลาด: '+e, 'error');
-    })
-    .removeDuplicates(sheet, keyCol);
-}
-
 // ── OTP Login ────────────────────────────────────────────────────────────────
 var otpCountdownTimer = null;
 
@@ -7024,7 +6708,7 @@ function initAdminWithUser(u) {
   document.getElementById('uname').textContent  = u.name;
   document.getElementById('uemail').textContent = u.email;
   document.getElementById('urole').innerHTML    = roleBadge(u.role);
-  ['students','users','log','issues','teachers','photo-upload','reset-pw','dedup'].forEach(function(id){
+  ['students','log','issues','teachers','photo-upload'].forEach(function(id){
     var el = document.getElementById('nav-'+id);
     if (el) el.style.display = '';
   });
@@ -7034,6 +6718,10 @@ function initAdminWithUser(u) {
       if (el) el.style.display = '';
     });
   }
+  var s1 = document.getElementById('nav-sep-manage');
+  if (s1) s1.style.display = '';
+  var s2 = document.getElementById('nav-sep-tools');
+  if (s2) s2.style.display = '';
   document.body.classList.remove('mode-register');
   // populate user pill
   var pill = document.getElementById('usr-pill');
@@ -7468,7 +7156,8 @@ function t(key) {
 function gradePfx() { return _lang === 'en' ? 'M.' : 'ม.'; }
 var PAGE_TITLES_EN = {
   dashboard:'Dashboard', ipads:'iPad List', overview:'Classroom Overview',
-  students:'Students', users:'Manage Users', log:'Activity Log',
+  students:'Students', 'admin-accounts':'Admin Accounts',
+  log:'Activity Log',
   issues:'iPad Issues', teachers:'Teachers'
 };
 var _lang = localStorage.getItem('app-lang') || 'th';
@@ -7645,7 +7334,7 @@ function staDoSearch(q) {
       '<div class="empty-state">' +
         '<div class="es-icon">🔍</div>' +
         '<div class="es-title">ไม่พบผลลัพธ์</div>' +
-        '<div class="es-text">ลองพิมพ์ชื่อ, Serial, หรือระดับชั้น เช่น "ม.3" หรือ "ห้อง 2"</div>' +
+        '<div class="es-text">ลองพิมพ์ชื่อ, Serial, หรือระดับชั้น เช่น "ม.4" หรือ "ห้อง 2"</div>' +
       '</div>';
     return;
   }
