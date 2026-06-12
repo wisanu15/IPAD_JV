@@ -649,14 +649,9 @@
       }
       // ── End subscribe overlay ─────────────────────────────────────────────
 
-      // DEBUG: verify notifyToast works on iOS
-      setTimeout(function() { notifyToast('🔧 wrapper ready'); }, 2000);
-
       window.addEventListener('message', function (event) {
         var data = event && event.data;
         if (!data) return;
-        // DEBUG: log every message type received
-        notifyToast('📨 msg: ' + (data.type || '?'));
         if (data.type === 'IPAD_JV_ADMIN_READY') {
           adminNotifyAllowed = true;
           initOneSignal();
@@ -676,8 +671,6 @@
         }
         if (data.type === 'IPAD_JV_SAVE_REMEMBER' && data.token) {
           saveRememberedAdminToken(data.token);
-          var ck = getCookie(COOKIE_NAME);
-          notifyToast(ck ? '🍪 wrapper saved: ' + data.token.substring(0,6) + '...' : '❌ wrapper: cookie save failed');
         }
         if (data.type === 'IPAD_JV_CLEAR_REMEMBER') {
           clearRememberedAdminToken();
@@ -796,15 +789,6 @@
       if ((isIOS && isStandalone) || (isAndroid && (isStandalone || launchedApp)) || forceEmbed) {
         shell.style.padding = '0';
         shell.style.display = 'block';
-        // Debug: show token status on load
-        (function() {
-          var t = getRememberedAdminToken();
-          var dbg = document.createElement('div');
-          dbg.style.cssText = 'position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);color:#fff;padding:6px 14px;border-radius:20px;font-size:12px;z-index:9999;font-family:sans-serif;pointer-events:none';
-          dbg.textContent = (t ? '🔑 token: มี' : '🔑 ไม่มี token') + ' | 📱 devID: ' + (_deviceId ? _deviceId.substring(0,8) + '...' : 'ไม่มี');
-          document.body.appendChild(dbg);
-          setTimeout(function(){ dbg.remove(); }, 6000);
-        })();
         var iframe = document.createElement('iframe');
         iframe.title = 'ระบบบริหารจัดการไอแพด';
         var _iframeTok = getRememberedAdminToken();
