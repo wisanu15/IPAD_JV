@@ -395,19 +395,52 @@ body.mode-register #register-app{display:flex}
 
 /* ─── Issue modal ────────────────────────────────── */
 .issue-step{display:none}.issue-step.active{display:block}
-.issue-menu-grid{display:flex;flex-direction:column;gap:10px;padding:4px 0 8px}
-.issue-menu-card{display:flex;align-items:center;gap:14px;padding:16px 18px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all var(--dur) var(--ease);text-align:left;width:100%}
-.issue-menu-card:hover,.issue-menu-card:active{background:var(--primary);color:#fff;border-color:var(--primary)}
-.issue-menu-card:hover .issue-menu-sub,.issue-menu-card:active .issue-menu-sub{color:rgba(255,255,255,.8)}
-.issue-menu-icon{font-size:28px;min-width:36px;text-align:center;line-height:1}
-.issue-menu-title{font-size:15px;font-weight:700;margin-bottom:3px}
-.issue-menu-sub{font-size:12px;color:var(--muted);line-height:1.4}
-.issue-status-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px}
-.issue-status-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:6px}
-.badge-pending{background:#FFF3CD;color:#856404}
-.badge-progress{background:#CCE5FF;color:#004085}
-.badge-done{background:#D4EDDA;color:#155724}
-.badge-other{background:#E2E3E5;color:#383d41}
+
+/* Menu intro */
+.im-intro{text-align:center;padding:10px 0 18px}
+.im-intro-title{font-size:17px;font-weight:800;color:var(--text);margin-bottom:4px}
+.im-intro-sub{font-size:13px;color:var(--muted)}
+
+/* Service cards */
+.im-grid{display:flex;flex-direction:column;gap:12px}
+.im-card{display:flex;align-items:stretch;border-radius:var(--r-md);overflow:hidden;border:1.5px solid var(--border);cursor:pointer;transition:transform .15s var(--ease),box-shadow .15s var(--ease),border-color .15s var(--ease);background:var(--surface);box-shadow:0 1px 4px rgba(0,0,0,.06);text-align:left;width:100%}
+.im-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.im-card:active{transform:translateY(0);box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.im-card-ico{width:68px;min-width:68px;display:flex;align-items:center;justify-content:center;font-size:30px;transition:background .15s}
+.im-card-body{flex:1;padding:14px 12px}
+.im-card-title{font-size:15px;font-weight:800;margin-bottom:4px;line-height:1.2}
+.im-card-sub{font-size:12px;color:var(--muted);line-height:1.5}
+.im-card-arr{display:flex;align-items:center;padding:0 14px;font-size:18px;color:var(--muted-l);transition:color .15s}
+.im-card:hover .im-card-arr{color:var(--text)}
+
+/* Color variants */
+.im-amber .im-card-ico{background:#FFF8E7}
+.im-amber:hover{border-color:#F59E0B}
+.im-amber:hover .im-card-ico{background:#FEF3C7}
+.im-amber .im-card-title{color:#92400E}
+.im-blue .im-card-ico{background:#EFF6FF}
+.im-blue:hover{border-color:#4F7EF7}
+.im-blue:hover .im-card-ico{background:#EEF2FF}
+.im-blue .im-card-title{color:#1E40AF}
+.im-purple .im-card-ico{background:#FAF5FF}
+.im-purple:hover{border-color:#8B5CF6}
+.im-purple:hover .im-card-ico{background:#F3E8FF}
+.im-purple .im-card-title{color:#5B21B6}
+
+/* Tags inside cards */
+.im-tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;margin-bottom:6px;letter-spacing:.3px}
+.im-tag-amber{background:#FEF3C7;color:#92400E}
+.im-tag-blue{background:#DBEAFE;color:#1E40AF}
+.im-tag-purple{background:#EDE9FE;color:#5B21B6}
+
+/* Status result cards */
+.issue-status-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;transition:box-shadow .12s}
+.issue-status-card:hover{box-shadow:0 3px 12px rgba(0,0,0,.08)}
+.issue-status-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:8px}
+.badge-pending{background:#FEF3C7;color:#92400E}
+.badge-progress{background:#DBEAFE;color:#1E40AF}
+.badge-done{background:#D1FAE5;color:#065F46}
+.badge-other{background:#F1F5F9;color:#475569}
 .stu-info-box{background:#EEF2FF;border:1.5px solid #C7D7FD;border-radius:var(--r-sm);padding:12px 14px;margin-bottom:14px;font-size:13px;line-height:1.6}
 .stu-info-box .si-name{font-size:15px;font-weight:700;margin-bottom:4px;color:var(--primary)}
 .file-drop-zone{border:2px dashed var(--border);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;transition:all var(--dur) var(--ease)}
@@ -1844,8 +1877,8 @@ body.dark-mode .sta-stu-chevron{background:rgba(255,255,255,.07)!important;color
         <button class="rg-card-btn rg-amber" onclick="openIssueModal()">
           <span class="rg-btn-glow"></span>
           <span class="rg-btn-icon">⚠️</span>
-          <span class="rg-btn-title" data-i18n="homeBtn2">แจ้งปัญหา</span>
-          <span class="rg-btn-sub" data-i18n="homeBtn2Sub">ส่งเรื่องให้ผู้ดูแลตรวจสอบ</span>
+          <span class="rg-btn-title" data-i18n="homeBtn2">แจ้งปัญหา / ส่งคำร้อง</span>
+          <span class="rg-btn-sub" data-i18n="homeBtn2Sub">แจ้งปัญหา · ขอแอพ · เช็คสถานะ</span>
         </button>
         <button class="rg-card-btn rg-green" onclick="openManual()">
           <span class="rg-btn-glow"></span>
@@ -1895,15 +1928,56 @@ body.dark-mode .sta-stu-chevron{background:rgba(255,255,255,.07)!important;color
   <div id="modal-issue">
     <div class="sta-header">
       <button class="sta-back-btn" onclick="closeModal('modal-issue')">‹</button>
-      <div class="sta-header-title" data-i18n="issueTitle">⚠️ แจ้งปัญหาไอแพด</div>
+      <div class="sta-header-title" id="issue-modal-title">📋 บริการนักเรียน</div>
       <div style="display:flex;align-items:center;gap:6px">
         <button class="sta-ctrl-btn" id="issue-theme-btn" onclick="toggleDark()">🌙</button>
       </div>
     </div>
     <div class="sta-body" style="max-width:700px;display:flex;flex-direction:column;gap:0">
 
-      <!-- Step 1: Enter student code -->
-      <div id="issue-step1" class="issue-step active">
+      <!-- Step 0: Menu -->
+      <div id="issue-step0" class="issue-step active">
+        <div class="im-intro">
+          <div class="im-intro-title">เลือกบริการที่ต้องการ</div>
+          <div class="im-intro-sub">กรอกรหัสนักเรียน แล้วดำเนินการตามขั้นตอน</div>
+        </div>
+        <div class="im-grid">
+
+          <button class="im-card im-amber" onclick="issueStartFlow('report')">
+            <div class="im-card-ico">⚠️</div>
+            <div class="im-card-body">
+              <div class="im-tag im-tag-amber">ปัญหาไอแพด</div>
+              <div class="im-card-title">แจ้งปัญหาไอแพด</div>
+              <div class="im-card-sub">หน้าจอแตก · แบต · ชาร์จไม่ได้ · ซอฟต์แวร์มีปัญหา<br>ระบบจะแจ้ง Admin ให้ทันที</div>
+            </div>
+            <div class="im-card-arr">›</div>
+          </button>
+
+          <button class="im-card im-blue" onclick="issueStartFlow('status')">
+            <div class="im-card-ico">🔍</div>
+            <div class="im-card-body">
+              <div class="im-tag im-tag-blue">ติดตามเรื่อง</div>
+              <div class="im-card-title">ตรวจสอบสถานะ</div>
+              <div class="im-card-sub">ดูว่าเรื่องที่แจ้งไว้ดำเนินการถึงไหนแล้ว<br>และ Admin มีหมายเหตุอะไรบ้าง</div>
+            </div>
+            <div class="im-card-arr">›</div>
+          </button>
+
+          <button class="im-card im-purple" onclick="issueStartFlow('appreq')">
+            <div class="im-card-ico">📲</div>
+            <div class="im-card-body">
+              <div class="im-tag im-tag-purple">ขอติดตั้งแอพ</div>
+              <div class="im-card-title">ส่งคำร้องขอแอพใส่ iPad</div>
+              <div class="im-card-sub">ต้องการแอพเพื่อการเรียน? ยื่นคำร้อง<br>พร้อมระบุเหตุผลให้ Admin พิจารณา</div>
+            </div>
+            <div class="im-card-arr">›</div>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Step 1: Enter student code (report issue) -->
+      <div id="issue-step1" class="issue-step">
         <div class="form-group">
           <label class="form-label" data-i18n="issueLblCode">รหัสนักเรียน *</label>
           <div style="display:flex;gap:8px">
@@ -1951,10 +2025,53 @@ body.dark-mode .sta-stu-chevron{background:rgba(255,255,255,.07)!important;color
         </div>
       </div>
 
+      <!-- Step S1: Enter student code (status check) -->
+      <div id="issue-step-s1" class="issue-step">
+        <div class="form-group">
+          <label class="form-label">รหัสนักเรียน *</label>
+          <div style="display:flex;gap:8px">
+            <input id="status-student-code" class="form-ctrl" placeholder="กรอกรหัสนักเรียน" maxlength="20" oninput="this.value=this.value.trim()" onkeydown="if(event.key==='Enter')lookupStatusIssues()">
+            <button class="btn btn-primary" onclick="lookupStatusIssues()" id="btn-lookup-status">ค้นหา</button>
+          </div>
+        </div>
+        <div id="status-lookup-msg" style="font-size:13px;color:var(--danger);margin-top:6px;display:none"></div>
+      </div>
+
+      <!-- Step S2: Issue status list -->
+      <div id="issue-step-s2" class="issue-step">
+        <div class="stu-info-box" id="status-stu-info"></div>
+        <div id="status-issue-list"></div>
+      </div>
+
+      <!-- Step A1: Enter student code (app request) -->
+      <div id="issue-step-a1" class="issue-step">
+        <div class="form-group">
+          <label class="form-label">รหัสนักเรียน *</label>
+          <div style="display:flex;gap:8px">
+            <input id="appreq-student-code" class="form-ctrl" placeholder="กรอกรหัสนักเรียน" maxlength="20" oninput="this.value=this.value.trim()" onkeydown="if(event.key==='Enter')lookupStudentForAppReq()">
+            <button class="btn btn-primary" onclick="lookupStudentForAppReq()" id="btn-lookup-appreq">ค้นหา</button>
+          </div>
+        </div>
+        <div id="appreq-lookup-msg" style="font-size:13px;color:var(--danger);margin-top:6px;display:none"></div>
+      </div>
+
+      <!-- Step A2: App name + reason -->
+      <div id="issue-step-a2" class="issue-step">
+        <div class="stu-info-box" id="appreq-stu-info"></div>
+        <div class="form-group">
+          <label class="form-label">ชื่อแอพที่ต้องการ *</label>
+          <input id="appreq-app-name" class="form-ctrl" placeholder="เช่น Duolingo, Kahoot, GoodNotes" maxlength="100">
+        </div>
+        <div class="form-group">
+          <label class="form-label">เหตุผลในการขอ *</label>
+          <textarea id="appreq-reason" class="form-ctrl" rows="3" placeholder="อธิบายว่าใช้แอพนี้เพื่ออะไร และเป็นประโยชน์ต่อการเรียนอย่างไร..."></textarea>
+        </div>
+      </div>
+
       <div class="app-footer">
-        <button class="btn btn-outline" id="btn-issue-back" onclick="issueGoBack()" style="display:none" data-i18n="issueBtnBack">← ย้อนกลับ</button>
+        <button class="btn btn-outline" id="btn-issue-back" onclick="issueGoBack()" style="display:none">← ย้อนกลับ</button>
         <button class="btn btn-outline" onclick="closeModal('modal-issue')" data-i18n="btnCancel">ยกเลิก</button>
-        <button class="btn btn-warning" id="btn-issue-submit" onclick="submitIssueForm()" style="display:none" data-i18n="issueBtnSubmit">📤 ส่งเรื่อง</button>
+        <button class="btn btn-warning" id="btn-issue-submit" style="display:none">📤 ส่งเรื่อง</button>
       </div>
     </div>
   </div>
@@ -3109,7 +3226,7 @@ var CU = null;        // currentUser
 var _authTok = '';    // session token for non-Google admin logins
 var ADMIN_REMEMBER_KEY = 'ipad_jv_admin_remember_token';
 var _pendingNavSection = '';
-var _loadedWithToken = false; // true when loaded with ?_rmt= to prevent iOS redirect loop
+var _initDeviceId = '<?= initDeviceId ?>';
 var allIPads = [];
 var selStatus = '';
 var searchTimer = null;
@@ -3186,18 +3303,8 @@ function saveRememberedAdminToken(token) {
     if (token) localStorage.setItem(ADMIN_REMEMBER_KEY, token);
   } catch(e) {}
   try {
-    if (token && window.parent !== window) {
+    if (token && window.parent !== window)
       window.parent.postMessage({type:'IPAD_JV_SAVE_REMEMBER', token:token}, '*');
-      // iOS PWA: cross-origin iframe→parent postMessage is blocked.
-      // Navigate the top window to the wrapper with ?rmt= so it can save the token
-      // as first-party storage. Skip if already loaded via hash redirect (prevent loop).
-      var _isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      if (_isIOS && !_loadedWithToken && window.top !== window) {
-        window.top.location.replace('https://wisanu15.github.io/IPAD_JV/?rmt=' +
-          encodeURIComponent(token) + '&app=1');
-      }
-    }
   } catch(e) {}
 }
 
@@ -3209,8 +3316,9 @@ function clearRememberedAdminToken() {
     if (window.parent !== window)
       window.parent.postMessage({type:'IPAD_JV_CLEAR_REMEMBER'}, '*');
   } catch(e) {}
-  if (revokeServer && tok) {
-    gsr.withFailureHandler(function(){}).forgetRememberToken(tok);
+  if (revokeServer) {
+    if (tok) gsr.withFailureHandler(function(){}).forgetRememberToken(tok);
+    if (_initDeviceId) gsr.withFailureHandler(function(){}).forgetDeviceRemember(_initDeviceId);
   }
 }
 
@@ -3252,6 +3360,23 @@ function tryRememberedAdminLogin(tok) {
     .consumeRememberToken(tok);
 }
 
+function tryDeviceAutoLogin(deviceId) {
+  if (!deviceId || _authTok) return;
+  gsr
+    .withSuccessHandler(function(r) {
+      if (!r || !r.success) return;
+      initAdminWithUser(r);
+      showToast('เข้าสู่ระบบผู้ดูแลอัตโนมัติ', 'success');
+    })
+    .withFailureHandler(function(){})
+    .autoLoginByDevice(deviceId);
+}
+
+function saveDeviceRememberIfAvailable() {
+  if (!_authTok || !_initDeviceId) return;
+  gsr.withFailureHandler(function(){}).registerDeviceRemember(_initDeviceId);
+}
+
 window.addEventListener('message', function(e) {
   if (!e.origin || e.origin.indexOf('wisanu15.github.io') === -1) return;
   if (!e.data) return;
@@ -3282,11 +3407,11 @@ window.onload = function() {
   document.body.classList.add('mode-register');
   initThemeAndLang();
   loadRegisterData();
-  // Template variable set by doGet when wrapper loads iframe with ?_rmt=TOKEN
   var _initToken = '<?= initRmt ?>';
   if (_initToken) {
-    _loadedWithToken = true; // prevent iOS redirect loop on saveAdminRememberIfRequested
     tryRememberedAdminLogin(_initToken);
+  } else if (_initDeviceId) {
+    tryDeviceAutoLogin(_initDeviceId);
   } else {
     tryRememberedAdminLogin();
   }
@@ -5387,21 +5512,78 @@ function staShowTeachers() {
 // ── Issue Report Modal ─────────────────────────────────────────────────
 var issueStudentData = null;
 var issueFiles = [];
+var issueModalState = 'menu';
+var appReqStudentData = null;
+
+var ISSUE_BACK_MAP = {
+  'report-1':'menu','report-2':'report-1',
+  'status-1':'menu','status-2':'status-1',
+  'appreq-1':'menu','appreq-2':'appreq-1'
+};
+var ISSUE_ALL_STEPS = ['issue-step0','issue-step1','issue-step2','issue-step-s1','issue-step-s2','issue-step-a1','issue-step-a2'];
+
+function setIssueState(state) {
+  ISSUE_ALL_STEPS.forEach(function(id){ document.getElementById(id).classList.remove('active'); });
+  var backBtn = document.getElementById('btn-issue-back');
+  var subBtn  = document.getElementById('btn-issue-submit');
+  backBtn.style.display = 'none';
+  subBtn.style.display  = 'none';
+  var title = document.getElementById('issue-modal-title');
+  if (state === 'menu') {
+    document.getElementById('issue-step0').classList.add('active');
+    title.textContent = '📋 บริการนักเรียน';
+  } else if (state === 'report-1') {
+    document.getElementById('issue-step1').classList.add('active');
+    title.textContent = '⚠️ แจ้งปัญหาไอแพด';
+    backBtn.style.display = '';
+  } else if (state === 'report-2') {
+    document.getElementById('issue-step2').classList.add('active');
+    title.textContent = '⚠️ แจ้งปัญหาไอแพด';
+    backBtn.style.display = '';
+    subBtn.style.display = '';
+    subBtn.innerHTML = '📤 ส่งเรื่อง';
+    subBtn.onclick = submitIssueForm;
+  } else if (state === 'status-1') {
+    document.getElementById('issue-step-s1').classList.add('active');
+    title.textContent = '🔍 ตรวจสอบสถานะ';
+    backBtn.style.display = '';
+  } else if (state === 'status-2') {
+    document.getElementById('issue-step-s2').classList.add('active');
+    title.textContent = '🔍 ตรวจสอบสถานะ';
+    backBtn.style.display = '';
+  } else if (state === 'appreq-1') {
+    document.getElementById('issue-step-a1').classList.add('active');
+    title.textContent = '📱 ส่งคำร้องขอแอพ';
+    backBtn.style.display = '';
+  } else if (state === 'appreq-2') {
+    document.getElementById('issue-step-a2').classList.add('active');
+    title.textContent = '📱 ส่งคำร้องขอแอพ';
+    backBtn.style.display = '';
+    subBtn.style.display = '';
+    subBtn.innerHTML = '📨 ส่งคำร้อง';
+    subBtn.onclick = submitAppRequestForm;
+  }
+  issueModalState = state;
+}
 
 function openIssueModal() {
   openPanelInCard();
   issueStudentData = null;
+  appReqStudentData = null;
   issueFiles = [];
   document.getElementById('issue-student-code').value = '';
   document.getElementById('issue-lookup-msg').style.display = 'none';
-  document.getElementById('issue-step1').classList.add('active');
-  document.getElementById('issue-step2').classList.remove('active');
-  document.getElementById('btn-issue-back').style.display = 'none';
-  document.getElementById('btn-issue-submit').style.display = 'none';
   document.getElementById('issue-type').value = '';
   document.getElementById('issue-description').value = '';
   document.getElementById('issue-file-list').innerHTML = '';
   document.getElementById('issue-upload-status').textContent = '';
+  document.getElementById('status-student-code').value = '';
+  document.getElementById('status-lookup-msg').style.display = 'none';
+  document.getElementById('appreq-student-code').value = '';
+  document.getElementById('appreq-lookup-msg').style.display = 'none';
+  document.getElementById('appreq-app-name').value = '';
+  document.getElementById('appreq-reason').value = '';
+  setIssueState('menu');
   openModal('modal-issue');
 }
 
@@ -5428,20 +5610,119 @@ function lookupStudentForIssue() {
         '<div class="si-name">' + st.prefix + st.firstName + ' ' + st.lastName + '</div>' +
         '<b>รหัส:</b> ' + st.code + ' | <b>ชั้น:</b> ' + (st.grade || '-') + '/' + (st.room || '-') + '<br>' +
         ipadInfo;
-      document.getElementById('issue-step1').classList.remove('active');
-      document.getElementById('issue-step2').classList.add('active');
-      document.getElementById('btn-issue-back').style.display = '';
-      document.getElementById('btn-issue-submit').style.display = '';
+      setIssueState('report-2');
     })
     .withFailureHandler(function(e) { btn.disabled=false; btn.innerHTML='ค้นหา'; showError(e); })
     .lookupStudentByCode(code);
 }
 
 function issueGoBack() {
-  document.getElementById('issue-step2').classList.remove('active');
-  document.getElementById('issue-step1').classList.add('active');
-  document.getElementById('btn-issue-back').style.display = 'none';
-  document.getElementById('btn-issue-submit').style.display = 'none';
+  setIssueState(ISSUE_BACK_MAP[issueModalState] || 'menu');
+}
+
+function issueStartFlow(flow) {
+  if (flow === 'report') setIssueState('report-1');
+  else if (flow === 'status') setIssueState('status-1');
+  else if (flow === 'appreq') setIssueState('appreq-1');
+}
+
+function lookupStatusIssues() {
+  var code = document.getElementById('status-student-code').value.trim();
+  var msgEl = document.getElementById('status-lookup-msg');
+  if (!code) { msgEl.textContent = 'กรุณากรอกรหัสนักเรียน'; msgEl.style.display = 'block'; return; }
+  var btn = document.getElementById('btn-lookup-status');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+  gsr
+    .withSuccessHandler(function(stu) {
+      btn.disabled = false; btn.innerHTML = 'ค้นหา';
+      if (!stu || !stu.found) {
+        msgEl.textContent = 'ไม่พบนักเรียนรหัส ' + code;
+        msgEl.style.display = 'block';
+        return;
+      }
+      msgEl.style.display = 'none';
+      var st = stu.student;
+      document.getElementById('status-stu-info').innerHTML =
+        '<div class="si-name">' + st.prefix + st.firstName + ' ' + st.lastName + '</div>' +
+        '<b>รหัส:</b> ' + st.code + ' | <b>ชั้น:</b> ' + (st.grade || '-') + '/' + (st.room || '-');
+      gsr
+        .withSuccessHandler(function(res) {
+          var listEl = document.getElementById('status-issue-list');
+          if (!res.success || !res.issues.length) {
+            listEl.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px 0;font-size:13px">ยังไม่มีเรื่องที่แจ้ง</div>';
+          } else {
+            listEl.innerHTML = res.issues.map(function(item) {
+              var statusColors = {
+                'รอดำเนินการ':'badge-pending','รับเรื่องแล้ว':'badge-progress',
+                'อยู่ระหว่างการตรวจสอบ':'badge-progress','แก้ไขแล้ว':'badge-done',
+                'อยู่ระหว่างการเคลม':'badge-progress','ใช้งานไม่ได้':'badge-other'
+              };
+              var badgeCls = statusColors[item.status] || 'badge-other';
+              var deadline = item.roomDeadline ? '<br><b>กำหนดส่ง:</b> ' + item.roomDeadline : '';
+              var notes = item.adminNotes ? '<br><b>หมายเหตุ:</b> ' + escHtml(item.adminNotes) : '';
+              return '<div class="issue-status-card">' +
+                '<span class="issue-status-badge ' + badgeCls + '">' + (item.status || '-') + '</span>' +
+                '<div style="font-size:13px;font-weight:700;margin-bottom:4px">' + escHtml(item.issueType) + '</div>' +
+                '<div style="font-size:12px;color:var(--muted)">' + escHtml(item.description || '') + '</div>' +
+                '<div style="font-size:11px;color:var(--muted);margin-top:6px"><b>แจ้งเมื่อ:</b> ' + item.reportedAt + deadline + notes + '</div>' +
+                '</div>';
+            }).join('');
+          }
+          setIssueState('status-2');
+        })
+        .withFailureHandler(function(e) { showError(e); })
+        .getMyIssues(code);
+    })
+    .withFailureHandler(function(e) { btn.disabled=false; btn.innerHTML='ค้นหา'; showError(e); })
+    .lookupStudentByCode(code);
+}
+
+function lookupStudentForAppReq() {
+  var code = document.getElementById('appreq-student-code').value.trim();
+  var msgEl = document.getElementById('appreq-lookup-msg');
+  if (!code) { msgEl.textContent = 'กรุณากรอกรหัสนักเรียน'; msgEl.style.display = 'block'; return; }
+  var btn = document.getElementById('btn-lookup-appreq');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+  gsr
+    .withSuccessHandler(function(r) {
+      btn.disabled = false; btn.innerHTML = 'ค้นหา';
+      if (!r || !r.found) {
+        msgEl.textContent = 'ไม่พบนักเรียนรหัส ' + code;
+        msgEl.style.display = 'block';
+        return;
+      }
+      appReqStudentData = r;
+      msgEl.style.display = 'none';
+      var st = r.student;
+      document.getElementById('appreq-stu-info').innerHTML =
+        '<div class="si-name">' + st.prefix + st.firstName + ' ' + st.lastName + '</div>' +
+        '<b>รหัส:</b> ' + st.code + ' | <b>ชั้น:</b> ' + (st.grade || '-') + '/' + (st.room || '-');
+      setIssueState('appreq-2');
+    })
+    .withFailureHandler(function(e) { btn.disabled=false; btn.innerHTML='ค้นหา'; showError(e); })
+    .lookupStudentByCode(code);
+}
+
+function submitAppRequestForm() {
+  if (!appReqStudentData) return;
+  var appName = document.getElementById('appreq-app-name').value.trim();
+  var reason  = document.getElementById('appreq-reason').value.trim();
+  if (!appName) { showToast('กรุณาระบุชื่อแอพ','error'); return; }
+  if (!reason)  { showToast('กรุณาระบุเหตุผลในการขอ','error'); return; }
+  var btn = document.getElementById('btn-issue-submit');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> กำลังส่ง...';
+  gsr
+    .withSuccessHandler(function(r) {
+      btn.disabled = false; btn.innerHTML = '📨 ส่งคำร้อง';
+      if (r && r.success) {
+        showToast(r.message || 'ส่งคำร้องสำเร็จ', 'success');
+        closeModal('modal-issue');
+      } else {
+        showToast((r && r.message) || 'เกิดข้อผิดพลาด', 'error');
+      }
+    })
+    .withFailureHandler(function(e) { btn.disabled=false; btn.innerHTML='📨 ส่งคำร้อง'; showError(e); })
+    .submitAppRequest({ studentCode: appReqStudentData.student.code, appName: appName, reason: reason });
 }
 
 function handleIssueDrop(e) {
@@ -6658,6 +6939,7 @@ function adminPasswordLogin() {
       showToast('เข้าสู่ระบบผู้ดูแลสำเร็จ','success');
       initAdminWithUser(r);
       saveAdminRememberIfRequested();
+      saveDeviceRememberIfAvailable();
     })
     .withFailureHandler(function(e) {
       btn.disabled = false;
@@ -6724,6 +7006,7 @@ function verifyOTPLogin() {
         showToast('เข้าสู่ระบบสำเร็จ','success');
         initAdminWithUser(r);
         saveAdminRememberIfRequested();
+        saveDeviceRememberIfAvailable();
       }
     })
     .withFailureHandler(function(e){ showToast(''+e,'error'); })
@@ -7076,7 +7359,7 @@ var I18N = {
     homeBadge:'📱 ระบบบริหารจัดการไอแพด',
     homeSub:'บริการนักเรียน ครู และผู้ดูแลระบบ',
     homeBtn1:'ตรวจสอบสถานะ',homeBtn1Sub:'ดูข้อมูลห้องเรียนและไอแพด',
-    homeBtn2:'แจ้งปัญหา',homeBtn2Sub:'ส่งเรื่องให้ผู้ดูแลตรวจสอบ',
+    homeBtn2:'แจ้งปัญหา / ส่งคำร้อง',homeBtn2Sub:'แจ้งปัญหา · ขอแอพ · เช็คสถานะ',
     homeBtn3:'คู่มือการใช้งาน',homeBtn3Sub:'วิธีใช้งานระบบและคำแนะนำ',
     homeBtn4:'ลงทะเบียน',homeBtn4Sub:'บันทึกการรับไอแพด',
     homeManual:'📖 คู่มือการใช้งาน',homeAdmin:'🔐 ผู้ดูแลระบบ',
@@ -7132,7 +7415,7 @@ var I18N = {
     homeBadge:'📱 iPad Management System',
     homeSub:'For students, teachers and administrators',
     homeBtn1:'Check Status',homeBtn1Sub:'View classroom and iPad info',
-    homeBtn2:'Report Issue',homeBtn2Sub:'Send a report to the administrator',
+    homeBtn2:'Issues / Requests',homeBtn2Sub:'Report issue · Request app · Check status',
     homeBtn3:'User Manual',homeBtn3Sub:'How-to guide and tips',
     homeBtn4:'Register',homeBtn4Sub:'Record iPad receipt',
     homeManual:'📖 User Manual',homeAdmin:'🔐 Administrator',

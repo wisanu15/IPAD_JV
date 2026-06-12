@@ -71,8 +71,9 @@ function doGet(e) {
     }
   }
   var tmpl = HtmlService.createTemplateFromFile('Index');
-  // Pass remember token from wrapper (iOS auto-login via URL param, since postMessage is blocked)
   tmpl.initRmt = (e && e.parameter && e.parameter._rmt) ? String(e.parameter._rmt) : '';
+  // Device ID for iOS auto-login (no cross-origin communication needed)
+  tmpl.initDeviceId = (e && e.parameter && e.parameter._devid) ? String(e.parameter._devid).trim().substring(0, 64) : '';
   return tmpl.evaluate()
     .setTitle('ระบบบริหารจัดการไอแพด')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
@@ -158,6 +159,46 @@ function createRememberForCurrentSession(tok) {
   const user = getCurrentUser(tok);
   if (!user || user.role === CONFIG.ROLES.USER) return err('Admin session required');
   return ok('Remembered login saved', { rememberToken: createRememberToken_(user) });
+}
+
+// ── Device-based auto-login (iOS PWA — no postMessage required) ───────────────
+
+function registerDeviceRemember(deviceId, tok) {
+  if (!deviceId || String(deviceId).length < 8) return err('Invalid device ID');
+  const user = getCurrentUser(tok);
+  if (!user || user.role === CONFIG.ROLES.USER) return err('Admin session required');
+  const expires = Date.now() + (30 * 24 * 60 * 60 * 1000);
+  const key = '_dev_' + String(deviceId).trim().substring(0, 64);
+  try {
+    PropertiesService.getScriptProperties().setProperty(key, JSON.stringify({ user: user, expires: expires }));
+  } catch(e) { return err('Register failed: ' + e.message); }
+  return ok('Device registered for auto-login');
+}
+
+function autoLoginByDevice(deviceId) {
+  if (!deviceId) return err('No device ID');
+  try {
+    const key = '_dev_' + String(deviceId).trim().substring(0, 64);
+    const raw = PropertiesService.getScriptProperties().getProperty(key);
+    if (!raw) return err('No device remember');
+    const data = JSON.parse(raw);
+    if (!data || !data.user || !data.expires || Date.now() > Number(data.expires)) {
+      PropertiesService.getScriptProperties().deleteProperty(key);
+      return err('Device remember expired');
+    }
+    if (data.user.role === CONFIG.ROLES.USER) return err('Invalid device remember');
+    const fresh = createSession_(data.user);
+    return ok('Auto-login successful', Object.assign({}, data.user, { token: fresh }));
+  } catch(e) {
+    return err('Device auto-login failed: ' + e.message);
+  }
+}
+
+function forgetDeviceRemember(deviceId) {
+  if (deviceId) {
+    try { PropertiesService.getScriptProperties().deleteProperty('_dev_' + String(deviceId).trim().substring(0, 64)); } catch(e) {}
+  }
+  return ok('Device remember cleared');
 }
 
 // ── iPad CRUD ─────────────────────────────────────────────────────────────────

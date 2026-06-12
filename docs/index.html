@@ -368,8 +368,19 @@
       var adminNotifyAllowed = false;
       var ADMIN_REMEMBER_KEY = 'ipad_jv_admin_remember_token';
       var ADMIN_REMEMBER_LEGACY_KEY = 'ipad_jv_admin_remember';
+      var DEVICE_ID_KEY = 'ipad_jv_device_id';
 
       var COOKIE_NAME = 'ipad_jv_remember';
+
+      // Generate stable device ID stored in first-party localStorage
+      var _deviceId = '';
+      try {
+        _deviceId = localStorage.getItem(DEVICE_ID_KEY) || '';
+        if (!_deviceId) {
+          _deviceId = Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+          localStorage.setItem(DEVICE_ID_KEY, _deviceId);
+        }
+      } catch(e) {}
 
       function setCookie(name, value, days) {
         try {
@@ -790,16 +801,17 @@
           var t = getRememberedAdminToken();
           var dbg = document.createElement('div');
           dbg.style.cssText = 'position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);color:#fff;padding:6px 14px;border-radius:20px;font-size:12px;z-index:9999;font-family:sans-serif;pointer-events:none';
-          dbg.textContent = t ? '🔑 token: มี (' + t.substring(0,8) + '...)' : '🔑 token: ไม่มี (ต้อง login ก่อน)';
+          dbg.textContent = (t ? '🔑 token: มี' : '🔑 ไม่มี token') + ' | 📱 devID: ' + (_deviceId ? _deviceId.substring(0,8) + '...' : 'ไม่มี');
           document.body.appendChild(dbg);
           setTimeout(function(){ dbg.remove(); }, 6000);
         })();
         var iframe = document.createElement('iframe');
         iframe.title = 'ระบบบริหารจัดการไอแพด';
         var _iframeTok = getRememberedAdminToken();
-        // Pass token via query param so GAS doGet receives it as template variable
-        // (hash on iframe.src is lost when GAS sandboxes to googleusercontent.com)
-        iframe.src = _iframeTok ? platformGasUrl + '?_rmt=' + encodeURIComponent(_iframeTok) : platformGasUrl;
+        var _srcParts = [];
+        if (_iframeTok) _srcParts.push('_rmt=' + encodeURIComponent(_iframeTok));
+        if (_deviceId) _srcParts.push('_devid=' + encodeURIComponent(_deviceId));
+        iframe.src = platformGasUrl + (_srcParts.length ? '?' + _srcParts.join('&') : '');
         iframe.referrerPolicy = 'no-referrer-when-downgrade';
         iframe.allow = 'clipboard-read; clipboard-write; fullscreen';
         iframe.addEventListener('load', function () {
