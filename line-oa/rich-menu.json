@@ -1,0 +1,59 @@
+{
+  "size": {
+    "width": 2500,
+    "height": 1686
+  },
+  "selected": true,
+  "name": "IPAD JV Main Menu",
+  "chatBarText": "เมนู iPad JV",
+  "areas": [
+    {
+      "bounds": { "x": 0, "y": 0, "width": 833, "height": 843 },
+      "action": {
+        "type": "uri",
+        "label": "ตรวจสถานะ",
+        "uri": "https://wisanu15.github.io/IPAD_JV/?embed=1&section=status&v=lineoa2"
+      }
+    },
+    {
+      "bounds": { "x": 833, "y": 0, "width": 833, "height": 843 },
+      "action": {
+        "type": "uri",
+        "label": "แจ้งปัญหา",
+        "uri": "https://wisanu15.github.io/IPAD_JV/?embed=1&section=issue&v=lineoa2"
+      }
+    },
+    {
+      "bounds": { "x": 1666, "y": 0, "width": 834, "height": 843 },
+      "action": {
+        "type": "uri",
+        "label": "ยืมคืน",
+        "uri": "https://wisanu15.github.io/IPAD_JV/?embed=1&section=register&v=lineoa2"
+      }
+    },
+    {
+      "bounds": { "x": 0, "y": 843, "width": 833, "height": 843 },
+      "action": {
+        "type": "uri",
+        "label": "ขอแอพ",
+        "uri": "https://wisanu15.github.io/IPAD_JV/?embed=1&section=appreq&v=lineoa2"
+      }
+    },
+    {
+      "bounds": { "x": 833, "y": 843, "width": 833, "height": 843 },
+      "action": {
+        "type": "uri",
+        "label": "คู่มือ",
+        "uri": "https://wisanu15.github.io/IPAD_JV/?embed=1&section=manual&v=lineoa2"
+      }
+    },
+    {
+      "bounds": { "x": 1666, "y": 843, "width": 834, "height": 843 },
+      "action": {
+        "type": "uri",
+        "label": "เปิดแอป",
+        "uri": "https://wisanu15.github.io/IPAD_JV/?v=lineoa2"
+      }
+    }
+  ]
+}

@@ -795,6 +795,7 @@
         var _srcParts = [];
         if (_iframeTok) _srcParts.push('_rmt=' + encodeURIComponent(_iframeTok));
         if (_deviceId) _srcParts.push('_devid=' + encodeURIComponent(_deviceId));
+        if (sectionParam) _srcParts.push('section=' + encodeURIComponent(sectionParam));
         iframe.src = platformGasUrl + (_srcParts.length ? '?' + _srcParts.join('&') : '');
         iframe.referrerPolicy = 'no-referrer-when-downgrade';
         iframe.allow = 'clipboard-read; clipboard-write; fullscreen';
