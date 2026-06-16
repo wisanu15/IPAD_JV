@@ -208,18 +208,31 @@ function getAllIPads() {
   const cached = cache.get('all_ipads');
   if (cached) { try { return JSON.parse(cached); } catch(e) {} }
 
+  // Build photo map from Students sheet: personCode → photoUrl
+  const photoMap = {};
+  const stuSheet = sh(CONFIG.SHEETS.STUDENTS);
+  if (stuSheet && stuSheet.getLastRow() >= 2) {
+    stuSheet.getRange(2, 2, stuSheet.getLastRow() - 1, 7).getValues().forEach(r => {
+      const code = String(r[0] || '').trim();
+      const url  = String(r[6] || '').trim();
+      if (code && url) photoMap[code] = url;
+    });
+  }
+
   const data = sh(CONFIG.SHEETS.IPAD).getDataRange().getValues();
   const rows = [];
   for (let i = 1; i < data.length; i++) {
     const r = data[i];
     if (r[0] === '' && r[1] === '') continue;
+    const personCode = String(r[6] || '').trim();
     rows.push({
       row: i + 1, id: r[0], serial: String(r[1]), assetCode: r[2],
-      prefix: r[3], firstName: r[4], lastName: r[5], personCode: r[6],
+      prefix: r[3], firstName: r[4], lastName: r[5], personCode,
       position: r[7], grade: r[8], room: r[9], status: r[10],
       borrowDate: r[11] ? fmt(r[11]) : '',
       returnDate: r[12] ? fmt(r[12]) : '',
-      notes: r[13] || ''
+      notes: r[13] || '',
+      photoUrl: photoMap[personCode] || ''
     });
   }
   try { cache.put('all_ipads', JSON.stringify(rows), 30); } catch(e) {}
@@ -335,12 +348,16 @@ function getDashboardStats() {
   }
   const totalReal = totalFromDB || ipads.length;
 
+  const inProgressStatuses = [S.PENDING_ISSUE, S.UNDER_INSPECTION, S.DEFECTIVE, S.UNDER_CLAIM];
+  const unavailableStatuses = inProgressStatuses.concat([S.BORROWED, S.CLAIMED]);
+  const inProgressCount = ipads.filter(r => inProgressStatuses.includes(r.status)).length;
   const stats = {
     total:            totalReal,
-    available:        totalReal - borrowed,
+    available:        Math.max(0, totalReal - ipads.filter(r => unavailableStatuses.includes(r.status)).length),
     borrowed:         borrowed,
     returned:         ipads.filter(r => r.status === S.RETURNED).length,
     claimed:          ipads.filter(r => r.status === S.CLAIMED).length,
+    inProgress:       inProgressCount,
     pendingIssue:     ipads.filter(r => r.status === S.PENDING_ISSUE).length,
     underInspection:  ipads.filter(r => r.status === S.UNDER_INSPECTION).length,
     defective:        ipads.filter(r => r.status === S.DEFECTIVE).length,
@@ -352,13 +369,13 @@ function getDashboardStats() {
   ipads.filter(r => r.position === 'นักเรียน' && r.grade).forEach(r => {
     const g = String(r.grade), rm = String(r.room);
     if (!stats.gradeMap[g])     stats.gradeMap[g]     = {};
-    if (!stats.gradeMap[g][rm]) stats.gradeMap[g][rm] = { total:0, available:0, borrowed:0, returned:0, claimed:0, pending:0 };
+    if (!stats.gradeMap[g][rm]) stats.gradeMap[g][rm] = { total:0, available:0, borrowed:0, returned:0, claimed:0, inProgress:0 };
     stats.gradeMap[g][rm].total++;
-    if      (r.status === S.AVAILABLE)         stats.gradeMap[g][rm].available++;
-    else if (r.status === S.BORROWED)          stats.gradeMap[g][rm].borrowed++;
-    else if (r.status === S.RETURNED)          stats.gradeMap[g][rm].returned++;
-    else if (r.status === S.CLAIMED)           stats.gradeMap[g][rm].claimed++;
-    else                                       stats.gradeMap[g][rm].pending++;
+    if      (r.status === S.AVAILABLE)                   stats.gradeMap[g][rm].available++;
+    else if (r.status === S.BORROWED)                    stats.gradeMap[g][rm].borrowed++;
+    else if (r.status === S.RETURNED)                    stats.gradeMap[g][rm].returned++;
+    else if (r.status === S.CLAIMED)                     stats.gradeMap[g][rm].claimed++;
+    else if (inProgressStatuses.includes(r.status))      stats.gradeMap[g][rm].inProgress++;
   });
   try { cache.put('dashboard_stats', JSON.stringify(stats), 60); } catch(e) {}
   return stats;
@@ -516,11 +533,14 @@ function exportCSV() {
   const headers = ['ID','Serial','รหัสครุภัณฑ์','คำนำหน้า','ชื่อ','นามสกุล',
                    'รหัส','ตำแหน่ง','ระดับชั้น','ห้อง','สถานะ','วันที่ยืม','วันที่คืน','หมายเหตุ'];
   const rows = [headers.join(',')];
-  getAllIPads().forEach(r => rows.push([
-    r.id, r.serial, r.assetCode, r.prefix, r.firstName, r.lastName,
-    r.personCode, r.position, r.grade, r.room, r.status,
-    r.borrowDate, r.returnDate, `"${String(r.notes).replace(/"/g,'""')}"`
-  ].join(',')));
+  getAllIPads().forEach(r => {
+    const fields = [r.id, r.serial, r.assetCode, r.prefix, r.firstName, r.lastName,
+      r.personCode, r.position, r.grade, r.room, r.status, r.borrowDate, r.returnDate, r.notes || ''];
+    rows.push(fields.map(c => {
+      const s = String(c == null ? '' : c).replace(/"/g, '""');
+      return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s}"` : s;
+    }).join(','));
+  });
   return ok('', { csv: rows.join('\n') });
 }
 
@@ -675,7 +695,7 @@ function adminLogin(user, pass, remember) {
       const tok = createSession_(current);
       const rememberTok = remember ? createRememberToken_(current) : '';
       log_(email, 'Admin Password Login', user);
-      return ok('เข้าสู่ระบบสำเร็จ', Object.assign({}, current, { token: tok }));
+      return ok('เข้าสู่ระบบสำเร็จ', Object.assign({}, current, { token: tok, rememberToken: rememberTok || '' }));
     }
   }
   return err('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
@@ -788,10 +808,12 @@ function findDatabaseSheet_() {
 
 function getAvailableSerials(cachedIpads) {
   const ipads = cachedIpads || getAllIPads();
+  const S = CONFIG.STATUS;
+  const unavailable = new Set([S.BORROWED, S.PENDING_ISSUE, S.UNDER_INSPECTION, S.DEFECTIVE, S.UNDER_CLAIM, S.CLAIMED]);
   const assigned = {}, assetBySerial = {};
   ipads.forEach(r => {
-    if (r.personCode) assigned[r.serial] = true;
-    if (r.assetCode)  assetBySerial[r.serial] = r.assetCode;
+    if (unavailable.has(r.status)) assigned[r.serial] = true;
+    if (r.assetCode) assetBySerial[r.serial] = r.assetCode;
   });
   const dbSheet = findDatabaseSheet_();
   const masterSerials = [];
@@ -810,7 +832,7 @@ function getAvailableSerials(cachedIpads) {
     }
   }
   if (!masterSerials.length) {
-    return ipads.filter(r => r.status === CONFIG.STATUS.AVAILABLE && !r.personCode)
+    return ipads.filter(r => !unavailable.has(r.status))
                 .map(r => ({ serial: r.serial, assetCode: r.assetCode || '' }));
   }
   const seen = {}, out = [];
@@ -837,7 +859,30 @@ function debugAvailableSerials() {
 }
 
 function registerIPadBatch(registrations, grade, room) {
-  const u = Session.getActiveUser().getEmail() || 'visitor';
+  const u = getCurrentUser(arguments[arguments.length - 1]);
+  if (u.role === CONFIG.ROLES.USER) return err('ไม่มีสิทธิ์ลงทะเบียนไอแพด');
+  return registerIPadBatch_(registrations, grade, room, u.email || 'visitor');
+}
+
+function registerIPadBatchMultiple(classes) {
+  const u = getCurrentUser(arguments[arguments.length - 1]);
+  if (u.role === CONFIG.ROLES.USER) return err('ไม่มีสิทธิ์ลงทะเบียนไอแพด');
+  const userEmail = u.email || 'visitor';
+  let totalCount = 0;
+  const results = [], allErrors = [];
+  for (const cls of classes) {
+    if (!cls.items || !cls.items.length) continue;
+    const r = registerIPadBatch_(cls.items, cls.grade, cls.room, userEmail);
+    results.push(`${cls.grade}/${cls.room}: ${r.message}`);
+    if (!r.success) { allErrors.push(`${cls.grade}/${cls.room}: ${r.message}`); }
+    else { const m = r.message.match(/(\d+)/); if (m) totalCount += Number(m[1]); }
+  }
+  if (allErrors.length && !totalCount) return err(allErrors.join('\n'));
+  return ok(`ลงทะเบียนสำเร็จรวม ${totalCount} เครื่อง จาก ${classes.length} ห้อง` +
+    (allErrors.length ? `\n⚠️ บางห้องมีข้อผิดพลาด` : ''), { results });
+}
+
+function registerIPadBatch_(registrations, grade, room, userEmail) {
   const sheet = sh(CONFIG.SHEETS.IPAD);
   const data  = sheet.getDataRange().getValues();
   const serialRowMap = {};
@@ -873,7 +918,7 @@ function registerIPadBatch(registrations, grade, room) {
     }
     count++;
   });
-  if (count > 0) { invalidateCache_(); log_(u, 'ลงทะเบียนไอแพด', `${grade}/${room} จำนวน ${count} เครื่อง`); }
+  if (count > 0) { invalidateCache_(); log_(userEmail, 'ลงทะเบียนไอแพด', `${grade}/${room} จำนวน ${count} เครื่อง`); }
   if (manualEntries.length) {
     const lines = manualEntries.map(e => {
       const parts = [];
@@ -891,25 +936,33 @@ function registerIPadBatch(registrations, grade, room) {
       '',
       { grade, room, manualCount: manualEntries.length }
     );
-    log_(u || 'visitor', 'แจ้งเตือน admin', `Manual entry: ${lines.join('; ')}`);
+    log_(userEmail, 'แจ้งเตือน admin', `Manual entry: ${lines.join('; ')}`);
   }
   if (errors.length && !count) return err(errors.join('\n'));
   return ok(`ลงทะเบียนสำเร็จ ${count} เครื่อง` + (errors.length ? `\n⚠️ ${errors.join(', ')}` : ''));
 }
 
-function registerIPadBatchMultiple(classes) {
-  let totalCount = 0;
-  const results = [], allErrors = [];
-  for (const cls of classes) {
-    if (!cls.items || !cls.items.length) continue;
-    const r = registerIPadBatch(cls.items, cls.grade, cls.room);
-    results.push(`${cls.grade}/${cls.room}: ${r.message}`);
-    if (!r.success) { allErrors.push(`${cls.grade}/${cls.room}: ${r.message}`); }
-    else { const m = r.message.match(/(\d+)/); if (m) totalCount += Number(m[1]); }
+function returnIpadByStudent(serial, studentCode) {
+  serial = String(serial || '').trim().toUpperCase();
+  if (!serial) return err('กรุณาระบุ Serial');
+  const ipadSheet = sh(CONFIG.SHEETS.IPAD);
+  const data = ipadSheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][1]).trim().toUpperCase() !== serial) continue;
+    const status = String(data[i][10]).trim();
+    if (status !== CONFIG.STATUS.BORROWED) return err('ไม่สามารถคืนได้ — สถานะปัจจุบัน: ' + status);
+    if (studentCode) {
+      const rowCode = String(data[i][6]).trim();
+      if (rowCode && rowCode !== String(studentCode).trim()) return err('ข้อมูลนักเรียนไม่ตรงกับไอแพดเครื่องนี้');
+    }
+    ipadSheet.getRange(i + 1, 11).setValue(CONFIG.STATUS.RETURNED);
+    ipadSheet.getRange(i + 1, 13).setValue(new Date());
+    invalidateCache_();
+    const name = [data[i][3], data[i][4], data[i][5]].filter(Boolean).join(' ');
+    log_('student', 'คืนไอแพด', `Serial ${serial} — ${name}`);
+    return ok('คืนไอแพดสำเร็จ', { serial, name });
   }
-  if (allErrors.length && !totalCount) return err(allErrors.join('\n'));
-  return ok(`ลงทะเบียนสำเร็จรวม ${totalCount} เครื่อง จาก ${classes.length} ห้อง` +
-    (allErrors.length ? `\n⚠️ บางห้องมีข้อผิดพลาด` : ''), { results });
+  return err('ไม่พบ Serial ' + serial + ' ในระบบ');
 }
 
 // ── Public Status ─────────────────────────────────────────────────────────────
@@ -1001,24 +1054,57 @@ function getPublicStatus() {
     totalFromDB = dbVals.filter(r => String(r[0]).trim()).length;
   }
   const availCount = getAvailableSerials(ipads).length;
+  const inProgressStatuses = [S.PENDING_ISSUE, S.UNDER_INSPECTION, S.DEFECTIVE, S.UNDER_CLAIM];
+  const unavailableStatuses = inProgressStatuses.concat([S.BORROWED, S.CLAIMED]);
+  const borrowedFromDB = ipads.filter(r => r.status === S.BORROWED).length;
+  const inProgressCount = ipads.filter(r => inProgressStatuses.includes(r.status)).length;
+  const totalReal = totalFromDB || ipads.length;
   const stats = {
     total:          stuTotal,
     borrowed:       stuBorrowed,
-    borrowedFromDB: ipads.filter(r => r.status === S.BORROWED).length,
+    borrowedFromDB: borrowedFromDB,
     returned:       stuReturned,
     available:      ipads.filter(r => r.position === 'นักเรียน' && r.status === S.AVAILABLE).length,
     claimed:        ipads.filter(r => r.position === 'นักเรียน' && r.status === S.CLAIMED).length,
     availableFromDB: availCount,
+    adminAvailable: Math.max(0, totalReal - ipads.filter(r => unavailableStatuses.includes(r.status)).length),
     problem:        ipads.filter(r => [S.PENDING_ISSUE, S.UNDER_INSPECTION, S.DEFECTIVE, S.UNDER_CLAIM, S.CLAIMED].includes(r.status)).length,
     totalIPads:     ipads.length,
-    totalFromDB:    totalFromDB || (availCount + ipads.filter(r => r.personCode).length)
+    totalFromDB:    totalFromDB || (availCount + ipads.filter(r => r.personCode).length),
+    stuIpadBorrowed: stuBorrowed,
+    stuIpadTotal:    stuTotal
   };
 
-  const teacherList = ipads.filter(r => r.position === 'ครู').map(r => ({
-    prefix: r.prefix, firstName: r.firstName, lastName: r.lastName,
-    personCode: r.personCode, serial: r.serial, assetCode: r.assetCode,
-    status: r.status, borrowDate: r.borrowDate
-  }));
+  // Build borrow lookup from iPad_Data (teachers)
+  const tBorrowByCode = {}, tBorrowByName = {};
+  ipads.filter(r => r.position === 'ครู').forEach(r => {
+    const entry = { serial: r.serial, assetCode: r.assetCode || '', status: r.status, borrowDate: r.borrowDate || '' };
+    if (r.personCode) tBorrowByCode[String(r.personCode)] = entry;
+    tBorrowByName[(String(r.firstName) + '|' + String(r.lastName)).toLowerCase()] = entry;
+  });
+  // All teachers from Teachers sheet
+  const tSheet = sh(CONFIG.SHEETS.TEACHERS);
+  let teacherList;
+  if (tSheet && tSheet.getLastRow() >= 2) {
+    const tData = tSheet.getDataRange().getValues().slice(1);
+    teacherList = tData.filter(r => r[3] || r[1]).map(r => {
+      const code = String(r[1] || '').trim();
+      const nameKey = (String(r[3]) + '|' + String(r[4])).toLowerCase();
+      const borrow = (code && tBorrowByCode[code]) || tBorrowByName[nameKey];
+      return {
+        prefix: String(r[2] || ''), firstName: String(r[3] || ''), lastName: String(r[4] || ''),
+        personCode: code, subject: String(r[5] || ''), room: String(r[6] || ''),
+        serial: borrow ? borrow.serial : '', assetCode: borrow ? borrow.assetCode : '',
+        status: borrow ? borrow.status : 'ยังไม่ยืม', borrowDate: borrow ? borrow.borrowDate : ''
+      };
+    });
+  } else {
+    teacherList = ipads.filter(r => r.position === 'ครู').map(r => ({
+      prefix: r.prefix, firstName: r.firstName, lastName: r.lastName,
+      personCode: r.personCode, subject: '', room: '',
+      serial: r.serial, assetCode: r.assetCode, status: r.status, borrowDate: r.borrowDate
+    }));
+  }
   return { stats, grades, teacherList };
 }
 
@@ -1053,7 +1139,7 @@ function getStudents(filters) {
   for (let i = 1; i < data.length; i++) {
     const r = data[i];
     if (!r[1] && !r[3]) continue;
-    rows.push({ row: i + 1, seq: r[0], code: String(r[1]), prefix: r[2], firstName: r[3], lastName: r[4], grade: r[5], room: r[6] });
+    rows.push({ row: i + 1, seq: r[0], code: String(r[1]), prefix: r[2], firstName: r[3], lastName: r[4], grade: r[5], room: r[6], photoUrl: String(r[7] || '') });
   }
   if (filters) {
     if (filters.grade && filters.grade !== 'all') rows = rows.filter(r => String(r.grade) === filters.grade);
@@ -1073,6 +1159,7 @@ function addStudent(d) {
   if (!sheet) return err('ไม่พบ Sheet Students');
   sheet.appendRow(['', d.code, d.prefix, d.firstName, d.lastName, d.grade, d.room]);
   renumberStudents_();
+  invalidateCache_();
   log_(u.email, 'เพิ่มนักเรียน', `${d.prefix}${d.firstName} ${d.lastName}`);
   return ok('เพิ่มนักเรียนสำเร็จ');
 }
@@ -1081,6 +1168,7 @@ function updateStudent(row, d) {
   const u = getCurrentUser(arguments[arguments.length - 1]);
   if (u.role === CONFIG.ROLES.USER) return err('ไม่มีสิทธิ์');
   sh(CONFIG.SHEETS.STUDENTS).getRange(row, 2, 1, 6).setValues([[d.code, d.prefix, d.firstName, d.lastName, d.grade, d.room]]);
+  invalidateCache_();
   log_(u.email, 'แก้ไขนักเรียน', `${d.firstName} ${d.lastName}`);
   return ok('แก้ไขสำเร็จ');
 }
@@ -1446,12 +1534,38 @@ function deleteTeacher(row) {
   return ok('ลบสำเร็จ');
 }
 
+function batchAddTeachers(teachers) {
+  try {
+    const u = getCurrentUser(arguments[arguments.length - 1]);
+    if (u.role === CONFIG.ROLES.USER) return err('ไม่มีสิทธิ์');
+    if (!Array.isArray(teachers) || !teachers.length) return err('ไม่มีข้อมูลครู');
+    let sheet = sh(CONFIG.SHEETS.TEACHERS);
+    if (!sheet) {
+      // sheet ไม่มี — สร้างใหม่พร้อม header
+      sheet = ss().insertSheet(CONFIG.SHEETS.TEACHERS);
+      sheet.appendRow(['ลำดับ','รหัส','คำนำหน้า','ชื่อ','นามสกุล','วิชา','ห้องประจำ']);
+    }
+    let added = 0;
+    teachers.forEach(d => {
+      if (!d.firstName) return;
+      sheet.appendRow(['', d.code || '', d.prefix || '', d.firstName, d.lastName || '', d.subject || '', d.room || '']);
+      added++;
+    });
+    renumberTeachers_();
+    log_(u.email, 'นำเข้าครู CSV', `${added} คน`);
+    return ok(`นำเข้าครูสำเร็จ ${added} คน`);
+  } catch(e) {
+    return err('เกิดข้อผิดพลาด: ' + e.message);
+  }
+}
+
 function renumberTeachers_() {
   const sheet = sh(CONFIG.SHEETS.TEACHERS);
   if (!sheet) return;
   const last = sheet.getLastRow();
   if (last < 2) return;
-  for (let i = 2; i <= last; i++) sheet.getRange(i, 1).setValue(i - 1);
+  const nums = Array.from({length: last - 1}, (_, i) => [i + 1]);
+  sheet.getRange(2, 1, last - 1, 1).setValues(nums);
 }
 
 // ── Issues (Problem Reports) ──────────────────────────────────────────────────
@@ -1474,6 +1588,31 @@ function lookupStudentByCode(code) {
     }
   }
   return { found: false };
+}
+
+function searchStudentsForIssue(query) {
+  query = String(query || '').trim();
+  if (!query || query.length < 2) return [];
+  const q = query.toLowerCase();
+  const students = sh(CONFIG.SHEETS.STUDENTS);
+  if (!students) return [];
+  const sData = students.getDataRange().getValues();
+  const ipads = getAllIPads();
+  const results = [];
+  for (let i = 1; i < sData.length && results.length < 10; i++) {
+    const code = String(sData[i][1] || '');
+    const firstName = String(sData[i][3] || '');
+    const lastName = String(sData[i][4] || '');
+    const grade = String(sData[i][5] || '');
+    const room = String(sData[i][6] || '');
+    const ipad = ipads.find(r => String(r.personCode) === code);
+    const serial = ipad ? ipad.serial : '';
+    if (firstName.toLowerCase().includes(q) || lastName.toLowerCase().includes(q) ||
+        serial.toLowerCase().includes(q) || code.includes(q)) {
+      results.push({ code, prefix: String(sData[i][2] || ''), firstName, lastName, grade, room, serial });
+    }
+  }
+  return results;
 }
 
 function uploadIssueFile(base64Data, filename, mimeType) {
@@ -1906,6 +2045,7 @@ function findDuplicates(sheetName, keyCol) {
   const data = sheet.getDataRange().getValues();
   if (data.length < 2) return ok('', { groups: [], total: 0 });
 
+  if (keyCol < 1 || keyCol > data[0].length) return err('keyCol ไม่ถูกต้อง');
   const keyIdx = keyCol - 1;
   const seen = {};   // key → first rowNum (1-based)
   const groups = {}; // key → [{rowNum, rowData}]
@@ -1937,6 +2077,7 @@ function removeDuplicates(sheetName, keyCol) {
   if (!sheet) return err('ไม่พบ Sheet: ' + sheetName);
 
   const data = sheet.getDataRange().getValues();
+  if (keyCol < 1 || keyCol > data[0].length) return err('keyCol ไม่ถูกต้อง');
   const keyIdx = keyCol - 1;
   const seen = new Set();
   const rowsToDelete = [];
@@ -1965,20 +2106,34 @@ function requestOTP(emailOrName) {
   // If input has no @, treat as name — look up email in Users or Accounts sheets
   if (!email.includes('@')) {
     const nameLow = email.toLowerCase();
-    const usersData = sh(CONFIG.SHEETS.USERS).getDataRange().getValues().slice(1);
+    const usersSheet_ = sh(CONFIG.SHEETS.USERS);
+    if (!usersSheet_) return err('ระบบยังไม่พร้อม กรุณาติดต่อ Admin');
+    const usersData = usersSheet_.getDataRange().getValues().slice(1);
     const adminRow = usersData.find(r => String(r[1]).trim().toLowerCase() === nameLow);
     if (adminRow && String(adminRow[0]).includes('@')) {
       email = String(adminRow[0]).trim();
     } else {
-      const accSheet = sh(CONFIG.SHEETS.ACCOUNTS);
-      if (accSheet) {
-        const accData = accSheet.getDataRange().getValues().slice(1);
-        // col 1 = firstName, col 2 = lastName, col 4 = email
-        const accRow = accData.find(r => {
-          const full = (String(r[1]) + ' ' + String(r[2])).trim().toLowerCase();
-          return full === nameLow;
-        });
-        if (accRow && String(accRow[4]).includes('@')) email = String(accRow[4]).trim();
+      // Search Students sheet by firstName+lastName → look up email in Accounts
+      const stuSheet = sh(CONFIG.SHEETS.STUDENTS);
+      if (stuSheet) {
+        const stuData = stuSheet.getDataRange().getValues().slice(1);
+        const stuRow = stuData.find(r => (String(r[3]) + ' ' + String(r[4])).trim().toLowerCase() === nameLow);
+        if (stuRow) {
+          const acc = lookupAccount_('student', String(stuRow[1]).trim());
+          if (acc && String(acc.email).includes('@')) email = String(acc.email).trim();
+        }
+      }
+      // Search Teachers sheet by firstName+lastName → look up email in Accounts
+      if (!email.includes('@')) {
+        const tSheet = sh(CONFIG.SHEETS.TEACHERS);
+        if (tSheet) {
+          const tData = tSheet.getDataRange().getValues().slice(1);
+          const tRow = tData.find(r => (String(r[3]) + ' ' + String(r[4])).trim().toLowerCase() === nameLow);
+          if (tRow) {
+            const acc = lookupAccount_('teacher', String(tRow[1]).trim());
+            if (acc && String(acc.email).includes('@')) email = String(acc.email).trim();
+          }
+        }
       }
     }
     if (!email.includes('@')) return err('ไม่พบชื่อ "' + emailOrName.trim() + '" ในระบบ กรุณาตรวจสอบชื่อ-นามสกุล หรือใช้ email แทน');
@@ -1988,7 +2143,8 @@ function requestOTP(emailOrName) {
 
   // Verify email is registered
   let found = false;
-  const usersData = sh(CONFIG.SHEETS.USERS).getDataRange().getValues().slice(1);
+  const usersSheet__ = sh(CONFIG.SHEETS.USERS);
+  const usersData = usersSheet__ ? usersSheet__.getDataRange().getValues().slice(1) : [];
   if (usersData.find(r => String(r[0]).trim().toLowerCase() === emailLow)) found = true;
 
   if (!found) {
@@ -2045,7 +2201,8 @@ function verifyOTP(email, otp) {
   cache.remove(attKey);
 
   // Check admin Users sheet first
-  const usersData = sh(CONFIG.SHEETS.USERS).getDataRange().getValues().slice(1);
+  const usersSheetV_ = sh(CONFIG.SHEETS.USERS);
+  const usersData = usersSheetV_ ? usersSheetV_.getDataRange().getValues().slice(1) : [];
   const adminUser = usersData.find(r => String(r[0]).trim().toLowerCase() === emailLow);
   if (adminUser && adminUser[3] !== CONFIG.ROLES.USER) {
     const userObj = { email: adminUser[0], name: adminUser[1], code: adminUser[2], role: adminUser[3], position: adminUser[4] };
@@ -2068,8 +2225,16 @@ function verifyOTP(email, otp) {
         log_(email, 'OTP Login (student)', 'สำเร็จ');
         return ok('เข้าสู่ระบบสำเร็จ', { loginType:'student', student: lookup.student, ipad: lookup.ipad });
       } else {
+        const tSheet_ = sh(CONFIG.SHEETS.TEACHERS);
+        let teacher = null;
+        if (tSheet_ && tSheet_.getLastRow() >= 2) {
+          const tData_ = tSheet_.getDataRange().getValues().slice(1);
+          const tRow_ = tData_.find(r => String(r[1]).trim() === code);
+          if (tRow_) teacher = { code, prefix: String(tRow_[2]), firstName: String(tRow_[3]), lastName: String(tRow_[4]), subject: String(tRow_[5] || ''), room: String(tRow_[6] || '') };
+        }
+        const accEmail = String(acc[4] || '').trim();
         log_(email, 'OTP Login (teacher)', 'สำเร็จ');
-        return ok('เข้าสู่ระบบสำเร็จ', { loginType:'teacher', code });
+        return ok('เข้าสู่ระบบสำเร็จ', { loginType:'teacher', code, email: accEmail, teacher });
       }
     }
   }
@@ -2169,7 +2334,7 @@ function getIPadHistory(serial) {
   const data = logSheet.getDataRange().getValues().slice(1);
   const keyword = String(serial).trim().toLowerCase();
   const history = data
-    .filter(r => String(r[3]).toLowerCase().includes(keyword) || String(r[2]).toLowerCase().includes('serial') && String(r[3]).toLowerCase().includes(keyword))
+    .filter(r => String(r[3]).toLowerCase().includes(keyword))
     .map(r => ({ date: r[0] ? fmt(r[0]) : '', email: r[1], action: r[2], detail: r[3] }))
     .reverse()
     .slice(0, 50);
@@ -2202,7 +2367,7 @@ function getDashboardChartData() {
     logData.forEach(r => {
       if (!r[0] || new Date(r[0]) < cutoff) return;
       if (!String(r[2]).includes('ยืม') && !String(r[2]).includes('Borrow')) return;
-      const d = Utilities.formatDate(new Date(r[0]), Session.getScriptTimeZone(), 'dd/MM');
+      const d = Utilities.formatDate(new Date(r[0]), 'Asia/Bangkok', 'dd/MM');
       trend[d] = (trend[d] || 0) + 1;
     });
   }
@@ -2244,4 +2409,191 @@ function initializeSpreadsheet() {
   }
 
   SpreadsheetApp.getUi().alert('✅ เริ่มต้นระบบสำเร็จ\n\nสร้าง Sheet ครบแล้ว พร้อมใช้งาน');
+}
+
+// ── Unregistered Devices Report ───────────────────────────────────────────────
+// Run this function from Apps Script editor → gets you a Google Sheet you can
+// File > Download > Excel (.xlsx)
+
+function runUnregisteredReport() {
+  const UNREGISTERED_SERIALS = [
+    'M2C217TNQ7','C36444YW7X','DY9MPG70PY','CPVYL97MF2','H400FJ409C','KG404H6270',
+    'LXCY9Q942G','K6122XP3KW','HGH605G7CN','G94T6HXY20','LXK2D7J30J','FHYTR4LQ0L',
+    'MWL5Q6264X','G7XCH2MVKD','MMFHFM07LW','F3XM9XPM61','H0F33H3JFC','G5VHWTJW6V',
+    'LV3GCP7WGW','KFKVTDQ3GX','L30N2HFVV3','F61PQNH54R','JCXMLH073V','GWXL65PWPG',
+    'D930XXG7L5','FD657R4QW4','JC4TQ7R7FK','K16J2CV69W','HCFC4R7WDN','FJ4GVKL74R',
+    'J217KJW3TL','F57DY4251W','F9HWLH91VF','KTH6P493H4','MHWVQD796R','JQX4RY5W5H',
+    'KMGF43Y7GX','MCYTG9691D','K27YGP6GP7','KXN3642VYJ','L1CYT6X71F','CTW9XJMWP1',
+    'J27L403VKP','LL4RK7M0MP','CVYVJ2FMQP','G9HXGW265R','MLXVV7GR75','DG7R06XRP0',
+    'L097THKKX4','FW2G65QJ6Y','C6WX6MCWRN','JM92RJJ4C9','G2CJP4K45G','CL4QYVGXF0',
+    'CVMHG2QFNQ','KGK9P6PXJ0','G4JGK6R14T','JTH2R24M0M','KX37N36H36','C6XCHXL2KR',
+    'K4XH74GW4C','J3DT2W4LXH','K5WYDFPHR2','M2RW4FV407','CQ2V123FHT','J46MVW4393',
+    'KKWWLYWG4X','M7VY9W7C40','KTV7FPPVHD','GHHDF9P1V4','L504JNY66W','H2G2QDK9LQ',
+    'H6Q59972JC','H66K30J92P','KQWP42LQ2Y','FJWQYMH20T','C7ML9KD9LM','CGGYKY07Q4',
+    'G6933T2002','F490XV2547','JL4LDQYJWW','C6J49HGXNG','MNXRNWND7V','M73FX4J7P7',
+    'HFW1R4JQPK','L17WP641H7','K767M3WQ2J','GV14LV771R','HT44X6XTG6','FD2YWN7K6W',
+    'LR7F23R75R','K46DQYP9PG','J67YQ2DFH6','H9H90R96CM','CKFF7MTGQ9','KJJ9GCWYXW',
+    'FQPFWT26QD','H2JN7T426H','FYXJ3XNHV6','GNVW6VJX9N','C2YC9VMP4X','FJFVRWW0XJ',
+    'L794GJG9VW','GVH321M9V7','KW96QYTVPQ','JY2G5QL734','F0CFDWYYDF','LF73HTK4CV',
+    'GHV9KLF7DH','HD47VWC04L','K7G4QTFPYQ','CN7PCWY4Y1','GFNY9XK40N','MQ6N16C2V2',
+    'K619MFWM96','D9VYVP2VK2','L7TGW4PX7G','DJVHC070NK','F9RR9RFK67','M54THR42TH',
+    'GDXL3R9JJV','KYPHYPPWQY','HGV9RRQ9J2','FCVJ2P52MX','CTW54DFVCG','FPVD97TTXY',
+    'HMVVDGGK6F','M6435HHCYM','LKF7QM3H42','L92WH549JW','KHQN6VC6KK','CL9G0P2DQK',
+    'HTWV6GYWCC','DC4W23GRX0','J2HGHLHP6M','LPFDFP6TWV','FV7QVD4QP5','LV1WRMQ9QN',
+    'M12K40J411','FYJ4KGXKLW','GVYGRXD9W4','GJG2YWG02F','KTY9DC9XC2','H253J4JLY2',
+    'HHCWP2742V','KJ7H029D20','J1QGYL6LQR','DHXN7FVQXP','MHG7MGYC41','M7X0MHH2JM',
+    'C0M0HJ9JLY','KQJ9K7W50Y','L6JVVM0JGK','F774LVVD6D','H6RYVJPXL4','F6P39JP79N',
+    'H64WN22VYY','JW9JV61MV2','G1Q96P0WYY','HFM77CT4D5','JJPGKMQDLP','DL2W7012YC',
+    'MGQWWQT9XM','KP91L655W9','H33WX6X3HW','L1PW4CGWY9','G34DVXY9M5','JQD64X49P4',
+    'K9X3W33473','KYFFVVD7FQ','G70QPYMJ6J','HX7MVK42R7','D6WYF6D6HT','JT6CF7LHVC',
+    'GJC46KJTG2','MR9FJW21F3','CWHYH7T5F4','D349JWH21Y','LDQ379FDJ9','GQGPV4GW75',
+    'CRWFF22DJP','F0CFC4G00W','C1FPWJK7M1','GG9PC764FC','FC7PN6QYFC','KWLD6HPQTV',
+    'DQTHGPM6KF','L25917W4N3','LXMP4V4LF4','MQ4YV9G4MQ','GJFT9G5XF2','K7P4R39YKV',
+    'L4WYKRQXL2','F5VH373V0R','FDYDC9HTPH','C4RXV471X9','FVMG0PKWNC','GN6LXFXJ3X',
+    'J7RX4HFRX6','FHYD9NYQ59','H3F9HFWGK9','H5HC06G671','LX2NC4GWX7','JQDC65HX5H',
+    'JL72V4CGJ9','KD2PRGC4D0','KCWJ41RY77','HWH9X4FVJD','FCY7VN46CF','D75C36JXCP',
+    'KY0RM26X3P','M1VYXQ5F02','JXJWYG5V23','LG770YXRF0','J7T7GCWQWQ','CTPQQYN3L7',
+    'GTPF03GHVV','GJYPQK3G00','GKM0P7D0H9','GL4VMKQK50','LJYR2YGVMR','M7T75WDFHQ',
+    'J22PK949LY','KTCQ9HVWGM','DVH07R2743','F03HFXC99M','K07L45NHDQ','K4FDJ61QNY',
+    'FGWQ02HNFJ','J0KKXR392T','D19VP6YTGQ','MGFPJCWRMJ','GNW7JG9LH4','DHXV2F17QK',
+    'J5QPYX5FPG','FQMQ9W219H','H9L646LN97','H0CMWW1GK4','HPHW50M4RL','MH6C0FNVXL',
+    'FVQ03W79F5','HQ5960V9Q6','CNG3PD2JK0','JG9HX7N29M','J274W661V9','C9K9MW64C4',
+    'FW3TVW3K5V','KX4TQR7NQH','LLK9PF09MY','JVPQDM9HQF','GKCF0XJ020','DDXW77R37L',
+    'GJ6NFPFHXF','CFJYW7XXKR','FDWKKWVW5M','GXX23LTXWX','F965WNWPFP','DL7CT9799H',
+    'JLJWXXFR61','D590K00C4D','J9F7X5C3G7','F42MN24H56','H2WLT2LNP4','LVFT2YWVNM',
+    'DNQFC64QM9','C7XJXJX0WP','KW36CQT29Q','JW9JHG7K2P','HD66JWG6C9','MT4Y3G5P4F',
+    'KD72K50QT2','H3DY2C7QC9','D9HN2XYK66','L2LTV176TJ','JGT4NM2P3J','H4CHY29R7J',
+    'J6JRVP2WT2','CPQQX0P6JN','JN02360XKK','H6P6PVC9T9','G32LQ41QNJ','KGKY60YF4V',
+    'CD6LHF9F06','L00F7D57L2','CKXYKWQCYP','CK6LHH5HJN','GXM44QKWNY','LF4GJ33KF4',
+    'CVVJ62K9YH','G99377NQH4','L07M2XVKDG','JXV7F9HP77','L4DD4527YL','KF6NKJ91Q7',
+    'HQ91P9G2Y5','MNPC2RKX4Y','CJ3C2C4XDR','H5KQV3344D','G7H3Y7Q9XF','K00M706HL0',
+    'GY42L0YVPK','MNQVV2LRP2','F7G3W9RWNW','MQ2MGXQQJQ','HXQV4R96VN','L26GNPH69R',
+    'CVNC434JXJ','F07Y26VGKX','FQ7C3HJDFY','F4522PJW1J','LR7L0MHKQ6','HR2FNYJVX0',
+    'FV2JWG7XKP','L56PGF65X9','LC2XQDNF3F','GHQFY27N3T','KGPDYPVVR2','G74RR44MDJ',
+    'LVY7VX7J5W','M44LH29QYW','CCXPMY43TC','D6Q1C322QR','FWHKYX5609','JX0NV6DX01',
+    'DQYQ09H4V2','GMVHGWYLVQ','F7QY6TL9V6','F99Q32FXC9','HYGVX9YYF7','GXQQ779K22',
+    'FHNW77HH40','JX7LVJLCM2','G37M69FW95','CQJ43PPGHJ','GQFHC9RD9C','D4J94JQJC5',
+    'J6G46P79JQ','KT76909THH','MJ6JKQKJ64','JYD76GFP95','K60QV0MHVW','K66726145X',
+    'FN0Q552J5C','D926X4YGGK','DVP37LXWHC','K9DD7D4DG7','MP2WR759RJ','FHT7GJ6WTQ',
+    'HVJ96QK9CH','CG7L4LP671','LYYXH4V4HP','HT9Y73YVXH','JR2507N9CP','FM7TJY6KQL',
+    'G765NY9CTX','MVHH0Y04YC','CY4MY65G2M','G0FF6NF27M','DXJ4HR67GR','J59Q269KK2',
+    'FY2FG3XYM3','D3NXM59YJD','CV643GVGFC','FPYF75H4MC','M3HPL7WF49','KW4K0GQ056',
+    'HHJXJJMFMC','JP9334L509','C27F96PFQW','L93CMCQ7PG','G3JFJQ0MV3','MF7W6TXFVT',
+    'H1G2DQKKWD','K33R7102VN','K4N02W7X6P','D57JGKLQ2R','CYKPXV27V0','LQ6FG402NV',
+    'D1WQCV7K14','KV914LFTQ7','HQYQCHYXX3','JQ2R7RQRQX','HXGV3HT2JK','LQ45QCFNR2',
+    'FXFHR72KL0','HQ9XT46TX4','KH0096RQQG','DK4HTK609V','JVXL17R622','JNQFGM627N',
+    'C590TLW7NY','HY60P7129H','H24L02VXDR','L2FQ6Q7VXD'
+  ];
+
+  // Build lookup map from iPad_Data: serial → row data
+  const ipadSheet = sh(CONFIG.SHEETS.IPAD);
+  const ipadData  = ipadSheet.getDataRange().getValues();
+  const ipadMap   = {};
+  for (let i = 1; i < ipadData.length; i++) {
+    const s = String(ipadData[i][1]).trim().toUpperCase();
+    if (s) ipadMap[s] = ipadData[i];
+  }
+
+  // Build result rows
+  const headers = [
+    'ลำดับ','Serial Number','พบในระบบ',
+    'รหัสครุภัณฑ์','คำนำหน้า','ชื่อ','นามสกุล',
+    'รหัส','ตำแหน่ง','ระดับชั้น','ห้อง',
+    'สถานะ','วันที่ยืม','วันที่คืน','หมายเหตุ'
+  ];
+  const resultRows = [headers];
+  UNREGISTERED_SERIALS.forEach((serial, idx) => {
+    const r = ipadMap[serial.toUpperCase()];
+    if (r) {
+      resultRows.push([
+        idx + 1, serial, 'พบ',
+        r[2], r[3], r[4], r[5],
+        r[6], r[7], r[8], r[9],
+        r[10],
+        r[11] ? Utilities.formatDate(new Date(r[11]), 'Asia/Bangkok', 'dd/MM/yyyy') : '',
+        r[12] ? Utilities.formatDate(new Date(r[12]), 'Asia/Bangkok', 'dd/MM/yyyy') : '',
+        r[13] || ''
+      ]);
+    } else {
+      resultRows.push([idx + 1, serial, 'ไม่พบ', '', '', '', '', '', '', '', '', '', '', '', '']);
+    }
+  });
+
+  // Create result sheet inside this spreadsheet (overwrite if exists)
+  const RESULT_SHEET_NAME = 'Unregistered_Report';
+  let outSheet = ss().getSheetByName(RESULT_SHEET_NAME);
+  if (outSheet) {
+    outSheet.clearContents();
+  } else {
+    outSheet = ss().insertSheet(RESULT_SHEET_NAME);
+  }
+
+  outSheet.getRange(1, 1, resultRows.length, headers.length).setValues(resultRows);
+
+  // Style header row
+  const headerRange = outSheet.getRange(1, 1, 1, headers.length);
+  headerRange.setFontWeight('bold').setBackground('#1a73e8').setFontColor('white');
+  outSheet.setFrozenRows(1);
+  outSheet.autoResizeColumns(1, headers.length);
+
+  // Color-code: ไม่พบ → light red, พบ → light green
+  for (let i = 2; i <= resultRows.length; i++) {
+    const found = String(outSheet.getRange(i, 3).getValue());
+    outSheet.getRange(i, 1, 1, headers.length)
+      .setBackground(found === 'พบ' ? '#e6f4ea' : '#fce8e6');
+  }
+
+  const foundCount    = resultRows.slice(1).filter(r => r[2] === 'พบ').length;
+  const notFoundCount = resultRows.slice(1).filter(r => r[2] === 'ไม่พบ').length;
+
+  const url = ss().getUrl() + '#gid=' + outSheet.getSheetId();
+  Logger.log(`✅ รายงานพร้อม: ${url}`);
+  Logger.log(`พบในระบบ: ${foundCount} | ไม่พบ: ${notFoundCount} | รวม: ${UNREGISTERED_SERIALS.length}`);
+
+  SpreadsheetApp.getUi().alert(
+    `✅ รายงานพร้อมแล้ว\n\n` +
+    `พบในระบบ: ${foundCount} เครื่อง\n` +
+    `ไม่พบในระบบ: ${notFoundCount} เครื่อง\n` +
+    `รวมทั้งหมด: ${UNREGISTERED_SERIALS.length} เครื่อง\n\n` +
+    `ดูที่ Sheet: "${RESULT_SHEET_NAME}"\n` +
+    `แล้ว File > Download > Microsoft Excel เพื่อรับไฟล์`
+  );
+
+  return { foundCount, notFoundCount, total: UNREGISTERED_SERIALS.length, sheetUrl: url };
+}
+
+// ── Web-callable: match uploaded serial list against iPad_Data ────────────────
+function matchSerialsWithSystem(serials) {
+  try {
+    const ipadSheet = sh(CONFIG.SHEETS.IPAD);
+    const ipadData  = ipadSheet.getDataRange().getValues();
+    const ipadMap   = {};
+    for (let i = 1; i < ipadData.length; i++) {
+      const s = String(ipadData[i][1]).trim().toUpperCase();
+      if (s) ipadMap[s] = ipadData[i];
+    }
+
+    const rows = serials.map((serial, idx) => {
+      const key = String(serial).trim().toUpperCase();
+      const r   = ipadMap[key];
+      if (r) {
+        return {
+          no: idx + 1, serial: key, found: true,
+          assetCode: r[2] || '', prefix: r[3] || '', firstName: r[4] || '', lastName: r[5] || '',
+          personCode: r[6] || '', position: r[7] || '', grade: r[8] || '', room: r[9] || '',
+          status: r[10] || '',
+          borrowDate: r[11] ? Utilities.formatDate(new Date(r[11]), 'Asia/Bangkok', 'dd/MM/yyyy') : '',
+          returnDate: r[12] ? Utilities.formatDate(new Date(r[12]), 'Asia/Bangkok', 'dd/MM/yyyy') : '',
+          notes: r[13] || ''
+        };
+      }
+      return { no: idx + 1, serial: key, found: false, assetCode:'', prefix:'', firstName:'', lastName:'', personCode:'', position:'', grade:'', room:'', status:'', borrowDate:'', returnDate:'', notes:'' };
+    });
+
+    const foundCount    = rows.filter(r => r.found).length;
+    const notFoundCount = rows.filter(r => !r.found).length;
+    return { ok: true, rows, foundCount, notFoundCount, total: serials.length };
+  } catch(e) {
+    return { ok: false, error: e.message };
+  }
 }
