@@ -69,8 +69,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);dis
 
 /* ─── Stat cards ─────────────────────────────────── */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:14px;margin-bottom:24px}
-.stat-card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:18px 20px;display:flex;flex-direction:column;gap:6px;border:1px solid rgba(0,0,0,.04);transition:transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease);cursor:pointer}
-.stat-card:hover{transform:translateY(-2px);box-shadow:var(--sh-md)}
+.stat-card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:18px 20px;display:flex;flex-direction:column;gap:6px;border:1px solid rgba(0,0,0,.04)}
 .stat-card .label{font-size:11.5px;color:var(--muted);font-weight:500;letter-spacing:.2px}
 .stat-card .value{font-size:30px;font-weight:800;line-height:1;font-family:'Inter','Sarabun',sans-serif}
 .stat-card .icon{font-size:20px}
@@ -81,13 +80,6 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);dis
 .stat-card.purple{border-top:3px solid var(--purple)}.stat-card.purple .value{color:var(--purple)}
 .stat-card.cyan{border-top:3px solid var(--cyan)}.stat-card.cyan .value{color:var(--cyan)}
 .stat-card.teal{border-top:3px solid #0891b2}.stat-card.teal .value{color:#0891b2}
-.stat-explain-inline{margin-top:10px;padding:10px 11px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:var(--text);font-size:12px;line-height:1.65;font-weight:500;grid-column:1/-1;box-shadow:inset 0 1px 0 rgba(255,255,255,.35);animation:fadeIn .14s ease both}
-.stat-explain-inline .sei-title{font-size:12px;font-weight:800;margin-bottom:4px;color:var(--text)}
-.stat-explain-inline .sei-value{font-family:'Inter','Sarabun',sans-serif;font-size:18px;font-weight:800;color:var(--primary);line-height:1;margin-bottom:6px}
-.stat-explain-open{box-shadow:0 0 0 2px rgba(79,126,247,.24),var(--sh-md)!important;transform:translateY(-2px)}
-.dash-sum-row .stat-explain-inline,.dash-room-row .stat-explain-inline{display:block;margin:8px 0 4px}
-.sta-hero-seg.stat-explain-open{flex-wrap:wrap}
-.sta-hero-seg .stat-explain-inline,.chart-card .stat-explain-inline{width:100%;flex-basis:100%}
 
 /* ─── Badges ─────────────────────────────────────── */
 .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;letter-spacing:.1px}
@@ -6933,38 +6925,7 @@ function jsString(s) {
     .replace(/\r?\n/g,' ');
 }
 
-function statExplain(host, title, value, body) {
-  var html = '<div class="stat-explain-inline">' +
-    '<div class="sei-title">' + escHtml(title || 'คำอธิบายสถิติ') + '</div>' +
-    '<div class="sei-value">' + escHtml(value == null ? '' : value) + '</div>' +
-    '<div>' + escHtml(body || '').replace(/\n/g,'<br>') + '</div>' +
-  '</div>';
-
-  if (!host || !host.closest) {
-    document.getElementById('stat-explain-title').textContent = title || 'คำอธิบายสถิติ';
-    document.getElementById('stat-explain-value').textContent = value == null ? '' : value;
-    document.getElementById('stat-explain-body').innerHTML = escHtml(body || '').replace(/\n/g,'<br>');
-    openModal('modal-stat-explain');
-    return;
-  }
-
-  var box = host.closest('.stat-card,.sta-stat,.issue-stat-card,.tch-summary-card,.sta-grade-card,.sta-hero-seg,.chart-card,.dash-sum-row,.dash-room-row') || host;
-  var existing = box.querySelector && box.querySelector(':scope > .stat-explain-inline');
-  var wasOpen = !!existing || box.classList.contains('stat-explain-open');
-
-  document.querySelectorAll('.stat-explain-inline').forEach(function(el){ el.remove(); });
-  document.querySelectorAll('.stat-explain-row').forEach(function(el){ el.remove(); });
-  document.querySelectorAll('.stat-explain-open').forEach(function(el){ el.classList.remove('stat-explain-open'); });
-  if (wasOpen) return;
-
-  box.classList.add('stat-explain-open');
-  if (box.tagName === 'TR') {
-    var colspan = box.children.length || 1;
-    box.insertAdjacentHTML('afterend', '<tr class="stat-explain-row"><td colspan="' + colspan + '">' + html + '</td></tr>');
-  } else {
-    box.insertAdjacentHTML('beforeend', html);
-  }
-}
+function statExplain(host, title, value, body) { /* disabled — no expand */ }
 
 function htmlAttrJsArg(s) {
   return JSON.stringify(String(s == null ? '' : s))
@@ -6974,9 +6935,7 @@ function htmlAttrJsArg(s) {
     .replace(/>/g,'&gt;');
 }
 
-function statExplainAttr(title, value, body) {
-  return ' onclick="event.stopPropagation();statExplain(this,' + htmlAttrJsArg(title) + ',' + htmlAttrJsArg(value) + ',' + htmlAttrJsArg(body) + ')"';
-}
+function statExplainAttr(title, value, body) { return ''; }
 
 function submitIssueForm() {
   if (!issueStudentData) return;
@@ -7488,9 +7447,9 @@ function filterIssuesByStat(status) {
   _applyIssueFilters();
   var cards = document.querySelectorAll('.issue-stat-card');
   cards.forEach(function(c){
-    var active = _issueStatFilter && c.querySelector('.isc-lbl') && c.getAttribute('onclick') &&
-                 c.getAttribute('onclick').indexOf(_issueStatFilter) !== -1;
-    c.classList.toggle('active', !!active);
+    var oc = c.getAttribute('onclick') || '';
+    var active = !!_issueStatFilter && oc.indexOf(_issueStatFilter) !== -1;
+    c.classList.toggle('active', active);
     c.classList.toggle('dimmed', !!_issueStatFilter && !active);
   });
 }
@@ -7556,7 +7515,7 @@ function renderIssues(data) {
     ];
     statCardsEl.innerHTML = statDefs.map(function(d){
       var n = counts[d[0]] || 0;
-      return '<div class="issue-stat-card '+d[2]+'"'+statExplainAttr(d[1], n, 'จำนวนรายการแจ้งปัญหาในตารางนี้ที่มีสถานะเป็น "' + d[0] + '"')+'>' +
+      return '<div class="issue-stat-card '+d[2]+'" onclick="filterIssuesByStat(\''+d[0]+'\')" style="cursor:pointer">' +
         '<div class="isc-val">'+n+'</div>' +
         '<div class="isc-lbl">'+d[1]+'</div>' +
       '</div>';
