@@ -7430,7 +7430,7 @@ function loadIssues() {
       _issueStatFilter = '';
       var tf = document.getElementById('issue-filter-type');
       if (tf) tf.value = 'all';
-      renderIssues(allIssues);
+      _applyIssueFilters();
     })
     .withFailureHandler(function(e){ doneRefresh(); nprogDone(); hideLoading(); showError(e); })
     .getIssues(filters);
