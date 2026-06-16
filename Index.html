@@ -515,6 +515,9 @@ body.dark-mode .ai-sugg-title{color:#34d399}
 .issue-badge-defect{background:#FEE2E2;color:#991B1B;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
 .issue-badge-claim{background:#EDE9FE;color:#5B21B6;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
 .issue-badge-cancel{background:#F1F5F9;color:#64748B;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.issue-mode-tabs{display:flex;gap:6px;margin-bottom:12px}
+.issue-mode-tab{flex:1;padding:8px 10px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:'Sarabun',sans-serif;transition:all .12s}
+.issue-mode-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 
 /* ════════════════════════════════════════════════════
    ▌ UI v3 — Modern Enhancements
@@ -2242,14 +2245,30 @@ body.dark-mode .sta-hero-divider{background:rgba(255,255,255,.1)}
       <div id="issue-step1" class="issue-step">
         <div class="form-group">
           <label class="form-label">ค้นหานักเรียน *</label>
-          <div class="autocomplete">
-            <input id="issue-search-input" class="form-ctrl" autocomplete="off"
-                   placeholder="พิมพ์ชื่อ, นามสกุล หรือ Serial..."
-                   oninput="onIssueAcInput('report')" onkeydown="onIssueAcKey(event,'report')"
-                   onblur="setTimeout(function(){hideIssueAc('report')},160)">
-            <div class="ac-list" id="issue-search-ac"></div>
+          <div class="issue-mode-tabs">
+            <button class="issue-mode-tab active" id="report-tab-search" onclick="setIssueLookupMode('report','search')">🔍 พิมพ์ค้นหา</button>
+            <button class="issue-mode-tab" id="report-tab-browse" onclick="setIssueLookupMode('report','browse')">📚 เลือกชั้น/ห้อง</button>
           </div>
-          <div style="font-size:12px;color:var(--muted);margin-top:4px">พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อค้นหา</div>
+          <div id="report-panel-search">
+            <div class="autocomplete">
+              <input id="issue-search-input" class="form-ctrl" autocomplete="off"
+                     placeholder="พิมพ์ชื่อ, นามสกุล หรือ Serial..."
+                     oninput="onIssueAcInput('report')" onkeydown="onIssueAcKey(event,'report')"
+                     onblur="setTimeout(function(){hideIssueAc('report')},160)">
+              <div class="ac-list" id="issue-search-ac"></div>
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อค้นหา</div>
+          </div>
+          <div id="report-panel-browse" style="display:none">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+              <div><label class="form-label" style="font-size:12px">ชั้น</label>
+                <select id="report-browse-grade" class="form-ctrl" onchange="onBrowseGradeChange('report')"><option value="">-- เลือกชั้น --</option></select></div>
+              <div><label class="form-label" style="font-size:12px">ห้อง</label>
+                <select id="report-browse-room" class="form-ctrl" disabled onchange="onBrowseRoomChange('report')"><option value="">-- เลือกห้อง --</option></select></div>
+            </div>
+            <label class="form-label" style="font-size:12px">ชื่อนักเรียน</label>
+            <select id="report-browse-student" class="form-ctrl" disabled onchange="onBrowseStudentChange('report')"><option value="">-- เลือกชื่อ --</option></select>
+          </div>
         </div>
         <div id="issue-lookup-msg" style="font-size:13px;color:var(--danger);margin-top:6px;display:none"></div>
       </div>
@@ -2333,14 +2352,30 @@ body.dark-mode .sta-hero-divider{background:rgba(255,255,255,.1)}
       <div id="issue-step-s1" class="issue-step">
         <div class="form-group">
           <label class="form-label">ค้นหานักเรียน *</label>
-          <div class="autocomplete">
-            <input id="status-search-input" class="form-ctrl" autocomplete="off"
-                   placeholder="พิมพ์ชื่อ, นามสกุล หรือ Serial..."
-                   oninput="onIssueAcInput('status')" onkeydown="onIssueAcKey(event,'status')"
-                   onblur="setTimeout(function(){hideIssueAc('status')},160)">
-            <div class="ac-list" id="status-search-ac"></div>
+          <div class="issue-mode-tabs">
+            <button class="issue-mode-tab active" id="status-tab-search" onclick="setIssueLookupMode('status','search')">🔍 พิมพ์ค้นหา</button>
+            <button class="issue-mode-tab" id="status-tab-browse" onclick="setIssueLookupMode('status','browse')">📚 เลือกชั้น/ห้อง</button>
           </div>
-          <div style="font-size:12px;color:var(--muted);margin-top:4px">พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อค้นหา</div>
+          <div id="status-panel-search">
+            <div class="autocomplete">
+              <input id="status-search-input" class="form-ctrl" autocomplete="off"
+                     placeholder="พิมพ์ชื่อ, นามสกุล หรือ Serial..."
+                     oninput="onIssueAcInput('status')" onkeydown="onIssueAcKey(event,'status')"
+                     onblur="setTimeout(function(){hideIssueAc('status')},160)">
+              <div class="ac-list" id="status-search-ac"></div>
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อค้นหา</div>
+          </div>
+          <div id="status-panel-browse" style="display:none">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+              <div><label class="form-label" style="font-size:12px">ชั้น</label>
+                <select id="status-browse-grade" class="form-ctrl" onchange="onBrowseGradeChange('status')"><option value="">-- เลือกชั้น --</option></select></div>
+              <div><label class="form-label" style="font-size:12px">ห้อง</label>
+                <select id="status-browse-room" class="form-ctrl" disabled onchange="onBrowseRoomChange('status')"><option value="">-- เลือกห้อง --</option></select></div>
+            </div>
+            <label class="form-label" style="font-size:12px">ชื่อนักเรียน</label>
+            <select id="status-browse-student" class="form-ctrl" disabled onchange="onBrowseStudentChange('status')"><option value="">-- เลือกชื่อ --</option></select>
+          </div>
         </div>
         <div id="status-lookup-msg" style="font-size:13px;color:var(--danger);margin-top:6px;display:none"></div>
       </div>
@@ -2355,14 +2390,30 @@ body.dark-mode .sta-hero-divider{background:rgba(255,255,255,.1)}
       <div id="issue-step-a1" class="issue-step">
         <div class="form-group">
           <label class="form-label">ค้นหานักเรียน *</label>
-          <div class="autocomplete">
-            <input id="appreq-search-input" class="form-ctrl" autocomplete="off"
-                   placeholder="พิมพ์ชื่อ, นามสกุล หรือ Serial..."
-                   oninput="onIssueAcInput('appreq')" onkeydown="onIssueAcKey(event,'appreq')"
-                   onblur="setTimeout(function(){hideIssueAc('appreq')},160)">
-            <div class="ac-list" id="appreq-search-ac"></div>
+          <div class="issue-mode-tabs">
+            <button class="issue-mode-tab active" id="appreq-tab-search" onclick="setIssueLookupMode('appreq','search')">🔍 พิมพ์ค้นหา</button>
+            <button class="issue-mode-tab" id="appreq-tab-browse" onclick="setIssueLookupMode('appreq','browse')">📚 เลือกชั้น/ห้อง</button>
           </div>
-          <div style="font-size:12px;color:var(--muted);margin-top:4px">พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อค้นหา</div>
+          <div id="appreq-panel-search">
+            <div class="autocomplete">
+              <input id="appreq-search-input" class="form-ctrl" autocomplete="off"
+                     placeholder="พิมพ์ชื่อ, นามสกุล หรือ Serial..."
+                     oninput="onIssueAcInput('appreq')" onkeydown="onIssueAcKey(event,'appreq')"
+                     onblur="setTimeout(function(){hideIssueAc('appreq')},160)">
+              <div class="ac-list" id="appreq-search-ac"></div>
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อค้นหา</div>
+          </div>
+          <div id="appreq-panel-browse" style="display:none">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+              <div><label class="form-label" style="font-size:12px">ชั้น</label>
+                <select id="appreq-browse-grade" class="form-ctrl" onchange="onBrowseGradeChange('appreq')"><option value="">-- เลือกชั้น --</option></select></div>
+              <div><label class="form-label" style="font-size:12px">ห้อง</label>
+                <select id="appreq-browse-room" class="form-ctrl" disabled onchange="onBrowseRoomChange('appreq')"><option value="">-- เลือกห้อง --</option></select></div>
+            </div>
+            <label class="form-label" style="font-size:12px">ชื่อนักเรียน</label>
+            <select id="appreq-browse-student" class="form-ctrl" disabled onchange="onBrowseStudentChange('appreq')"><option value="">-- เลือกชื่อ --</option></select>
+          </div>
         </div>
         <div id="appreq-lookup-msg" style="font-size:13px;color:var(--danger);margin-top:6px;display:none"></div>
       </div>
@@ -6645,6 +6696,15 @@ function openIssueModal() {
   document.getElementById('appreq-app-name').value = '';
   document.getElementById('appreq-reason').value = '';
   hideIssueAc('report'); hideIssueAc('status'); hideIssueAc('appreq');
+  ['report','status','appreq'].forEach(function(f) {
+    var ts = document.getElementById(f+'-tab-search'); if (ts) { ts.classList.add('active'); }
+    var tb = document.getElementById(f+'-tab-browse'); if (tb) { tb.classList.remove('active'); }
+    var ps = document.getElementById(f+'-panel-search'); if (ps) ps.style.display = '';
+    var pb = document.getElementById(f+'-panel-browse'); if (pb) pb.style.display = 'none';
+    var gr = document.getElementById(f+'-browse-grade'); if (gr) gr.innerHTML = '<option value="">-- เลือกชั้น --</option>';
+    var rm = document.getElementById(f+'-browse-room'); if (rm) { rm.innerHTML = '<option value="">-- เลือกห้อง --</option>'; rm.disabled = true; }
+    var st = document.getElementById(f+'-browse-student'); if (st) { st.innerHTML = '<option value="">-- เลือกชื่อ --</option>'; st.disabled = true; }
+  });
   setIssueState('menu');
   openModal('modal-issue');
 }
@@ -6746,6 +6806,88 @@ function hideIssueAc(flow) {
   _issueAc[flow].idx = -1;
   var b = document.getElementById(_issueAcIds[flow]);
   if (b) b.classList.remove('show');
+}
+
+// ── Browse mode (grade → room → student) ──────────────────────────────
+var _gradeRoomsCache = null;
+var _browseStudentsCache = {};
+
+function setIssueLookupMode(flow, mode) {
+  var isBrowse = mode === 'browse';
+  document.getElementById(flow + '-tab-search').classList.toggle('active', !isBrowse);
+  document.getElementById(flow + '-tab-browse').classList.toggle('active', isBrowse);
+  document.getElementById(flow + '-panel-search').style.display = isBrowse ? 'none' : '';
+  document.getElementById(flow + '-panel-browse').style.display = isBrowse ? '' : 'none';
+  if (isBrowse && !_gradeRoomsCache) _loadBrowseGrades(flow);
+  else if (isBrowse && _gradeRoomsCache) _populateBrowseGrades(flow, _gradeRoomsCache);
+}
+
+function _loadBrowseGrades(flow) {
+  var gradeEl = document.getElementById(flow + '-browse-grade');
+  gradeEl.innerHTML = '<option value="">กำลังโหลด...</option>';
+  gsr
+    .withSuccessHandler(function(data) {
+      _gradeRoomsCache = data || [];
+      _populateBrowseGrades(flow, _gradeRoomsCache);
+    })
+    .withFailureHandler(function() {
+      gradeEl.innerHTML = '<option value="">โหลดไม่สำเร็จ</option>';
+    })
+    .getGradesRooms();
+}
+
+function _populateBrowseGrades(flow, data) {
+  var gradeEl = document.getElementById(flow + '-browse-grade');
+  var grades = [];
+  data.forEach(function(d) { if (grades.indexOf(d.grade) === -1) grades.push(d.grade); });
+  gradeEl.innerHTML = '<option value="">-- เลือกชั้น --</option>' +
+    grades.map(function(g) { return '<option value="' + escHtml(g) + '">' + escHtml(g) + '</option>'; }).join('');
+}
+
+function onBrowseGradeChange(flow) {
+  var grade = document.getElementById(flow + '-browse-grade').value;
+  var roomEl = document.getElementById(flow + '-browse-room');
+  var stuEl = document.getElementById(flow + '-browse-student');
+  stuEl.innerHTML = '<option value="">-- เลือกชื่อ --</option>'; stuEl.disabled = true;
+  if (!grade || !_gradeRoomsCache) { roomEl.innerHTML = '<option value="">-- เลือกห้อง --</option>'; roomEl.disabled = true; return; }
+  var rooms = _gradeRoomsCache.filter(function(d) { return d.grade === grade; });
+  roomEl.innerHTML = '<option value="">-- เลือกห้อง --</option>' +
+    rooms.map(function(d) { return '<option value="' + escHtml(d.room) + '">' + escHtml(d.room) + '</option>'; }).join('');
+  roomEl.disabled = false;
+}
+
+function onBrowseRoomChange(flow) {
+  var grade = document.getElementById(flow + '-browse-grade').value;
+  var room = document.getElementById(flow + '-browse-room').value;
+  var stuEl = document.getElementById(flow + '-browse-student');
+  stuEl.innerHTML = '<option value="">กำลังโหลด...</option>'; stuEl.disabled = true;
+  if (!grade || !room) return;
+  var cacheKey = grade + '|' + room;
+  if (_browseStudentsCache[cacheKey]) { _populateBrowseStudents(flow, _browseStudentsCache[cacheKey]); return; }
+  gsr
+    .withSuccessHandler(function(students) {
+      _browseStudentsCache[cacheKey] = students || [];
+      _populateBrowseStudents(flow, _browseStudentsCache[cacheKey]);
+    })
+    .withFailureHandler(function() { stuEl.innerHTML = '<option value="">โหลดไม่สำเร็จ</option>'; })
+    .getStudentsForRegistration(grade, room);
+}
+
+function _populateBrowseStudents(flow, students) {
+  var stuEl = document.getElementById(flow + '-browse-student');
+  stuEl.innerHTML = '<option value="">-- เลือกชื่อ --</option>' +
+    students.map(function(s) {
+      return '<option value="' + escHtml(s.code) + '">' + escHtml((s.prefix||'') + s.firstName + ' ' + s.lastName) + '</option>';
+    }).join('');
+  stuEl.disabled = false;
+}
+
+function onBrowseStudentChange(flow) {
+  var code = document.getElementById(flow + '-browse-student').value;
+  if (!code) return;
+  if (flow === 'report') lookupStudentForIssue(code);
+  else if (flow === 'status') lookupStatusIssues(code);
+  else if (flow === 'appreq') lookupStudentForAppReq(code);
 }
 
 function issueStartFlow(flow) {
