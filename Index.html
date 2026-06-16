@@ -522,6 +522,7 @@ body.dark-mode .ai-sugg-title{color:#34d399}
 .issue-badge-fixed{background:#D1FAE5;color:#065F46;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
 .issue-badge-defect{background:#FEE2E2;color:#991B1B;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
 .issue-badge-claim{background:#EDE9FE;color:#5B21B6;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.issue-badge-cancel{background:#F1F5F9;color:#64748B;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
 
 /* ════════════════════════════════════════════════════
    ▌ UI v3 — Modern Enhancements
@@ -2909,6 +2910,7 @@ body.dark-mode .sta-hero-divider{background:rgba(255,255,255,.1)}
           <div class="chart-wrap"><canvas id="chart-grade"></canvas></div>
         </div>
       </div>
+      <div id="dash-issue-widget" style="display:none;margin-bottom:16px"></div>
       <div id="dash-table"></div>
     </div>
 
@@ -3058,6 +3060,7 @@ body.dark-mode .sta-hero-divider{background:rgba(255,255,255,.1)}
       <div id="issues-stat-cards" class="issue-stat-grid" style="display:none"></div>
       <div id="issues-summary" style="margin-bottom:14px"></div>
       <div class="filter-bar">
+        <input id="issue-search-text" type="text" placeholder="🔍 ชื่อนักเรียน, Serial..." oninput="debounceIssueTextSearch()" style="min-width:180px">
         <select id="issue-filter-status" onchange="loadIssues()" class="form-ctrl" style="width:auto">
           <option value="all">ทุกสถานะ</option>
           <option value="อยู่ระหว่างการส่งเรื่อง">รอรับเรื่อง</option>
@@ -3065,6 +3068,7 @@ body.dark-mode .sta-hero-divider{background:rgba(255,255,255,.1)}
           <option value="แก้ไขแล้ว">แก้ไขแล้ว</option>
           <option value="ใช้งานไม่ได้">ใช้งานไม่ได้</option>
           <option value="อยู่ระหว่างการเคลม">อยู่ระหว่างการเคลม</option>
+          <option value="ยกเลิกโดยนักเรียน">ยกเลิกโดยนักเรียน</option>
         </select>
         <select id="issue-filter-type" onchange="applyIssueTypeFilter()" class="form-ctrl" style="width:auto">
           <option value="all">ทุกประเภท</option>
@@ -5056,6 +5060,30 @@ function loadDashboard() {
     .withFailureHandler(function(e){ nprogDone(); hideLoading(); showError(e); })
     .getDashboardStats();
   loadDashboardCharts();
+  loadDashboardIssueWidget();
+}
+
+function loadDashboardIssueWidget() {
+  var el = document.getElementById('dash-issue-widget');
+  if (!el) return;
+  gsr
+    .withSuccessHandler(function(s) {
+      if (!s || !s.total) { el.style.display = 'none'; return; }
+      var urgentCls = s.pending > 0 ? 'var(--danger)' : 'var(--primary)';
+      el.style.display = '';
+      el.innerHTML =
+        '<div style="background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:14px 18px;border:1px solid rgba(0,0,0,.04);border-left:4px solid ' + urgentCls + ';cursor:pointer" onclick="showPage(\'issues\')">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">' +
+            '<div>' +
+              '<div style="font-weight:700;font-size:14px;margin-bottom:4px">🔧 ปัญหาไอแพดที่ยังค้างอยู่</div>' +
+              '<div style="font-size:12px;color:var(--muted)">รอรับเรื่อง <b style="color:var(--warning)">' + s.pending + '</b> · กำลังตรวจสอบ <b style="color:var(--primary)">' + s.inspect + '</b> · คลิกเพื่อดูทั้งหมด</div>' +
+            '</div>' +
+            '<div style="font-size:36px;font-weight:900;font-family:Inter,sans-serif;color:' + urgentCls + ';line-height:1">' + s.total + '</div>' +
+          '</div>' +
+        '</div>';
+    })
+    .withFailureHandler(function(){})
+    .getIssueSummary();
 }
 
 function statCard(cls, icon, label, val, explanation) {
@@ -6757,19 +6785,19 @@ function lookupStatusIssues(code) {
             listEl.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px 0;font-size:13px">ยังไม่มีเรื่องที่แจ้ง</div>';
           } else {
             listEl.innerHTML = res.issues.map(function(item) {
-              var statusColors = {
-                'รอดำเนินการ':'badge-pending','รับเรื่องแล้ว':'badge-progress',
-                'อยู่ระหว่างการตรวจสอบ':'badge-progress','แก้ไขแล้ว':'badge-done',
-                'อยู่ระหว่างการเคลม':'badge-progress','ใช้งานไม่ได้':'badge-other'
-              };
-              var badgeCls = statusColors[item.status] || 'badge-other';
               var deadline = item.roomDeadline ? '<br><b>กำหนดส่ง:</b> ' + item.roomDeadline : '';
               var notes = item.adminNotes ? '<br><b>หมายเหตุ:</b> ' + escHtml(item.adminNotes) : '';
+              var canCancel = item.status === 'อยู่ระหว่างการส่งเรื่อง';
+              var cancelBtn = canCancel
+                ? '<button style="margin-top:10px;padding:6px 14px;font-size:12px;font-weight:600;background:#FEE2E2;color:#991B1B;border:none;border-radius:8px;cursor:pointer;font-family:inherit" ' +
+                  'onclick="cancelMyIssue(\'' + escHtml(String(item.id)) + '\',\'' + escHtml(code) + '\')">❌ ยกเลิก / แก้ไขเองแล้ว</button>'
+                : '';
               return '<div class="issue-status-card">' +
-                '<span class="issue-status-badge ' + badgeCls + '">' + (item.status || '-') + '</span>' +
-                '<div style="font-size:13px;font-weight:700;margin-bottom:4px">' + escHtml(item.issueType) + '</div>' +
+                issueBadge(item.status) +
+                '<div style="font-size:13px;font-weight:700;margin:6px 0 4px">' + escHtml(item.issueType) + '</div>' +
                 '<div style="font-size:12px;color:var(--muted)">' + escHtml(item.description || '') + '</div>' +
                 '<div style="font-size:11px;color:var(--muted);margin-top:6px"><b>แจ้งเมื่อ:</b> ' + item.reportedAt + deadline + notes + '</div>' +
+                cancelBtn +
                 '</div>';
             }).join('');
           }
@@ -6780,6 +6808,17 @@ function lookupStatusIssues(code) {
     })
     .withFailureHandler(function(e) { showError(e); })
     .lookupStudentByCode(code);
+}
+
+function cancelMyIssue(issueId, studentCode) {
+  if (!confirm('ยืนยันยกเลิกการแจ้งปัญหานี้?')) return;
+  gsr
+    .withSuccessHandler(function(r) {
+      showToast(r.message, r.success ? 'success' : 'error');
+      if (r.success) lookupStatusIssues(studentCode);
+    })
+    .withFailureHandler(function(e) { showError(e); })
+    .cancelStudentIssue(issueId, studentCode);
 }
 
 function lookupStudentForAppReq(code) {
@@ -7456,11 +7495,25 @@ function filterIssuesByStat(status) {
   });
 }
 
+var _issueTextTimer = null;
+function debounceIssueTextSearch() {
+  clearTimeout(_issueTextTimer);
+  _issueTextTimer = setTimeout(_applyIssueFilters, 250);
+}
+
 function _applyIssueFilters() {
   var typeFilter = document.getElementById('issue-filter-type').value;
+  var textEl = document.getElementById('issue-search-text');
+  var q = textEl ? textEl.value.trim().toLowerCase() : '';
   var result = allIssues;
   if (_issueStatFilter) result = result.filter(function(i){ return i.status === _issueStatFilter; });
   if (typeFilter !== 'all') result = result.filter(function(i){ return i.issueType === typeFilter; });
+  if (q) result = result.filter(function(i){
+    return (i.studentName || '').toLowerCase().includes(q) ||
+           (i.serial || '').toLowerCase().includes(q) ||
+           (i.studentCode || '').toLowerCase().includes(q) ||
+           (i.issueType || '').toLowerCase().includes(q);
+  });
   renderIssues(result);
 }
 
@@ -7470,7 +7523,8 @@ function issueBadge(s) {
     'อยู่ระหว่างการตรวจสอบ':'issue-badge-inspect',
     'แก้ไขแล้ว':'issue-badge-fixed',
     'ใช้งานไม่ได้':'issue-badge-defect',
-    'อยู่ระหว่างการเคลม':'issue-badge-claim'
+    'อยู่ระหว่างการเคลม':'issue-badge-claim',
+    'ยกเลิกโดยนักเรียน':'issue-badge-cancel'
   };
   return '<span class="'+(map[s]||'issue-badge-pending')+'">'+s+'</span>';
 }

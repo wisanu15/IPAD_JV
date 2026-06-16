@@ -1824,12 +1824,47 @@ function getMyIssues(studentCode) {
     if (!r[0]) continue;
     if (String(r[1]).trim() !== String(studentCode).trim()) continue;
     issues.push({
-      id: r[0], issueType: r[4], description: r[5],
+      row: i + 1, id: r[0], issueType: r[4], description: r[5],
       status: r[8], reportedAt: r[9] ? fmtTs(r[9]) : '',
       adminNotes: r[10] || '', roomDeadline: r[12] || ''
     });
   }
   return { success: true, issues: issues.reverse() };
+}
+
+function cancelStudentIssue(issueId, studentCode) {
+  if (!issueId || !studentCode) return err('ข้อมูลไม่ครบ');
+  const sheet = sh(CONFIG.SHEETS.ISSUES);
+  if (!sheet) return err('ไม่พบข้อมูล');
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) !== String(issueId)) continue;
+    if (String(data[i][1]).trim() !== String(studentCode).trim()) return err('ไม่มีสิทธิ์ยกเลิก');
+    const status = String(data[i][8] || '');
+    if (status !== 'อยู่ระหว่างการส่งเรื่อง') return err('ไม่สามารถยกเลิกได้ เนื่องจากเรื่องอยู่ระหว่างดำเนินการแล้ว');
+    sheet.getRange(i + 1, 9).setValue('ยกเลิกโดยนักเรียน');
+    sheet.getRange(i + 1, 12).setValue(new Date());
+    return ok('ยกเลิกเรื่องแล้ว');
+  }
+  return err('ไม่พบรายการนี้');
+}
+
+function getIssueSummary() {
+  const u = getCurrentUser(arguments[arguments.length - 1]);
+  if (u.role === CONFIG.ROLES.USER) return { pending: 0, inspect: 0, total: 0 };
+  const sheet = sh(CONFIG.SHEETS.ISSUES);
+  if (!sheet || sheet.getLastRow() < 2) return { pending: 0, inspect: 0, total: 0 };
+  const data = sheet.getDataRange().getValues();
+  let pending = 0, inspect = 0, total = 0;
+  for (let i = 1; i < data.length; i++) {
+    if (!data[i][0]) continue;
+    const status = String(data[i][8] || '');
+    if (status === 'แก้ไขแล้ว' || status === 'ยกเลิกโดยนักเรียน') continue;
+    total++;
+    if (status === 'อยู่ระหว่างการส่งเรื่อง') pending++;
+    else if (status === 'อยู่ระหว่างการตรวจสอบ') inspect++;
+  }
+  return { pending, inspect, total };
 }
 
 function submitAppRequest(data) {
