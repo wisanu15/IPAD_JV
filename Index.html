@@ -1858,8 +1858,9 @@ body.dark-mode .stu-code{color:rgba(255,255,255,.38)!important}
   width:42px;height:42px;border-radius:50%;
   color:#fff;font-size:16px;font-weight:800;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  font-family:'Inter','Sarabun',sans-serif
+  font-family:'Inter','Sarabun',sans-serif;overflow:hidden
 }
+.tch-avatar img{width:100%;height:100%;object-fit:cover;object-position:top}
 .tch-info{flex:1;min-width:0}
 .tch-name{
   font-size:13.5px;font-weight:700;line-height:1.3;
@@ -1885,6 +1886,21 @@ body.dark-mode .tch-name{color:#F1F5F9!important}
 body.dark-mode .tch-code{color:rgba(255,255,255,.38)!important}
 body.dark-mode .tch-summary-card{background:rgba(255,255,255,.058)!important;border-color:rgba(255,255,255,.09)!important;box-shadow:0 2px 10px rgba(0,0,0,.35)!important}
 body.dark-mode .tch-serial-line,body.dark-mode .tch-asset-line{color:rgba(255,255,255,.5)!important}
+/* Photo assignment */
+.pa-teacher-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:10px;cursor:pointer;border:1.5px solid transparent;transition:background .12s,border-color .12s}
+.pa-teacher-item:hover{background:var(--surface)}
+.pa-teacher-item.selected{background:rgba(99,102,241,.1);border-color:var(--primary)}
+.pa-teacher-avatar{width:34px;height:34px;border-radius:50%;flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff}
+.pa-teacher-avatar img{width:100%;height:100%;object-fit:cover;object-position:top}
+.pa-teacher-name{font-size:12.5px;font-weight:600;line-height:1.3}
+.pa-teacher-nick{font-size:11px;color:var(--muted)}
+.pa-photo-cell{border-radius:10px;overflow:hidden;border:2.5px solid transparent;cursor:pointer;position:relative;transition:border-color .12s,transform .12s;background:var(--surface)}
+.pa-photo-cell:hover{border-color:var(--primary);transform:translateY(-2px)}
+.pa-photo-cell.assigned{border-color:var(--success)}
+.pa-photo-cell.selected-photo{border-color:var(--primary);box-shadow:0 0 0 2px rgba(99,102,241,.3)}
+.pa-photo-cell img{width:100%;aspect-ratio:3/4;object-fit:cover;object-position:top;display:block}
+.pa-photo-label{font-size:9.5px;text-align:center;padding:4px 3px 5px;color:var(--muted);line-height:1.2;word-break:break-all}
+.pa-photo-assigned-tag{position:absolute;top:4px;right:4px;background:var(--success);color:#fff;font-size:9px;border-radius:6px;padding:1px 5px;font-weight:700}
 
 /* ── Responsive card grids ─────────────────────────────────────────── */
 @media(max-width:480px){
@@ -2211,9 +2227,9 @@ body.dark-mode .sta-hero-divider{background:rgba(255,255,255,.1)}
           <button class="im-card im-amber" onclick="issueStartFlow('report')">
             <div class="im-card-ico">⚠️</div>
             <div class="im-card-body">
-              <div class="im-tag im-tag-amber">ปัญหาไอแพด</div>
-              <div class="im-card-title">แจ้งปัญหาไอแพด</div>
-              <div class="im-card-sub">หน้าจอแตก · แบต · ชาร์จไม่ได้ · ซอฟต์แวร์มีปัญหา<br>ระบบจะแจ้ง Admin ให้ทันที</div>
+              <div class="im-tag im-tag-amber">ปัญหาอุปกรณ์</div>
+              <div class="im-card-title">แจ้งปัญหาไอแพด/อุปกรณ์</div>
+              <div class="im-card-sub">ไอแพด · ปากกา · เคส · สายชาร์จ<br>ระบบจะแจ้ง Admin ให้ทันที</div>
             </div>
             <div class="im-card-arr">›</div>
           </button>
@@ -2277,8 +2293,19 @@ body.dark-mode .sta-hero-divider{background:rgba(255,255,255,.1)}
       <div id="issue-step2" class="issue-step">
         <div class="stu-info-box" id="issue-stu-info"></div>
         <div class="form-group">
+          <label class="form-label">อุปกรณ์ที่มีปัญหา *</label>
+          <select id="issue-device" class="form-ctrl">
+            <option value="">-- เลือกอุปกรณ์ --</option>
+            <option value="ไอแพด">ไอแพด</option>
+            <option value="ปากกา">ปากกา</option>
+            <option value="เคส">เคส</option>
+            <option value="สายชาร์จ">สายชาร์จ</option>
+          </select>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px">เลือกให้ตรงกับของที่เสียหรือมีปัญหา เพื่อให้ Admin เตรียมตรวจได้ถูกจุด</div>
+        </div>
+        <div class="form-group">
           <label class="form-label" data-i18n="issueLblDesc">รายละเอียดปัญหา *</label>
-          <textarea id="issue-description" class="form-ctrl" rows="4" placeholder="อธิบายอาการปัญหาโดยละเอียด เช่น หน้าจอแตก ชาร์จไม่ติด แบตหมดเร็ว..."></textarea>
+          <textarea id="issue-description" class="form-ctrl" rows="4" placeholder="อธิบายอาการปัญหาโดยละเอียด เช่น ไอแพดหน้าจอแตก ปากกาเขียนไม่ติด เคสแตก สายชาร์จชำรุด..."></textarea>
           <div style="font-size:12px;color:var(--muted);margin-top:4px">AI จะวิเคราะห์และจัดประเภทปัญหาให้อัตโนมัติ</div>
         </div>
         <div class="form-group">
@@ -2315,6 +2342,7 @@ body.dark-mode .sta-hero-divider{background:rgba(255,255,255,.1)}
               <span class="ai-badge from-ai" id="ai-source-badge">🤖 AI วิเคราะห์</span>
               <div class="ai-result-title">ผลการวิเคราะห์ปัญหา</div>
             </div>
+            <div id="ai-device-summary" style="font-size:13px;color:var(--muted);margin-top:8px"></div>
             <div class="form-group" style="margin-top:14px">
               <label class="form-label">ประเภทปัญหาที่ตรวจพบ</label>
               <select id="ai-type-confirm" class="form-ctrl">
@@ -2830,44 +2858,6 @@ body.dark-mode .sta-hero-divider{background:rgba(255,255,255,.1)}
             <li>กด <b>"ส่งเรื่อง"</b> — Admin ได้รับแจ้งทาง Email ทันที</li>
           </ul>
           <div class="note">⚠️ หลังส่งเรื่อง สถานะจะเปลี่ยนเป็น "อยู่ระหว่างดำเนินการ" รอ Admin ติดต่อกลับ</div>
-        </div>
-      </div>
-      <div class="manual-section">
-        <div class="manual-hd" onclick="toggleManual(this)">
-          🔐 ผู้ดูแลระบบ (Admin)
-          <span class="chevron">▼</span>
-        </div>
-        <div class="manual-body">
-          <ul>
-            <li>กดลิงก์ <b>"ผู้ดูแลระบบ"</b> ด้านล่างหน้าแรก แล้วใส่รหัสผ่าน Admin</li>
-            <li><b>แดชบอร์ด</b> — สรุปสถิติการยืมทั้งโรงเรียนแบบ real-time</li>
-            <li><b>รายการไอแพด</b> — ค้นหา กรอง แก้ไข เปลี่ยนสถานะ</li>
-            <li><b>ภาพรวมห้องเรียน</b> — ดูสถานะทุกห้องในมุมมองกว้าง</li>
-            <li><b>รายชื่อนักเรียน/ครู</b> — เพิ่ม แก้ไข นำเข้า CSV</li>
-            <li><b>ปัญหาไอแพด</b> — รับเรื่อง ติดตาม อัพเดทสถานะ</li>
-            <li><b>จัดการผู้ใช้</b> — เพิ่ม/ลบบัญชี Admin (Super Admin เท่านั้น)</li>
-          </ul>
-          <div class="tip">✅ Super Admin: ลบข้อมูลและจัดการผู้ใช้ได้ &nbsp;|&nbsp; Admin: จัดการข้อมูลได้แต่ลบไม่ได้</div>
-        </div>
-      </div>
-      <div class="manual-section">
-        <div class="manual-hd" onclick="toggleManual(this)">
-          📂 นำเข้าข้อมูล CSV (สำหรับ Admin)
-          <span class="chevron">▼</span>
-        </div>
-        <div class="manual-body">
-          <b>นำเข้ารายชื่อนักเรียน:</b>
-          <ul>
-            <li>หน้า "รายชื่อนักเรียน" → กด <b>"นำเข้า CSV"</b></li>
-            <li>ไฟล์ต้องมีคอลัมน์: <b>ลำดับ | รหัส | ชื่อ-นามสกุล</b></li>
-            <li>ระบบอ่านชั้น/ห้องจาก header อัตโนมัติ — ลากหลายไฟล์พร้อมกันได้</li>
-          </ul>
-          <b>นำเข้าข้อมูลไอแพด:</b>
-          <ul>
-            <li>หน้า "รายการไอแพด" → กด <b>"นำเข้าจากแบบยืม"</b></li>
-            <li>คอลัมน์: <b>ลำดับ | Serial | รหัสครุภัณฑ์ | รหัสนักเรียน | ชื่อ-นามสกุล</b></li>
-          </ul>
-          <div class="note">⚠️ ไฟล์ต้องเป็น UTF-8 — ใน Excel ให้ Save As → CSV UTF-8 ก่อน import</div>
         </div>
       </div>
     </div>
@@ -3600,10 +3590,57 @@ body.dark-mode .sta-hero-divider{background:rgba(255,255,255,.1)}
           <input id="t-homeroom" class="form-ctrl" placeholder="ห้อง">
         </div>
       </div>
+      <div class="form-row" style="align-items:center">
+        <div class="form-group" style="flex:1">
+          <label class="form-label">รูปโปรไฟล์</label>
+          <button type="button" class="btn btn-outline" style="width:100%;font-size:13px" onclick="openTeacherPhotoUpload()">📷 อัปโหลดรูป</button>
+        </div>
+        <div style="flex:0 0 56px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:2px">
+          <div id="t-photo-preview" onclick="openTeacherPhotoUpload()" style="width:48px;height:48px;border-radius:50%;overflow:hidden;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer">📷</div>
+        </div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modal-teacher')">ยกเลิก</button>
       <button class="btn btn-primary" id="btn-save-teacher" onclick="saveTeacher()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Photo Assignment -->
+<div id="modal-photo-assign" class="modal-overlay">
+  <div class="modal" style="max-width:900px;width:96vw;height:90vh;display:flex;flex-direction:column">
+    <div class="modal-header" style="flex-shrink:0">
+      <h3>🖼️ จัดการรูปครู</h3>
+      <button class="close-btn" onclick="closeModal('modal-photo-assign')">×</button>
+    </div>
+    <div style="flex:1;display:flex;gap:0;overflow:hidden;min-height:0">
+      <!-- Left: teacher list -->
+      <div style="width:260px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;padding:10px 8px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.6px;margin-bottom:8px;text-transform:uppercase">รายชื่อครู</div>
+        <input id="pa-teacher-search" class="form-ctrl" style="margin-bottom:8px;font-size:13px" placeholder="🔍 ค้นหาครู" oninput="paFilterTeachers(this.value)">
+        <div id="pa-teacher-list" style="display:flex;flex-direction:column;gap:4px"></div>
+      </div>
+      <!-- Right: photo grid -->
+      <div style="flex:1;overflow-y:auto;padding:12px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.6px;text-transform:uppercase">รูปภาพทั้งหมด</div>
+          <div id="pa-selected-label" style="font-size:12px;color:var(--primary);font-weight:600"></div>
+          <input id="pa-photo-search" class="form-ctrl" style="margin-left:auto;width:160px;font-size:13px" placeholder="🔍 ค้นหารูป" oninput="paFilterPhotos(this.value)">
+          <label style="font-size:12px;color:var(--muted);cursor:pointer;white-space:nowrap">
+            <input type="checkbox" id="pa-show-unassigned" onchange="paFilterPhotos(document.getElementById('pa-photo-search').value)"> แสดงเฉพาะยังไม่ได้จับคู่
+          </label>
+        </div>
+        <div id="pa-photo-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px"></div>
+      </div>
+    </div>
+    <div class="modal-footer" style="flex-shrink:0;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div id="pa-status" style="font-size:13px;color:var(--muted);flex:1;min-width:0"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline" style="font-size:13px" onclick="paDeletePhoto()">🗑️ ลบรูป</button>
+        <button class="btn btn-outline" style="font-size:13px" onclick="paUploadFromFile()">📁 อัปโหลดจากเครื่อง</button>
+        <button class="btn btn-outline" onclick="closeModal('modal-photo-assign')">ปิด</button>
+      </div>
     </div>
   </div>
 </div>
@@ -3712,6 +3749,7 @@ var ADMIN_REMEMBER_KEY = 'ipad_jv_admin_remember_token';
 var _pendingNavSection = '';
 var _initDeviceId = '<?= initDeviceId ?>';
 var _initToken = '<?= initRmt ?>';
+var _initSection = '<?= initSection ?>';
 var _pendingRememberToken = '';
 var allIPads = [];
 var selStatus = '';
@@ -3870,6 +3908,7 @@ window.addEventListener('message', function(e) {
     _pendingRememberToken = e.data.token;
   }
   if (e.data.type === 'IPAD_JV_NAVIGATE' && e.data.section) {
+    if (handleDeepLinkSection(e.data.section)) return;
     if (_authTok) showPage(e.data.section);
     else _pendingNavSection = e.data.section;
   }
@@ -3887,6 +3926,29 @@ var PAGE_TITLES = {
 var parsedStudents = [];
 var studentSearchTimer = null;
 
+function handleDeepLinkSection(section) {
+  section = String(section || '').trim().toLowerCase();
+  if (!section) return false;
+  var openers = {
+    status: openStatusApp,
+    issue: function(){ openIssueModal(); setTimeout(function(){ issueStartFlow('report'); }, 120); },
+    report: function(){ openIssueModal(); setTimeout(function(){ issueStartFlow('report'); }, 120); },
+    'issue-status': function(){ openIssueModal(); setTimeout(function(){ issueStartFlow('status'); }, 120); },
+    appreq: function(){ openIssueModal(); setTimeout(function(){ issueStartFlow('appreq'); }, 120); },
+    manual: openManual,
+    guide: openManual,
+    register: startRegister,
+    borrow: startRegister,
+    return: function(){
+      startRegister();
+      setTimeout(function(){ switchRegMode('return'); }, 120);
+    }
+  };
+  if (!openers[section]) return false;
+  setTimeout(function(){ openers[section](); }, 80);
+  return true;
+}
+
 // ── Boot ───────────────────────────────────────────────────────────────
 window.onload = function() {
   document.body.classList.add('mode-register');
@@ -3896,6 +3958,7 @@ window.onload = function() {
     if (window.parent !== window)
       window.parent.postMessage({ type: 'IPAD_JV_READY' }, '*');
   } catch(e) {}
+  handleDeepLinkSection(_initSection);
 };
 
 // ── Registration (หน้าแรก) ─────────────────────────────────────────────
@@ -4961,7 +5024,7 @@ function showPage(page) {
   if (page === 'admin-accounts' && CU && CU.role === 'super admin')
     actions.innerHTML = '<button class="btn btn-primary" onclick="openAddAdminAccount()">＋ เพิ่มบัญชีแอดมิน</button>';
   if (page === 'teachers' && CU && CU.role !== 'user')
-    actions.innerHTML = '<button class="btn btn-outline" onclick="openTeacherImport()">📂 นำเข้า CSV</button> <button class="btn btn-primary" onclick="openAddTeacher()">＋ เพิ่มครู</button>';
+    actions.innerHTML = '<button class="btn btn-outline" onclick="openTeacherImport()">📂 นำเข้า CSV</button> <button class="btn btn-outline" onclick="openPhotoAssign()">🖼️ จัดการรูป</button> <button class="btn btn-primary" onclick="openAddTeacher()">＋ เพิ่มครู</button>';
 
   var loaders = { dashboard:loadDashboard, ipads:loadIPads, overview:loadOverview, students:loadStudents, log:loadLog, issues:loadIssues, teachers:loadTeachers, 'admin-accounts':loadAdminAccounts, unregistered:function(){} };
   if (loaders[page]) { nprogStart(); loaders[page](); }
@@ -6642,18 +6705,18 @@ function setIssueState(state) {
     title.textContent = '📋 บริการนักเรียน';
   } else if (state === 'report-1') {
     document.getElementById('issue-step1').classList.add('active');
-    title.textContent = '⚠️ แจ้งปัญหาไอแพด';
+    title.textContent = '⚠️ แจ้งปัญหาไอแพด/อุปกรณ์';
     backBtn.style.display = '';
   } else if (state === 'report-2') {
     document.getElementById('issue-step2').classList.add('active');
-    title.textContent = '⚠️ แจ้งปัญหาไอแพด';
+    title.textContent = '⚠️ แจ้งปัญหาไอแพด/อุปกรณ์';
     backBtn.style.display = '';
     subBtn.style.display = '';
     subBtn.innerHTML = '🤖 วิเคราะห์ปัญหา';
     subBtn.onclick = analyzeIssueWithAI;
   } else if (state === 'report-ai') {
     document.getElementById('issue-step-ai').classList.add('active');
-    title.textContent = '⚠️ แจ้งปัญหาไอแพด';
+    title.textContent = '⚠️ แจ้งปัญหาไอแพด/อุปกรณ์';
     backBtn.style.display = 'none';
     subBtn.style.display = 'none';
   } else if (state === 'status-1') {
@@ -6686,6 +6749,8 @@ function openIssueModal() {
   issueFiles = [];
   document.getElementById('issue-search-input').value = '';
   document.getElementById('issue-lookup-msg').style.display = 'none';
+  var issueDeviceEl = document.getElementById('issue-device');
+  if (issueDeviceEl) issueDeviceEl.value = '';
   document.getElementById('issue-description').value = '';
   document.getElementById('issue-file-list').innerHTML = '';
   document.getElementById('issue-upload-status').textContent = '';
@@ -7081,8 +7146,11 @@ function statExplainAttr(title, value, body) { return ''; }
 
 function submitIssueForm() {
   if (!issueStudentData) return;
-  var type = document.getElementById('issue-type').value;
+  var device = getIssueDevice();
+  var typeEl = document.getElementById('issue-type');
+  var type = typeEl ? typeEl.value : '';
   var desc = document.getElementById('issue-description').value.trim();
+  if (!device) { showToast('กรุณาเลือกอุปกรณ์ที่มีปัญหา','error'); return; }
   if (!type) { showToast('กรุณาเลือกประเภทปัญหา','error'); return; }
   if (!desc)  { showToast('กรุณากรอกรายละเอียด','error'); return; }
 
@@ -7141,6 +7209,7 @@ function doFinalSubmitIssue(type, desc, btn, statusEl) {
   statusEl.textContent = 'กำลังส่งเรื่อง...';
   btn.innerHTML = '<span class="spinner"></span> ส่งเรื่อง...';
   var urls = issueFiles.filter(function(f){ return f.done && f.url; }).map(function(f){ return f.url; });
+  var issueType = combineIssueType(getIssueDevice(), type);
   gsr
     .withSuccessHandler(function(r) {
       btn.disabled = false;
@@ -7154,15 +7223,31 @@ function doFinalSubmitIssue(type, desc, btn, statusEl) {
       }
     })
     .withFailureHandler(function(e) { btn.disabled=false; btn.innerHTML='📤 ส่งเรื่อง'; statusEl.textContent=''; showError(e); })
-    .submitIssue({ studentCode: issueStudentData.student.code, issueType: type, description: desc, fileUrls: urls });
+    .submitIssue({ studentCode: issueStudentData.student.code, issueType: issueType, description: desc, fileUrls: urls });
 }
 
 // ── AI Issue Analysis ──────────────────────────────────────────────────
 var aiAnalysisResult = null;
 
+function getIssueDevice() {
+  var el = document.getElementById('issue-device');
+  return el ? el.value.trim() : '';
+}
+
+function combineIssueType(device, type) {
+  device = String(device || '').trim();
+  type = String(type || '').trim();
+  if (!device) return type || 'ไม่ระบุประเภท';
+  if (!type) return device;
+  if (type.indexOf(device + ' - ') === 0) return type;
+  return device + ' - ' + type;
+}
+
 function analyzeIssueWithAI() {
   if (!issueStudentData) return;
+  var device = getIssueDevice();
   var desc = document.getElementById('issue-description').value.trim();
+  if (!device) { showToast('กรุณาเลือกอุปกรณ์ที่มีปัญหา', 'error'); return; }
   if (!desc) { showToast('กรุณากรอกรายละเอียดปัญหาก่อน', 'error'); return; }
 
   document.getElementById('ai-loading-view').style.display = '';
@@ -7178,7 +7263,7 @@ function analyzeIssueWithAI() {
       showToast('เกิดข้อผิดพลาด กรุณาลองใหม่', 'error');
       setIssueState('report-2');
     })
-    .analyzeIssue(desc);
+    .analyzeIssue(device + ': ' + desc);
 }
 
 function showAIResult(data) {
@@ -7198,6 +7283,9 @@ function showAIResult(data) {
   sel.value = data.issueType || 'อื่นๆ';
   if (!sel.value) sel.value = 'อื่นๆ';
 
+  var deviceSummary = document.getElementById('ai-device-summary');
+  if (deviceSummary) deviceSummary.textContent = 'อุปกรณ์ที่แจ้ง: ' + (getIssueDevice() || '-');
+
   var list = document.getElementById('ai-sugg-list');
   list.innerHTML = (data.suggestions || []).map(function(s) {
     return '<li>' + escHtml(s) + '</li>';
@@ -7214,8 +7302,10 @@ function issueResolveSelf() {
 
 function issueSubmitToAdmin() {
   if (!issueStudentData) return;
+  var device = getIssueDevice();
   var type = document.getElementById('ai-type-confirm').value;
   var desc = document.getElementById('issue-description').value.trim();
+  if (!device) { showToast('กรุณาเลือกอุปกรณ์ที่มีปัญหา', 'error'); return; }
   if (!type) { showToast('กรุณาเลือกประเภทปัญหา', 'error'); return; }
 
   var btn = document.getElementById('btn-submit-to-admin');
@@ -7260,6 +7350,7 @@ function issueSubmitToAdmin() {
 function doAIFinalSubmit(type, desc, btn, origHTML, statusEl) {
   statusEl.textContent = 'กำลังส่งเรื่อง...';
   var urls = issueFiles.filter(function(f){ return f.done && f.url; }).map(function(f){ return f.url; });
+  var issueType = combineIssueType(getIssueDevice(), type);
   gsr
     .withSuccessHandler(function(r) {
       btn.disabled = false;
@@ -7276,7 +7367,7 @@ function doAIFinalSubmit(type, desc, btn, origHTML, statusEl) {
       btn.disabled = false; btn.innerHTML = origHTML; statusEl.textContent = '';
       showError(e);
     })
-    .submitIssue({ studentCode: issueStudentData.student.code, issueType: type, description: desc, fileUrls: urls });
+    .submitIssue({ studentCode: issueStudentData.student.code, issueType: issueType, description: desc, fileUrls: urls });
 }
 
 // ── Login Modal ────────────────────────────────────────────────────────
@@ -7805,6 +7896,20 @@ var _tchAvatarColors = [
   'linear-gradient(135deg,#EC4899,#8B5CF6)'
 ];
 
+var _TEACHER_PHOTO_BASE = 'https://wisanu15.github.io/IPAD_JV/teachers/';
+var _TEACHER_MANIFEST_URL = _TEACHER_PHOTO_BASE + 'manifest.json';
+
+function _buildTeacherAvatarHtml(tc, color, initial) {
+  if (tc.photoUrl) {
+    return '<div class="tch-avatar" style="background:' + color + '">' +
+      '<img src="' + escHtml(tc.photoUrl) + '" alt=""' +
+      ' onerror="this.style.display=\'none\'"' +
+      ' style="width:100%;height:100%;object-fit:cover;object-position:top;border-radius:50%">' +
+    '</div>';
+  }
+  return '<div class="tch-avatar" style="background:' + color + '">' + initial + '</div>';
+}
+
 function renderTeachers(data, q) {
   var filtered = q
     ? data.filter(function(tc){
@@ -7866,8 +7971,9 @@ function renderTeachers(data, q) {
         '<div class="tch-serial-line">S/N: ' + escHtml(ipadInfo.serial || '-') + '</div>' +
         (ipadInfo.assetCode ? '<div class="tch-asset-line">ครุภัณฑ์: ' + escHtml(ipadInfo.assetCode) + '</div>' : '')
       : '<div class="tch-ipad-row"><span class="tch-no-ipad">ไม่มีไอแพด</span></div>';
+    var avatarHtml = _buildTeacherAvatarHtml(tc, color, initial);
     return '<div class="tch-card" style="animation-delay:' + delay + '">' +
-      '<div class="tch-avatar" style="background:' + color + '">' + initial + '</div>' +
+      avatarHtml +
       '<div class="tch-info">' +
         '<div class="tch-name">' + escHtml(formatPersonName(tc)) + '</div>' +
         '<div class="tch-meta">' +
@@ -8125,11 +8231,209 @@ function doTeacherImport() {
     .batchAddTeachers(_parsedTeachers);
 }
 
+// ── Photo Assignment ──────────────────────────────────────────────────────────
+var _paManifest = null;
+var _paSelectedTeacher = null;
+var _paColors = ['#6366F1','#8B5CF6','#EC4899','#3B82F6','#10B981','#F59E0B','#EF4444'];
+
+function openPhotoAssign() {
+  _paSelectedTeacher = null;
+  openModal('modal-photo-assign');
+  document.getElementById('pa-teacher-search').value = '';
+  document.getElementById('pa-photo-search').value = '';
+  document.getElementById('pa-show-unassigned').checked = false;
+  document.getElementById('pa-selected-label').textContent = '← เลือกครูก่อน';
+  document.getElementById('pa-status').textContent = '';
+  _paRenderTeachers('');
+  if (_paManifest) { _paRenderPhotos(''); return; }
+  document.getElementById('pa-photo-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px">⏳ กำลังโหลดรายการรูป...</div>';
+  fetch(_TEACHER_MANIFEST_URL + '?v=' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(list){ _paManifest = list; _paRenderPhotos(''); })
+    .catch(function(){ document.getElementById('pa-photo-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--danger);padding:30px">โหลด manifest.json ไม่ได้ กรุณา push docs/teachers/ ขึ้น GitHub Pages ก่อน</div>'; });
+}
+
+function _paRenderTeachers(q) {
+  var list = document.getElementById('pa-teacher-list');
+  var teachers = allTeachers || [];
+  var filtered = q ? teachers.filter(function(tc){
+    return (tc.firstName + ' ' + tc.lastName).toLowerCase().indexOf(q.toLowerCase()) >= 0;
+  }) : teachers;
+  list.innerHTML = filtered.map(function(tc, i) {
+    var color = _paColors[i % _paColors.length];
+    var initial = (tc.firstName || '?').charAt(0);
+    var hasPhoto = !!tc.photoUrl;
+    var photoHtml = hasPhoto
+      ? '<div class="pa-teacher-avatar" style="background:' + color + '"><img src="' + escHtml(tc.photoUrl) + '" onerror="this.style.display=\'none\'" style="width:100%;height:100%;object-fit:cover;object-position:top"></div>'
+      : '<div class="pa-teacher-avatar" style="background:' + color + '">' + initial + '</div>';
+    var selected = _paSelectedTeacher && _paSelectedTeacher.row === tc.row ? ' selected' : '';
+    return '<div class="pa-teacher-item' + selected + '" onclick="paSelectTeacher(' + JSON.stringify(tc).replace(/'/g,'\\\'') + ')">' +
+      photoHtml +
+      '<div><div class="pa-teacher-name">' + escHtml(tc.prefix + tc.firstName + ' ' + tc.lastName) + '</div>' +
+      '<div class="pa-teacher-nick">' + (hasPhoto ? '<span style="color:var(--success)">✓ มีรูปแล้ว</span>' : '<span style="color:var(--muted)">ยังไม่มีรูป</span>') + '</div></div>' +
+    '</div>';
+  }).join('');
+}
+
+function paFilterTeachers(q) { _paRenderTeachers(q); }
+
+function paSelectTeacher(tc) {
+  _paSelectedTeacher = tc;
+  document.getElementById('pa-selected-label').textContent = 'ครูที่เลือก: ' + tc.prefix + tc.firstName + ' ' + tc.lastName;
+  _paRenderTeachers(document.getElementById('pa-teacher-search').value);
+  _paRenderPhotos(document.getElementById('pa-photo-search').value);
+}
+
+function _paRenderPhotos(q) {
+  var grid = document.getElementById('pa-photo-grid');
+  if (!_paManifest) return;
+  var onlyUnassigned = document.getElementById('pa-show-unassigned').checked;
+  var photos = _paManifest.filter(function(f){
+    if (!q) return true;
+    return f.toLowerCase().indexOf(q.toLowerCase()) >= 0;
+  });
+  if (!photos.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px">ไม่พบรูป</div>'; return; }
+  grid.innerHTML = photos.map(function(f) {
+    var nameNoExt = f.replace(/\.[^.]+$/, '');
+    var ext = f.match(/\.[^.]+$/)[0];
+    var url = _TEACHER_PHOTO_BASE + encodeURIComponent(f);
+    return '<div class="pa-photo-cell" onclick="paAssignPhoto(\'' + jsString(f) + '\',\'' + jsString(url) + '\')" title="' + escHtml(nameNoExt) + '">' +
+      '<img src="' + url + '" loading="lazy" onerror="this.parentNode.style.display=\'none\'">' +
+      '<div class="pa-photo-label">' + escHtml(nameNoExt) + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function paFilterPhotos(q) { _paRenderPhotos(q); }
+
+function _fileToBase64(blob) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var b64 = e.target.result.split(',')[1];
+      resolve(b64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+function paAssignPhoto(filename, url) {
+  if (!_paSelectedTeacher) { showToast('กรุณาเลือกครูก่อน', 'error'); return; }
+  var tc = _paSelectedTeacher;
+  var status = document.getElementById('pa-status');
+  status.textContent = '⏳ กำลังโหลดรูป...';
+  fetch(url)
+    .then(function(r){ return r.blob(); })
+    .then(function(blob){
+      status.textContent = '⏳ กำลังอัปโหลดไป Drive...';
+      var mimeType = blob.type || 'image/jpeg';
+      return _fileToBase64(blob).then(function(b64){
+        return new Promise(function(resolve, reject){
+          gsr
+            .withSuccessHandler(resolve)
+            .withFailureHandler(reject)
+            .uploadTeacherPhoto(Number(tc.row), b64, filename, mimeType);
+        });
+      });
+    })
+    .then(function(r){
+      if (r.success) {
+        for (var i = 0; i < allTeachers.length; i++) { if (allTeachers[i].row === tc.row) { allTeachers[i].photoUrl = r.url; break; } }
+        _paSelectedTeacher.photoUrl = r.url;
+        status.textContent = '✅ บันทึกรูป "' + tc.firstName + '" สำเร็จ';
+        _paRenderTeachers(document.getElementById('pa-teacher-search').value);
+      } else {
+        status.textContent = '❌ ' + r.message;
+      }
+    })
+    .catch(function(e){ status.textContent = '❌ โหลดรูปไม่ได้: ' + e; });
+}
+
+function paUploadFromFile() {
+  if (!_paSelectedTeacher) { showToast('กรุณาเลือกครูก่อน', 'error'); return; }
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = function() {
+    var file = input.files[0];
+    if (!file) return;
+    var tc = _paSelectedTeacher;
+    var status = document.getElementById('pa-status');
+    status.textContent = '⏳ กำลังอัปโหลด...';
+    _fileToBase64(file).then(function(b64){
+      return new Promise(function(resolve, reject){
+        gsr
+          .withSuccessHandler(resolve)
+          .withFailureHandler(reject)
+          .uploadTeacherPhoto(Number(tc.row), b64, file.name, file.type);
+      });
+    }).then(function(r){
+      if (r.success) {
+        for (var i = 0; i < allTeachers.length; i++) { if (allTeachers[i].row === tc.row) { allTeachers[i].photoUrl = r.url; break; } }
+        _paSelectedTeacher.photoUrl = r.url;
+        status.textContent = '✅ อัปโหลดรูป "' + tc.firstName + '" สำเร็จ';
+        _paRenderTeachers(document.getElementById('pa-teacher-search').value);
+      } else { status.textContent = '❌ ' + r.message; }
+    }).catch(function(e){ status.textContent = '❌ ' + e; });
+  };
+  input.click();
+}
+
+function paDeletePhoto() {
+  if (!_paSelectedTeacher) { showToast('กรุณาเลือกครูก่อน', 'error'); return; }
+  if (!_paSelectedTeacher.photoUrl) { showToast('ครูคนนี้ยังไม่มีรูป', 'error'); return; }
+  var tc = _paSelectedTeacher;
+  var status = document.getElementById('pa-status');
+  status.textContent = '⏳ กำลังลบ...';
+  gsr
+    .withSuccessHandler(function(r){
+      if (r.success) {
+        for (var i = 0; i < allTeachers.length; i++) { if (allTeachers[i].row === tc.row) { allTeachers[i].photoUrl = ''; break; } }
+        _paSelectedTeacher.photoUrl = '';
+        status.textContent = '✅ ลบรูป "' + tc.firstName + '" สำเร็จ';
+        _paRenderTeachers(document.getElementById('pa-teacher-search').value);
+      } else { status.textContent = '❌ ' + r.message; }
+    })
+    .withFailureHandler(function(e){ status.textContent = '❌ ' + e; })
+    .deleteTeacherPhoto(Number(tc.row));
+}
+
+var _editingTeacherRow = null;
+
+function openTeacherPhotoUpload() {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = function() {
+    var file = input.files[0];
+    if (!file) return;
+    var row = parseInt(document.getElementById('teacher-row').value);
+    if (!row) { showToast('บันทึกข้อมูลครูก่อน แล้วค่อยอัปโหลดรูป', 'error'); return; }
+    var prev = document.getElementById('t-photo-preview');
+    prev.innerHTML = '⏳';
+    _fileToBase64(file).then(function(b64){
+      return new Promise(function(resolve, reject){
+        gsr.withSuccessHandler(resolve).withFailureHandler(reject)
+          .uploadTeacherPhoto(row, b64, file.name, file.type);
+      });
+    }).then(function(r){
+      if (r.success) {
+        prev.innerHTML = '<img src="' + r.url + '" style="width:100%;height:100%;object-fit:cover;object-position:top;border-radius:50%">';
+        for (var i = 0; i < allTeachers.length; i++) { if (allTeachers[i].row === row) { allTeachers[i].photoUrl = r.url; break; } }
+        showToast('อัปโหลดรูปสำเร็จ', 'success');
+      } else { prev.innerHTML = '📷'; showToast(r.message, 'error'); }
+    }).catch(function(e){ prev.innerHTML = '📷'; showError(e); });
+  };
+  input.click();
+}
+
 function openAddTeacher() {
   document.getElementById('modal-teacher-title').textContent = 'เพิ่มครู';
   document.getElementById('teacher-row').value = '';
   ['t-firstName','t-lastName','t-code','t-subject','t-homeroom'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('t-prefix').value = 'นาย';
+  document.getElementById('t-photo-preview').innerHTML = '📷';
   openModal('modal-teacher');
 }
 
@@ -8142,6 +8446,10 @@ function openEditTeacher(t) {
   document.getElementById('t-code').value         = t.code;
   document.getElementById('t-subject').value  = t.subject;
   document.getElementById('t-homeroom').value = t.room;
+  var prev = document.getElementById('t-photo-preview');
+  prev.innerHTML = t.photoUrl
+    ? '<img src="' + escHtml(t.photoUrl) + '" style="width:100%;height:100%;object-fit:cover;object-position:top;border-radius:50%" onerror="this.parentNode.innerHTML=\'📷\'">'
+    : '📷';
   openModal('modal-teacher');
 }
 
@@ -8151,8 +8459,8 @@ function saveTeacher() {
     firstName: document.getElementById('t-firstName').value.trim(),
     lastName:  document.getElementById('t-lastName').value.trim(),
     code:      document.getElementById('t-code').value.trim(),
-    subject: document.getElementById('t-subject').value.trim(),
-    room:    document.getElementById('t-homeroom').value.trim()
+    subject:   document.getElementById('t-subject').value.trim(),
+    room:      document.getElementById('t-homeroom').value.trim()
   };
   if (!d.firstName || !d.lastName) { showToast('กรุณากรอกชื่อและนามสกุล','error'); return; }
   var row = document.getElementById('teacher-row').value;

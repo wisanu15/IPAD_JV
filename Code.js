@@ -74,6 +74,7 @@ function doGet(e) {
   tmpl.initRmt = (e && e.parameter && e.parameter._rmt) ? String(e.parameter._rmt) : '';
   // Device ID for iOS auto-login (no cross-origin communication needed)
   tmpl.initDeviceId = (e && e.parameter && e.parameter._devid) ? String(e.parameter._devid).trim().substring(0, 64) : '';
+  tmpl.initSection = (e && e.parameter && e.parameter.section) ? String(e.parameter.section).trim().substring(0, 40) : '';
   return tmpl.evaluate()
     .setTitle('ระบบบริหารจัดการไอแพด')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
@@ -1496,7 +1497,7 @@ function getTeachers(filters) {
   for (let i = 1; i < data.length; i++) {
     const r = data[i];
     if (!r[3] && !r[1]) continue;
-    rows.push({ row: i + 1, seq: r[0], code: String(r[1]), prefix: r[2], firstName: r[3], lastName: r[4], subject: r[5] || '', room: r[6] || '' });
+    rows.push({ row: i + 1, seq: r[0], code: String(r[1]), prefix: r[2], firstName: r[3], lastName: r[4], subject: r[5] || '', room: r[6] || '', photoUrl: String(r[7] || '') });
   }
   if (filters && filters.query) {
     const q = filters.query.toLowerCase();
@@ -1510,7 +1511,7 @@ function addTeacher(d) {
   if (u.role === CONFIG.ROLES.USER) return err('ไม่มีสิทธิ์');
   const sheet = sh(CONFIG.SHEETS.TEACHERS);
   if (!sheet) return err('ไม่พบ Sheet Teachers');
-  sheet.appendRow(['', d.code || '', d.prefix || 'นาย', d.firstName, d.lastName, d.subject || '', d.room || '']);
+  sheet.appendRow(['', d.code || '', d.prefix || 'นาย', d.firstName, d.lastName, d.subject || '', d.room || '', '']);
   renumberTeachers_();
   log_(u.email, 'เพิ่มครู', `${d.prefix}${d.firstName} ${d.lastName}`);
   return ok('เพิ่มครูสำเร็จ');
@@ -1522,6 +1523,37 @@ function updateTeacher(row, d) {
   sh(CONFIG.SHEETS.TEACHERS).getRange(row, 2, 1, 6).setValues([[d.code || '', d.prefix || 'นาย', d.firstName, d.lastName, d.subject || '', d.room || '']]);
   log_(u.email, 'แก้ไขครู', `${d.firstName} ${d.lastName}`);
   return ok('แก้ไขสำเร็จ');
+}
+
+function uploadTeacherPhoto(row, base64Data, filename, mimeType) {
+  const u = getCurrentUser(arguments[arguments.length - 1]);
+  if (u.role === CONFIG.ROLES.USER) return err('ไม่มีสิทธิ์');
+  if (!row || !base64Data) return err('ข้อมูลไม่ครบ');
+  const sheet = sh(CONFIG.SHEETS.TEACHERS);
+  if (!sheet) return err('ไม่พบ Sheet Teachers');
+  try {
+    const folders = DriveApp.getFoldersByName('รูปครู');
+    const folder = folders.hasNext() ? folders.next() : DriveApp.createFolder('รูปครู');
+    const existing = folder.getFilesByName(filename);
+    while (existing.hasNext()) existing.next().setTrashed(true);
+    const blob = Utilities.newBlob(Utilities.base64Decode(base64Data), mimeType || 'image/jpeg', filename);
+    const file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    const url = 'https://drive.google.com/thumbnail?id=' + file.getId() + '&sz=w200';
+    sheet.getRange(row, 8).setValue(url);
+    log_(u.email, 'อัพโหลดรูปครู', `แถว: ${row} | ${file.getName()}`);
+    return ok('สำเร็จ', { url });
+  } catch(e) { return err('อัพโหลดไม่สำเร็จ: ' + e.message); }
+}
+
+function deleteTeacherPhoto(row) {
+  const u = getCurrentUser(arguments[arguments.length - 1]);
+  if (u.role === CONFIG.ROLES.USER) return err('ไม่มีสิทธิ์');
+  const sheet = sh(CONFIG.SHEETS.TEACHERS);
+  if (!sheet) return err('ไม่พบ Sheet Teachers');
+  sheet.getRange(row, 8).setValue('');
+  log_(u.email, 'ลบรูปครู', `แถว: ${row}`);
+  return ok('ลบรูปสำเร็จ');
 }
 
 function deleteTeacher(row) {
@@ -1543,12 +1575,12 @@ function batchAddTeachers(teachers) {
     if (!sheet) {
       // sheet ไม่มี — สร้างใหม่พร้อม header
       sheet = ss().insertSheet(CONFIG.SHEETS.TEACHERS);
-      sheet.appendRow(['ลำดับ','รหัส','คำนำหน้า','ชื่อ','นามสกุล','วิชา','ห้องประจำ']);
+      sheet.appendRow(['ลำดับ','รหัส','คำนำหน้า','ชื่อ','นามสกุล','วิชา','ห้องประจำ','รูปภาพ']);
     }
     let added = 0;
     teachers.forEach(d => {
       if (!d.firstName) return;
-      sheet.appendRow(['', d.code || '', d.prefix || '', d.firstName, d.lastName || '', d.subject || '', d.room || '']);
+      sheet.appendRow(['', d.code || '', d.prefix || '', d.firstName, d.lastName || '', d.subject || '', d.room || '', '']);
       added++;
     });
     renumberTeachers_();
@@ -1627,6 +1659,15 @@ function uploadIssueFile(base64Data, filename, mimeType) {
   } catch(e) { return err('อัพโหลดไม่สำเร็จ: ' + e.message); }
 }
 
+function issueDeviceFromType_(issueType) {
+  const text = String(issueType || '').trim();
+  const devices = ['ไอแพด', 'ปากกา', 'เคส', 'สายชาร์จ'];
+  for (let i = 0; i < devices.length; i++) {
+    if (text === devices[i] || text.indexOf(devices[i] + ' - ') === 0) return devices[i];
+  }
+  return '';
+}
+
 function submitIssue(data) {
   // data: { studentCode, issueType, description, fileUrls: ['url1',...] }
   if (!data || !data.studentCode) return err('กรุณาระบุรหัสนักเรียน');
@@ -1642,11 +1683,16 @@ function submitIssue(data) {
   }
 
   const fileUrls = (data.fileUrls || []).slice(0, 10);
+  const incomingDevice = issueDeviceFromType_(data.issueType);
 
-  // Prevent double-submit: reject if an open issue already exists for this serial
-  const existingRows = sheet.getLastRow() > 1
+  // Prevent duplicate open reports for the same serial and same device/accessory.
+  let existingRows = sheet.getLastRow() > 1
     ? sheet.getRange(2, 4, sheet.getLastRow() - 1, 6).getValues()
     : [];
+  existingRows = existingRows.filter(row => {
+    const existingDevice = issueDeviceFromType_(row[1]);
+    return !incomingDevice || !existingDevice || incomingDevice === existingDevice;
+  });
   const alreadyOpen = existingRows.some(row =>
     String(row[0]).trim() === lookup.ipad.serial &&
     [CONFIG.STATUS.PENDING_ISSUE, 'รับเรื่องแล้ว', 'อยู่ระหว่างการตรวจสอบ', 'อยู่ระหว่างการเคลม'].includes(String(row[5]).trim())
