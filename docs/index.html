@@ -814,7 +814,8 @@
       var launcherBase = './index.html?v=ios-admin-remember-2';
       var launcherUrl = new URL(launcherBase, window.location.href).href;
       var _gasSep = platformGasUrl.includes('?') ? '&' : '?';
-      var directGasUrl = platformGasUrl + (sectionParam ? _gasSep + 'section=' + encodeURIComponent(sectionParam) : '');
+      var _gasTarget = platformGasUrl + (sectionParam ? _gasSep + 'section=' + encodeURIComponent(sectionParam) : '');
+      var directGasUrl = 'https://accounts.google.com/AccountChooser?continue=' + encodeURIComponent(_gasTarget);
       var chromeIntentUrl = 'intent://' +
         directGasUrl.replace(/^https?:\/\//, '') +
         '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' +
