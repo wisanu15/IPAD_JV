@@ -786,7 +786,16 @@
         return;
       }
 
-      if ((isIOS && isStandalone) || (isAndroid && (isStandalone || launchedApp)) || (forceEmbed && !isInAppBrowser)) {
+      if (isAndroid && (isStandalone || launchedApp)) {
+        var _sep0 = platformGasUrl.includes('?') ? '&' : '?';
+        var _parts0 = [];
+        if (sectionParam) _parts0.push('section=' + encodeURIComponent(sectionParam));
+        var _androidGasUrl = platformGasUrl + (_parts0.length ? _sep0 + _parts0.join('&') : '');
+        window.location.replace(_androidGasUrl);
+        return;
+      }
+
+      if ((isIOS && isStandalone) || (forceEmbed && !isInAppBrowser)) {
         shell.style.padding = '0';
         shell.style.display = 'block';
         var iframe = document.createElement('iframe');
