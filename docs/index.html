@@ -786,7 +786,7 @@
         return;
       }
 
-      if ((isIOS && isStandalone) || (isAndroid && (isStandalone || launchedApp)) || forceEmbed) {
+      if ((isIOS && isStandalone) || (isAndroid && (isStandalone || launchedApp)) || (forceEmbed && !isInAppBrowser)) {
         shell.style.padding = '0';
         shell.style.display = 'block';
         var iframe = document.createElement('iframe');
@@ -796,7 +796,8 @@
         if (_iframeTok) _srcParts.push('_rmt=' + encodeURIComponent(_iframeTok));
         if (_deviceId) _srcParts.push('_devid=' + encodeURIComponent(_deviceId));
         if (sectionParam) _srcParts.push('section=' + encodeURIComponent(sectionParam));
-        iframe.src = platformGasUrl + (_srcParts.length ? '?' + _srcParts.join('&') : '');
+        var _sep = platformGasUrl.includes('?') ? '&' : '?';
+        iframe.src = platformGasUrl + (_srcParts.length ? _sep + _srcParts.join('&') : '');
         iframe.referrerPolicy = 'no-referrer-when-downgrade';
         iframe.allow = 'clipboard-read; clipboard-write; fullscreen';
         iframe.addEventListener('load', function () {
@@ -810,7 +811,12 @@
         return;
       }
 
-      var launcherUrl = new URL('./index.html?v=ios-admin-remember-2', window.location.href).href;
+      var launcherBase = './index.html?v=ios-admin-remember-2';
+      if (forceEmbed || sectionParam) {
+        launcherBase += '&app=1';
+        if (sectionParam) launcherBase += '&section=' + encodeURIComponent(sectionParam);
+      }
+      var launcherUrl = new URL(launcherBase, window.location.href).href;
       var chromeIntentUrl = 'intent://' +
         launcherUrl.replace(/^https?:\/\//, '') +
         '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' +
