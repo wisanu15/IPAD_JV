@@ -813,8 +813,7 @@
 
       var _gasSep = platformGasUrl.includes('?') ? '&' : '?';
       var directGasUrl = platformGasUrl + (sectionParam ? _gasSep + 'section=' + encodeURIComponent(sectionParam) : '');
-      // Intent opens launcher with ?open=1 so Chrome session handles the GAS redirect
-      var launcherBase = './index.html?open=1&v=line-intent-1';
+      var launcherBase = './index.html?v=line-intent-2';
       var launcherUrl = new URL(launcherBase, window.location.href).href;
       var chromeIntentUrl = 'intent://' +
         launcherUrl.replace(/^https?:\/\//, '') +
