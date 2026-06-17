@@ -827,17 +827,61 @@
         window.location.href = chromeIntentUrl;
         return;
       }
+      if (isIOS && isInAppBrowser && !isStandalone) {
+        shell.innerHTML =
+          '<section style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;padding:28px 24px;text-align:center;font-family:sans-serif;">' +
+            '<img src="./icons/icon-192.png" alt="" style="width:72px;height:72px;border-radius:16px;margin-bottom:16px;">' +
+            '<h1 style="font-size:20px;color:#fff;margin:0 0 6px;">iPad JV</h1>' +
+            '<p style="font-size:15px;color:rgba(255,255,255,0.7);margin:0 0 28px;line-height:1.5;">ไม่สามารถเปิดระบบใน LINE ได้โดยตรง<br>กรุณาเปิดในเบราว์เซอร์ก่อน</p>' +
+            '<div style="background:rgba(255,255,255,0.08);border-radius:16px;padding:20px;width:100%;max-width:320px;text-align:left;margin-bottom:20px;">' +
+              '<p style="color:#fff;font-size:15px;font-weight:600;margin:0 0 12px;">วิธีที่ 1 (แนะนำ)</p>' +
+              '<p style="color:rgba(255,255,255,0.85);font-size:14px;line-height:1.7;margin:0;">' +
+                '1. กดปุ่ม <strong style="color:#fff;">···</strong> หรือ <strong style="color:#fff;">⋮</strong> มุมขวาบน<br>' +
+                '2. เลือก <strong style="color:#fff;">เปิดในเบราว์เซอร์</strong><br>' +
+                '3. ระบบจะเปิดใน Safari อัตโนมัติ' +
+              '</p>' +
+            '</div>' +
+            '<div style="background:rgba(255,255,255,0.05);border-radius:16px;padding:20px;width:100%;max-width:320px;text-align:left;margin-bottom:24px;">' +
+              '<p style="color:#fff;font-size:15px;font-weight:600;margin:0 0 12px;">วิธีที่ 2</p>' +
+              '<p style="color:rgba(255,255,255,0.85);font-size:14px;line-height:1.7;margin:0 0 12px;">' +
+                '1. กดปุ่ม <strong style="color:#fff;">คัดลอกลิงก์</strong> ด้านล่าง<br>' +
+                '2. เปิดแอป <strong style="color:#fff;">Safari</strong> แล้ววางลิงก์<br>' +
+                '3. กดแชร์ → <strong style="color:#fff;">เพิ่มไปยังหน้าจอโฮม</strong>' +
+              '</p>' +
+              '<button id="copy-safari-btn" type="button" data-copy-url="' + escapeAttr(launcherUrl) + '" style="width:100%;background:#4F7EF7;color:#fff;border:none;border-radius:12px;padding:13px 20px;font-size:15px;cursor:pointer;">คัดลอกลิงก์</button>' +
+              '<div id="copy-feedback" style="margin-top:8px;font-size:13px;color:#4ade80;display:none;">คัดลอกแล้ว!</div>' +
+            '</div>' +
+          '</section>';
+        var cpBtn = document.getElementById('copy-safari-btn');
+        if (cpBtn) {
+          cpBtn.addEventListener('click', function () {
+            var url = cpBtn.getAttribute('data-copy-url');
+            var fb = document.getElementById('copy-feedback');
+            try {
+              navigator.clipboard.writeText(url).then(function () {
+                if (fb) { fb.style.display = 'block'; setTimeout(function(){ fb.style.display='none'; }, 2500); }
+              });
+            } catch(e) {
+              var ta = document.createElement('textarea');
+              ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+              document.body.appendChild(ta); ta.focus(); ta.select();
+              try { document.execCommand('copy'); } catch(e2) {}
+              document.body.removeChild(ta);
+              if (fb) { fb.style.display = 'block'; setTimeout(function(){ fb.style.display='none'; }, 2500); }
+            }
+          });
+        }
+        return;
+      }
       var showOpenChrome = isAndroid && !isChrome && !isStandalone;
-      var showSafariHelp = isIOS && !isSafari && !isStandalone;
-      var helpText = showSafariHelp ?
-        '<div class="platform-steps"><strong>ต้องเปิดด้วย Safari ก่อน:</strong><br>iPad/iPhone ไม่อนุญาตให้เว็บใน LINE เด้งออกไป Safari อัตโนมัติเสมอไป<br>1. กด คัดลอกลิงก์สำหรับ Safari<br>2. เปิดแอป Safari แล้ววางลิงก์นี้<br>3. จาก Safari ให้กดแชร์ แล้วเลือก Add to Home Screen</div>' :
+      var showSafariHelp = false;
+      var helpText =
         (isIOS ?
-          '<div class="platform-steps"><strong>ติดตั้งบน iPhone/iPad:</strong><br>1. อย่าเปิดระบบจาก Safari ตรงๆ<br>2. กดปุ่มแชร์<br>3. เลือก Add to Home Screen หรือ เพิ่มไปยังหน้าจอโฮม<br>4. เปิดไอคอน iPad JV แล้วระบบจะเข้าแบบเต็มจอ</div>' :
+          '<div class="platform-steps"><strong>ติดตั้งบน iPhone/iPad:</strong><br>1. กดปุ่มแชร์<br>2. เลือก Add to Home Screen หรือ เพิ่มไปยังหน้าจอโฮม<br>3. เปิดไอคอน iPad JV แล้วระบบจะเข้าแบบเต็มจอ</div>' :
         (showOpenChrome ?
           '<div class="platform-steps"><strong>เปิดด้วย Chrome ก่อน:</strong><br>กดปุ่ม เปิดใน Chrome เพื่อไปหน้าติดตั้งที่ถูกต้อง</div>' :
           '<div class="platform-steps"><strong>ติดตั้งบน Android:</strong><br>1. กดปุ่ม ติดตั้ง<br>2. ถ้าไม่ขึ้นหน้าต่างติดตั้ง ให้กดเมนู Chrome ⋮ แล้วเลือก Install app หรือ Add to Home screen<br>3. หลังติดตั้งเสร็จ ให้เปิดจากไอคอน iPad JV เพื่อทดสอบโหมดเต็มจอ</div>'));
-      var noteText = showSafariHelp ?
-        'ถ้ามีเมนู เปิดใน Safari ใน LINE ให้ใช้เมนูนั้นได้เลย ถ้าไม่มีให้คัดลอกลิงก์ไปวางใน Safari' :
+      var noteText =
         (isIOS ?
           'หน้านี้ใช้สำหรับติดตั้งเท่านั้น หลังติดตั้งให้เข้าแอปจากไอคอนบนหน้าจอหลัก' :
         (showOpenChrome ? 'หน้านี้ยังไม่ได้เปิดใน Chrome จึงยังติดตั้งไม่ได้' : 'หน้านี้ใช้สำหรับติดตั้งเท่านั้น หลังติดตั้งให้เข้าแอปจากไอคอนบนหน้าจอหลัก'));
