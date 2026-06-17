@@ -812,15 +812,13 @@
       }
 
       var launcherBase = './index.html?v=ios-admin-remember-2';
-      if (forceEmbed || sectionParam) {
-        launcherBase += '&app=1';
-        if (sectionParam) launcherBase += '&section=' + encodeURIComponent(sectionParam);
-      }
       var launcherUrl = new URL(launcherBase, window.location.href).href;
+      var _gasSep = platformGasUrl.includes('?') ? '&' : '?';
+      var directGasUrl = platformGasUrl + (sectionParam ? _gasSep + 'section=' + encodeURIComponent(sectionParam) : '');
       var chromeIntentUrl = 'intent://' +
-        launcherUrl.replace(/^https?:\/\//, '') +
+        directGasUrl.replace(/^https?:\/\//, '') +
         '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' +
-        encodeURIComponent(launcherUrl) +
+        encodeURIComponent(directGasUrl) +
         ';end';
       if (isAndroid && isInAppBrowser) {
         shell.innerHTML = '<section style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:65vh;padding:24px;text-align:center;font-family:sans-serif;"><p style="font-size:17px;color:#fff;margin:0 0 8px;">กำลังเปิด Chrome...</p><p style="font-size:14px;color:rgba(255,255,255,0.6);margin:0;">ถ้าไม่เด้งอัตโนมัติ กดปุ่มด้านล่าง</p><a href="' + escapeAttr(chromeIntentUrl) + '" style="margin-top:24px;background:#4F7EF7;color:#fff;border-radius:12px;padding:14px 32px;font-size:17px;text-decoration:none;">เปิดใน Chrome</a></section>';
@@ -848,7 +846,7 @@
                 '2. เปิดแอป <strong style="color:#fff;">Safari</strong> แล้ววางลิงก์<br>' +
                 '3. กดแชร์ → <strong style="color:#fff;">เพิ่มไปยังหน้าจอโฮม</strong>' +
               '</p>' +
-              '<button id="copy-safari-btn" type="button" data-copy-url="' + escapeAttr(launcherUrl) + '" style="width:100%;background:#4F7EF7;color:#fff;border:none;border-radius:12px;padding:13px 20px;font-size:15px;cursor:pointer;">คัดลอกลิงก์</button>' +
+              '<button id="copy-safari-btn" type="button" data-copy-url="' + escapeAttr(directGasUrl) + '" style="width:100%;background:#4F7EF7;color:#fff;border:none;border-radius:12px;padding:13px 20px;font-size:15px;cursor:pointer;">คัดลอกลิงก์</button>' +
               '<div id="copy-feedback" style="margin-top:8px;font-size:13px;color:#4ade80;display:none;">คัดลอกแล้ว!</div>' +
             '</div>' +
           '</section>';
