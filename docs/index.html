@@ -821,15 +821,8 @@
         encodeURIComponent(directGasUrl) +
         ';end';
       if (isAndroid && isInAppBrowser) {
-        shell.innerHTML =
-          '<section style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;padding:28px 24px;text-align:center;font-family:sans-serif;">' +
-            '<img src="./icons/icon-192.png" alt="" style="width:72px;height:72px;border-radius:16px;margin-bottom:16px;">' +
-            '<h1 style="font-size:20px;color:#fff;margin:0 0 8px;">iPad JV</h1>' +
-            '<p style="font-size:15px;color:rgba(255,255,255,0.7);margin:0 0 28px;line-height:1.5;">กดปุ่มด้านล่างเพื่อเปิดระบบ<br>ในเบราว์เซอร์ของเครื่อง</p>' +
-            '<a href="' + escapeAttr(directGasUrl) + '" target="_blank" rel="noopener" style="display:block;background:#4F7EF7;color:#fff;border-radius:14px;padding:16px 40px;font-size:18px;font-weight:600;text-decoration:none;margin-bottom:12px;">เปิดระบบ</a>' +
-            '<p style="font-size:13px;color:rgba(255,255,255,0.45);margin:0;">ถ้าปุ่มด้านบนไม่ทำงาน</p>' +
-            '<a href="' + escapeAttr(chromeIntentUrl) + '" style="display:block;margin-top:8px;color:#93c5fd;font-size:14px;">เปิดใน Chrome โดยตรง</a>' +
-          '</section>';
+        shell.innerHTML = '<section style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:65vh;padding:24px;text-align:center;font-family:sans-serif;"><p style="font-size:17px;color:#fff;margin:0 0 8px;">กำลังเปิดระบบ...</p><p style="font-size:14px;color:rgba(255,255,255,0.6);margin:0 0 24px;">ถ้าไม่เด้งอัตโนมัติ กดปุ่มด้านล่าง</p><a href="' + escapeAttr(chromeIntentUrl) + '" style="background:#4F7EF7;color:#fff;border-radius:12px;padding:14px 32px;font-size:17px;text-decoration:none;">เปิดระบบ</a></section>';
+        window.location.href = chromeIntentUrl;
         return;
       }
       if (isIOS && isInAppBrowser && !isStandalone) {
