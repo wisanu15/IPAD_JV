@@ -379,6 +379,8 @@ body.mode-register #register-app{display:flex}
 .sta-stu-photo-wrap.has-photo{cursor:zoom-in}
 .sta-stu-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top}
 .sta-stu-photo-ph{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#EEF2FF,#E0E7FF);border:2px solid #C7D7FD;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--primary);flex-shrink:0}
+.sta-tch-list-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px}
+.sta-stu-avatar{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;object-fit:cover;object-position:top}
 
 /* ─── Photo Upload ───────────────────────────────── */
 .photo-preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(116px,1fr));gap:10px;max-height:320px;overflow-y:auto;padding:4px 0}
@@ -783,6 +785,7 @@ body.dark-mode:not(.mode-register) #menu-toggle{color:rgba(255,255,255,.7)!impor
 body.dark-mode:not(.mode-register) .bicon{background:rgba(255,255,255,.07)!important;border-color:rgba(255,255,255,.12)!important;color:rgba(255,255,255,.7)!important}
 body.dark-mode:not(.mode-register) .bicon:hover{background:rgba(255,255,255,.13)!important;color:#fff!important}
 @media(max-width:768px){#topbar-logo{display:block!important}}
+@media(max-width:768px){#status-app,#modal-issue,#modal-login,#register-page-app,#modal-manual,#sta-stu-popup{border-radius:0!important}}
 body.dark-mode:not(.mode-register) #main{background:transparent!important}
 body.dark-mode:not(.mode-register) .content{background:transparent!important}
 body.dark-mode:not(.mode-register) .card{
@@ -1256,6 +1259,14 @@ tbody tr{transition:background .1s}
 
 /* Sidebar nav transitions */
 #sidebar nav a{transition:all .15s cubic-bezier(.4,0,.2,1)!important}
+
+/* Stat explain tooltip */
+#stat-tip{position:fixed;z-index:9999;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;max-width:260px;min-width:160px;box-shadow:0 8px 28px rgba(0,0,0,.18);font-size:12.5px;line-height:1.5;pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s}
+#stat-tip.show{opacity:1;transform:translateY(0)}
+#stat-tip .st-title{font-weight:700;color:var(--text);margin-bottom:3px;font-size:12px}
+#stat-tip .st-val{color:var(--primary);font-weight:800;font-size:15px;line-height:1;margin-bottom:5px}
+#stat-tip .st-body{color:var(--muted);font-size:11.5px;line-height:1.55}
+body.dark-mode #stat-tip{background:rgba(14,22,50,.97);border-color:rgba(255,255,255,.13)}
 
 /* Stat card entrance stagger */
 @keyframes statIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
@@ -2845,7 +2856,7 @@ body.dark-mode .sta-hero-divider{background:rgba(255,255,255,.1)}
       </div>
       <div class="manual-section">
         <div class="manual-hd" onclick="toggleManual(this)">
-          ⚠️ แจ้งปัญหาไอแพด — เครื่องหาย/เสีย/มีรอย
+          🔔 แจ้งปัญหาไอแพด — เครื่องหาย/เสีย/มีรอย
           <span class="chevron">▼</span>
         </div>
         <div class="manual-body">
@@ -2858,6 +2869,75 @@ body.dark-mode .sta-hero-divider{background:rgba(255,255,255,.1)}
             <li>กด <b>"ส่งเรื่อง"</b> — Admin ได้รับแจ้งทาง Email ทันที</li>
           </ul>
           <div class="note">⚠️ หลังส่งเรื่อง สถานะจะเปลี่ยนเป็น "อยู่ระหว่างดำเนินการ" รอ Admin ติดต่อกลับ</div>
+        </div>
+      </div>
+      <div class="manual-section">
+        <div class="manual-hd" onclick="toggleManual(this)">
+          🔄 ยืม / คืนไอแพด — บันทึกการยืม-คืน
+          <span class="chevron">▼</span>
+        </div>
+        <div class="manual-body">
+          <ul>
+            <li>กดปุ่ม <b>"ยืม / คืน"</b> บนหน้าแรก</li>
+            <li>กรอก <b>รหัสนักเรียน</b> หรือค้นหาชื่อ แล้วกด <b>"ค้นหา"</b></li>
+            <li>ระบบแสดงข้อมูลนักเรียนและสถานะไอแพดปัจจุบัน</li>
+            <li>กด <b>"ยืม"</b> เพื่อบันทึกการยืม หรือ <b>"คืน"</b> เพื่อบันทึกการคืน</li>
+            <li>ระบบบันทึกวันเวลาและอัปเดตสถานะอัตโนมัติ</li>
+          </ul>
+          <div class="tip">✅ ตรวจสอบสถานะก่อนยืมเสมอ เพื่อให้แน่ใจว่าเครื่องว่างอยู่</div>
+        </div>
+      </div>
+      <div class="manual-section">
+        <div class="manual-hd" onclick="toggleManual(this)">
+          📲 ขอแอพพลิเคชัน — ยื่นคำร้องติดตั้งแอพ
+          <span class="chevron">▼</span>
+        </div>
+        <div class="manual-body">
+          <ul>
+            <li>กดปุ่ม <b>"ขอแอพ"</b> บนหน้าแรก</li>
+            <li>กรอก <b>รหัสนักเรียน</b> แล้วกด <b>"ค้นหา"</b></li>
+            <li>กรอก <b>ชื่อแอพ</b> ที่ต้องการติดตั้ง</li>
+            <li>ระบุ <b>เหตุผล</b> ที่ต้องการแอพนี้</li>
+            <li>กด <b>"ส่งคำร้อง"</b> — Admin พิจารณาและดำเนินการต่อไป</li>
+          </ul>
+          <div class="note">⚠️ คำร้องที่ไม่มีเหตุผลชัดเจนอาจถูกปฏิเสธ กรุณาระบุให้ครบถ้วน</div>
+        </div>
+      </div>
+      <div class="manual-section">
+        <div class="manual-hd" onclick="toggleManual(this)">
+          📥 ติดตั้งแอป — เพิ่มไอคอนบนหน้าจอหลัก
+          <span class="chevron">▼</span>
+        </div>
+        <div class="manual-body">
+          <b>Android (Chrome):</b>
+          <ul>
+            <li>กดปุ่ม <b>"ติดตั้งแอป"</b> ในเมนู LINE OA</li>
+            <li>Chrome จะเปิดหน้าติดตั้ง — กด <b>"ติดตั้ง"</b></li>
+            <li>ไอคอน <b>iPad JV</b> จะปรากฏบนหน้าจอหลัก</li>
+          </ul>
+          <b>iPhone / iPad (Safari):</b>
+          <ul>
+            <li>กดปุ่ม <b>"ติดตั้งแอป"</b> แล้วกด <b>"เปิดในเบราว์เซอร์"</b></li>
+            <li>ใน Safari กดปุ่ม <b>แชร์ 📤</b> ด้านล่าง</li>
+            <li>เลือก <b>"เพิ่มไปยังหน้าจอโฮม"</b></li>
+            <li>กด <b>"เพิ่ม"</b> — ไอคอน iPad JV จะปรากฏบนหน้าจอหลัก</li>
+          </ul>
+          <div class="tip">✅ หลังติดตั้งแล้ว เปิดแอปจากไอคอนบนหน้าจอหลักเพื่อใช้งานแบบเต็มจอ</div>
+        </div>
+      </div>
+      <div class="manual-section">
+        <div class="manual-hd" onclick="toggleManual(this)">
+          ❓ คำถามที่พบบ่อย (FAQ)
+          <span class="chevron">▼</span>
+        </div>
+        <div class="manual-body">
+          <ul>
+            <li><b>ลืมรหัสนักเรียน?</b> — ดูได้จากบัตรนักเรียนหรือถามครูประจำชั้น</li>
+            <li><b>หา Serial Number ไม่เจอ?</b> — อยู่บนกล่องไอแพดหรือหลังเครื่อง (รูปแบบ F/G/H/Q...)</li>
+            <li><b>ระบบโหลดช้า?</b> — ลองรีเฟรชหน้าหรือเช็คสัญญาณอินเทอร์เน็ต</li>
+            <li><b>ส่งเรื่องแล้วไม่มีการตอบกลับ?</b> — รอ 1–2 วันทำการ ถ้ายังไม่มีติดต่อครูผู้ดูแลโดยตรง</li>
+            <li><b>เปิดแอปได้แต่ไม่มีชื่อตัวเองในรายการ?</b> — แจ้งครูเพื่อเพิ่มข้อมูลในระบบ</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -3261,6 +3341,22 @@ body.dark-mode .sta-hero-divider{background:rgba(255,255,255,.1)}
   </div>
 </div>
 
+<!-- Modal: Available iPads -->
+<div id="modal-avail-ipads" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-avail-ipads')">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <div>
+        <h3 style="margin:0;font-size:15px">✅ เครื่องว่าง</h3>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px" id="avail-ipads-count">พร้อมยืม</div>
+      </div>
+      <button class="close-btn" onclick="closeModal('modal-avail-ipads')">×</button>
+    </div>
+    <div class="modal-body" id="avail-ipads-body" style="padding:12px 16px;max-height:65vh;overflow-y:auto">
+      <div style="text-align:center;color:var(--muted);padding:24px">⏳ กำลังโหลด...</div>
+    </div>
+  </div>
+</div>
+
 <!-- Modal: Status -->
 <div id="modal-status" class="modal-overlay">
   <div class="modal" style="max-width:420px">
@@ -3639,6 +3735,7 @@ body.dark-mode .sta-hero-divider{background:rgba(255,255,255,.1)}
       <div style="display:flex;gap:8px">
         <button class="btn btn-outline" style="font-size:13px" onclick="paDeletePhoto()">🗑️ ลบรูป</button>
         <button class="btn btn-outline" style="font-size:13px" onclick="paUploadFromFile()">📁 อัปโหลดจากเครื่อง</button>
+        <button class="btn btn-outline" style="font-size:13px" onclick="paAutoMatch()">🔄 จับคู่อัตโนมัติ</button>
         <button class="btn btn-outline" onclick="closeModal('modal-photo-assign')">ปิด</button>
       </div>
     </div>
@@ -4574,6 +4671,8 @@ function staRender(level) {
   var backBtn = document.getElementById('sta-back-btn');
   backBtn.textContent = level === 0 ? '✕' : '‹';
 
+  if (level === 10) { staShowTeachers(); return; }
+
   if (level === 0) {
     title.textContent = t('staTitle');
     bc.innerHTML = '<span>' + t('staBcOverview') + '</span>';
@@ -4870,12 +4969,58 @@ function staRoomGridCols(n) {
 }
 
 function staAvailCard(count) {
-  return '<div class="sta-grade-card sta-avail-card"'+statExplainAttr('เครื่องว่าง', count, 'จำนวนเครื่องที่ยังไม่ถูกยืม หรือพร้อมให้ยืมตามข้อมูลสถานะล่าสุด')+'>' +
+  return '<div class="sta-grade-card sta-avail-card" onclick="showAvailIPadList()" style="cursor:pointer" title="ดูรายการเครื่องว่าง">' +
     '<div class="tc-icon">✅</div>' +
     '<div class="tc-label" style="color:var(--muted)">เครื่องว่าง</div>' +
     '<div style="font-size:28px;font-weight:800;font-family:\'Inter\',\'Sarabun\',sans-serif;color:var(--success);line-height:1;margin:8px 0 2px">'+count+'</div>' +
-    '<div style="font-size:10px;color:var(--muted-l);margin-top:2px">พร้อมยืม</div>' +
+    '<div style="font-size:10px;color:var(--muted-l);margin-top:2px">พร้อมยืม • ดูรายการ</div>' +
   '</div>';
+}
+
+function showAvailIPadList() {
+  var body = document.getElementById('avail-ipads-body');
+  body.innerHTML =
+    '<div class="sta-student-list">' +
+      [1,2,3].map(function(i) {
+        return '<div class="sta-stu-card" style="opacity:.35;pointer-events:none">' +
+          '<div class="sta-stu-row">' +
+            '<div class="sta-stu-num">' + i + '</div>' +
+            '<div class="sta-stu-info"><div class="sta-stu-name" style="width:120px;height:12px;background:var(--border);border-radius:4px"></div>' +
+            '<div class="sta-stu-meta" style="width:80px;height:10px;background:var(--border);border-radius:4px;margin-top:5px"></div></div>' +
+          '</div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  openModal('modal-avail-ipads');
+  gsr
+    .withSuccessHandler(function(list) {
+      list = list || [];
+      var hdr = document.getElementById('avail-ipads-count');
+      if (hdr) hdr.textContent = list.length + ' เครื่อง';
+      if (!list.length) {
+        body.innerHTML = '<div style="text-align:center;padding:32px 0"><div style="font-size:32px;margin-bottom:8px">📭</div><div style="color:var(--muted);font-size:14px">ไม่มีเครื่องว่างในขณะนี้</div></div>';
+        return;
+      }
+      var cards = list.map(function(item, i) {
+        var serial = escHtml(item.serial || '—');
+        var asset  = escHtml(item.assetCode || '');
+        return '<div class="sta-stu-card">' +
+          '<div class="sta-stu-row">' +
+            '<div class="sta-stu-num">' + (i + 1) + '</div>' +
+            '<div class="sta-stu-info">' +
+              '<div class="sta-stu-name" style="font-family:\'Courier New\',monospace;letter-spacing:.5px">' + serial + '</div>' +
+              (asset ? '<div class="sta-stu-meta">' + asset + '</div>' : '') +
+            '</div>' +
+            '<span class="badge" style="background:rgba(16,185,129,.12);color:var(--success);font-size:10.5px;flex-shrink:0">พร้อมยืม</span>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+      body.innerHTML = '<div class="sta-student-list">' + cards + '</div>';
+    })
+    .withFailureHandler(function(e) {
+      body.innerHTML = '<div style="text-align:center;padding:32px 0"><div style="font-size:28px;margin-bottom:8px">⚠️</div><div style="color:var(--danger);font-size:13px">โหลดไม่สำเร็จ</div><div style="color:var(--muted);font-size:11px;margin-top:4px">' + escHtml((e && e.message) || '') + '</div></div>';
+    })
+    .getAvailableSerials();
 }
 
 function staCalcGradeStats(rooms) {
@@ -5262,10 +5407,23 @@ function _avatarHtml(r, size) {
   var initial = ((r.firstName||'?').charAt(0)).toUpperCase();
   var colors = ['#4F7EF7','#10B981','#F59E0B','#8B5CF6','#EF4444','#06B6D4','#EC4899'];
   var bg = colors[(r.id || 0) % colors.length];
-  if (r.photoUrl) {
-    return '<img src="'+escHtml(r.photoUrl)+'" alt="" loading="lazy" class="ipad-avatar" style="width:'+size+'px;height:'+size+'px" data-fb="'+initial+'" data-fbg="'+bg+'">';
+  var photoUrl = r.photoUrl || '';
+  if (!photoUrl && r.position === 'ครู' && allTeachers && allTeachers.length) {
+    for (var ti = 0; ti < allTeachers.length; ti++) {
+      var tc = allTeachers[ti];
+      if ((r.personCode && tc.code && String(r.personCode) === String(tc.code)) ||
+          (tc.firstName === r.firstName && tc.lastName === r.lastName)) {
+        photoUrl = tc.photoUrl || '';
+        break;
+      }
+    }
   }
-  return '<span class="ipad-avatar" style="width:'+size+'px;height:'+size+'px;background:'+bg+'">'+initial+'</span>';
+  var s = size + 'px';
+  if (photoUrl) {
+    return '<span class="ipad-avatar" style="width:'+s+';height:'+s+';background:'+bg+';position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;font-size:'+(size/2.2|0)+'px;font-weight:700;color:#fff">'+initial+
+      '<img src="'+escHtml(photoUrl)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top"></span>';
+  }
+  return '<span class="ipad-avatar" style="width:'+s+';height:'+s+';background:'+bg+'">'+initial+'</span>';
 }
 
 function renderIPads(data) {
@@ -6654,28 +6812,36 @@ function staShowTeachers() {
   title.textContent = t('staTeachers');
   bc.innerHTML = '<span class="sta-bc-link" onclick="staRender(0)">' + t('staBcOverview') + '</span><span class="sta-bc-sep"> › </span><span>' + t('staTeachers') + '</span>';
   var list = staData.teacherList || [];
+  var tchColors = ['#4F7EF7','#10B981','#F59E0B','#8B5CF6','#EF4444','#06B6D4','#EC4899'];
   body.innerHTML =
     '<div class="sta-section-hd">' + t('navTeachers') + ' (' + list.length + t('peopleSuffix') + ')</div>' +
     '<div class="sta-student-list">' +
       list.map(function(tc, i){
         var isBorrowing = tc.serial && tc.status === 'ยืม';
         var cls = isBorrowing ? 'sta-stu-card' : 'sta-stu-card sta-no-ipad';
-        var badge = isBorrowing
-          ? '<span class="badge b-borrowed">' + t('staStuBorrow') + '</span>'
-          : '<span class="badge b-available">' + t('staStuAvail') + '</span>';
-        var idPart = tc.personCode ? '<span style="font-family:monospace;font-size:11px;color:var(--muted)">ID: ' + tc.personCode + '</span>' : '';
+        var badgeCls = isBorrowing ? 'b-borrowed' : 'b-available';
+        var label = isBorrowing ? t('staStuBorrow') : t('staStuAvail');
         var subjectLabel = _teacherSubjectLabel(tc.subject);
-        var subjectPart = subjectLabel ? '<span style="color:var(--primary);font-size:11px">📚 กลุ่มสาระ: ' + escHtml(subjectLabel) + '</span>' : '';
-        var ipadPart = isBorrowing
-          ? '📱 S/N: ' + escHtml(tc.serial || '-') + (tc.assetCode ? ' · ครุภัณฑ์: ' + escHtml(tc.assetCode) : '') + (tc.borrowDate ? ' · ' + escHtml(tc.borrowDate) : '')
-          : '<span style="color:#94a3b8">' + t('staNoIpad') + '</span>';
-        var metaParts = [idPart, subjectPart, ipadPart].filter(Boolean).join(' · ');
-        return '<div class="' + cls + '">' +
-          '<div class="sta-stu-num">' + (i+1) + '</div>' +
-          '<div class="sta-stu-info">' +
-            '<div class="sta-stu-name">' + escHtml(formatPersonName(tc)) + '</div>' +
-            '<div class="sta-stu-meta">' + metaParts + '</div>' +
-          '</div>' + badge + '</div>';
+        var meta = isBorrowing
+          ? 'S/N: ' + escHtml(tc.serial || '-')
+          : (subjectLabel ? escHtml(subjectLabel) : '<span style="color:#94a3b8">—</span>');
+        var tchPhotoUrl = tc.photoUrl || '';
+        var tchInitial = (tc.firstName || '?').charAt(0).toUpperCase();
+        var tchBg = tchColors[i % tchColors.length];
+        var photoHtml = '<div class="sta-stu-photo-wrap' + (tchPhotoUrl ? ' has-photo' : '') + '" style="background:'+tchBg+'">' +
+          tchInitial +
+          (tchPhotoUrl ? '<img class="sta-stu-photo" src="'+escHtml(tchPhotoUrl)+'" alt="" onerror="this.style.display=\'none\'">' : '') +
+          '</div>';
+        var delay = (Math.min(i, 24) * 0.022).toFixed(3) + 's';
+        return '<div class="'+cls+'" style="animation-delay:'+delay+'">' +
+          '<div class="sta-stu-card-hd">' +
+            '<div class="sta-stu-num">'+(i+1)+'</div>' +
+            '<span class="badge '+badgeCls+'" style="font-size:10px;padding:2px 7px">'+label+'</span>' +
+          '</div>' +
+          photoHtml +
+          '<div class="sta-stu-name">'+escHtml(formatPersonName(tc))+'</div>' +
+          '<div class="sta-stu-meta">'+meta+'</div>' +
+        '</div>';
       }).join('') +
     '</div>';
 }
@@ -7132,8 +7298,6 @@ function jsString(s) {
     .replace(/\r?\n/g,' ');
 }
 
-function statExplain(host, title, value, body) { /* disabled — no expand */ }
-
 function htmlAttrJsArg(s) {
   return JSON.stringify(String(s == null ? '' : s))
     .replace(/&/g,'&amp;')
@@ -7142,7 +7306,50 @@ function htmlAttrJsArg(s) {
     .replace(/>/g,'&gt;');
 }
 
-function statExplainAttr(title, value, body) { return ''; }
+function statExplainAttr(title, value, body) {
+  if (!body) return '';
+  return ' onclick="showStatTip(event,' + htmlAttrJsArg(title) + ',' + htmlAttrJsArg(String(value)) + ',' + htmlAttrJsArg(body) + ')" style="cursor:pointer"';
+}
+
+var _statTipTimer = null;
+function showStatTip(event, title, value, body) {
+  event.stopPropagation();
+  var tip = document.getElementById('stat-tip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'stat-tip';
+    document.body.appendChild(tip);
+  }
+  tip.innerHTML =
+    '<div class="st-title">' + escHtml(title) + '</div>' +
+    '<div class="st-val">' + escHtml(value) + '</div>' +
+    '<div class="st-body">' + escHtml(body) + '</div>';
+
+  var rect = event.currentTarget.getBoundingClientRect();
+  var w = 260;
+  var left = rect.left + rect.width / 2 - w / 2;
+  left = Math.max(8, Math.min(left, window.innerWidth - w - 8));
+  var top = rect.bottom + 8;
+  if (rect.bottom + 110 > window.innerHeight) top = rect.top - 8;
+
+  tip.style.left = left + 'px';
+  tip.style.top  = top  + 'px';
+  if (rect.bottom + 110 > window.innerHeight) {
+    tip.style.transform = 'translateY(-100%)';
+    tip.style.transition = 'opacity .12s,transform .12s';
+  } else {
+    tip.style.transform = 'translateY(4px)';
+  }
+  tip.classList.remove('show');
+  void tip.offsetWidth;
+  tip.classList.add('show');
+
+  clearTimeout(_statTipTimer);
+  function dismiss() { tip.classList.remove('show'); document.removeEventListener('click', dismiss); }
+  _statTipTimer = setTimeout(function() { document.addEventListener('click', dismiss); }, 80);
+}
+
+function statExplain(host, title, value, body) { /* kept for compat */ }
 
 function submitIssueForm() {
   if (!issueStudentData) return;
@@ -8397,6 +8604,26 @@ function paDeletePhoto() {
     })
     .withFailureHandler(function(e){ status.textContent = '❌ ' + e; })
     .deleteTeacherPhoto(Number(tc.row));
+}
+
+function paAutoMatch() {
+  var status = document.getElementById('pa-status');
+  if (!confirm('จับคู่รูปครูอัตโนมัติจาก jv.ac.th?\n(จะข้ามครูที่มีรูปแล้ว ใช้เวลาสักครู่)')) return;
+  status.textContent = '⏳ กำลังจับคู่...';
+  gsr
+    .withSuccessHandler(function(r){
+      if (r.success) {
+        status.textContent = '✅ ' + r.message;
+        gsr.withSuccessHandler(function(data){
+          if (data && data.length) {
+            allTeachers = data;
+            _paRenderTeachers(document.getElementById('pa-teacher-search').value);
+          }
+        }).withFailureHandler(function(){}).getTeachers();
+      } else { status.textContent = '❌ ' + r.message; }
+    })
+    .withFailureHandler(function(e){ status.textContent = '❌ ' + e; })
+    .autoMatchTeacherPhotos();
 }
 
 var _editingTeacherRow = null;

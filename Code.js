@@ -1094,6 +1094,7 @@ function getPublicStatus() {
       const borrow = (code && tBorrowByCode[code]) || tBorrowByName[nameKey];
       return {
         prefix: String(r[2] || ''), firstName: String(r[3] || ''), lastName: String(r[4] || ''),
+        photoUrl: String(r[7] || ''),
         personCode: code, subject: String(r[5] || ''), room: String(r[6] || ''),
         serial: borrow ? borrow.serial : '', assetCode: borrow ? borrow.assetCode : '',
         status: borrow ? borrow.status : 'ยังไม่ยืม', borrowDate: borrow ? borrow.borrowDate : ''
@@ -1106,6 +1107,13 @@ function getPublicStatus() {
       serial: r.serial, assetCode: r.assetCode, status: r.status, borrowDate: r.borrowDate
     }));
   }
+  // เรียงฝ่ายบริหารขึ้นก่อน
+  const mgmtP = (r) => {
+    if (r.subject === 'ผู้อำนวยการโรงเรียน' || r.firstName === 'ศราวุธ') return 0;
+    if (r.subject === 'รองผู้อำนวยการโรงเรียน' || r.subject === 'ฝ่ายบริหาร') return 1;
+    return 2;
+  };
+  teacherList.sort((a, b) => mgmtP(a) - mgmtP(b));
   return { stats, grades, teacherList };
 }
 
@@ -1503,7 +1511,36 @@ function getTeachers(filters) {
     const q = filters.query.toLowerCase();
     rows = rows.filter(r => r.code.includes(q) || r.firstName.toLowerCase().includes(q) || r.lastName.toLowerCase().includes(q) || (r.subject || '').toLowerCase().includes(q));
   }
+  // เรียงฝ่ายบริหารขึ้นก่อน (รองรับทั้ง subject ใหม่และ "ฝ่ายบริหาร" เดิม)
+  const mgmtPriority = (r) => {
+    if (r.subject === 'ผู้อำนวยการโรงเรียน' || r.firstName === 'ศราวุธ') return 0;
+    if (r.subject === 'รองผู้อำนวยการโรงเรียน' || r.subject === 'ฝ่ายบริหาร') return 1;
+    return 2;
+  };
+  rows.sort((a, b) => mgmtPriority(a) - mgmtPriority(b));
   return rows;
+}
+
+function updateManagementTitles() {
+  const sheet = sh(CONFIG.SHEETS.TEACHERS);
+  if (!sheet) return { ok: false, error: 'ไม่พบ Sheet Teachers' };
+  const data = sheet.getDataRange().getValues();
+  const mgmt = {
+    'ศราวุธ': 'ผู้อำนวยการโรงเรียน',
+    'บุญไพร': 'รองผู้อำนวยการโรงเรียน',
+    'กรวัลล์': 'รองผู้อำนวยการโรงเรียน',
+    'พิมพ์ประภา': 'รองผู้อำนวยการโรงเรียน',
+    'พัชรวลี': 'รองผู้อำนวยการโรงเรียน',
+  };
+  let updated = 0;
+  for (let i = 1; i < data.length; i++) {
+    const firstName = String(data[i][3] || '').trim();
+    if (mgmt[firstName]) {
+      sheet.getRange(i + 1, 6).setValue(mgmt[firstName]);
+      updated++;
+    }
+  }
+  return { ok: true, updated };
 }
 
 function addTeacher(d) {
@@ -1523,6 +1560,183 @@ function updateTeacher(row, d) {
   sh(CONFIG.SHEETS.TEACHERS).getRange(row, 2, 1, 6).setValues([[d.code || '', d.prefix || 'นาย', d.firstName, d.lastName, d.subject || '', d.room || '']]);
   log_(u.email, 'แก้ไขครู', `${d.firstName} ${d.lastName}`);
   return ok('แก้ไขสำเร็จ');
+}
+
+function autoMatchTeacherPhotos() {
+  const u = getCurrentUser(arguments[arguments.length - 1]);
+  if (u.role === CONFIG.ROLES.USER) return err('ไม่มีสิทธิ์');
+
+  // ข้อมูลจาก jv.ac.th: "ชื่อ|นามสกุล" → ชื่อไฟล์รูปบนเว็บ rr
+  const WEB_BASE = 'https://jv.ac.th/assets/images/personal/';
+  const webMap = {
+    // ผู้บริหาร
+    'ศราวุธ|ศรีหาบุญทัน':      '17361547195085pic.jpg',
+    'บุญไพร|หมู่ทองหลาง':      '17069350223551pic.jpg',
+    'กรวัลล์|สุวรรณทา':        '17124810061905pic.jpg',
+    'พิมพ์ประภา|วรรณา':        '17420287240679pic.jpg',
+    'พัชรวลี|ทวรรณกุล':        '17371870944353pic.jpg',
+    // ภาษาไทย
+    'น้องนุช|บุญจันทร์':       '16719571949456pic.jpg',
+    'ปราณี|พิศุทธิสุวรรณ':     '16714307952138pic.jpg',
+    'นิภาวรรณ|ภูมิทน':         '16719571840887pic.jpg',
+    'ทัศนี|ฆารเจริญ':           '16719656375994pic.jpg',
+    'ดวงพร|วรสีหะ':             '16719640098671pic.jpg',
+    'วราภรณ์|ศรีสันต์':         '16718618830687pic.jpg',
+    'พิจิตรา|หัตถกิจ':          '16719572056732pic.jpg',
+    'ทิพย์สุคนธ์|ไตรพรม':      '16725487953140pic.jpg',
+    'บุณยวีร์|การชงัด':         '16719656488422pic.jpg',
+    'จุฑารัตน์|ศิริวัฒน์ธนรักษ์': '17616264955252pic.jpg',
+    // คณิตศาสตร์
+    'วาสนา|กุนอก':              '16718738883961pic.jpg',
+    'ธณัฐตา|ราษฎร์เจริญ':       '16719571279807pic.jpg',
+    'กุสุมา|กุนหนองแดง':        '16719473053563pic.jpg',
+    'อรัญญา|อะทอยรัมย์':        '16719571387177pic.jpg',
+    'อัญญาลักษณ์|ทินกระโทก':   '16719655789708pic.jpg',
+    'เชษฐ์|รักกลาง':            '16731579013448pic.jpg',
+    'วาสนา|พิระชัย':            '17059793387861pic.jpeg',
+    'สถิต|ถูระพี':              '16719642890413pic.jpg',
+    'สรรญ์|มากทรัพย์':          '16725495613521pic.jpg',
+    'ประภัสสร|เพชรสุ่ม':        '16719473205691pic.jpg',
+    'ยุวรินทร์|สามารถ':         '16719473340568pic.jpg',
+    'กรกนก|ร้อยอำแพง':          '16719571666659pic.jpg',
+    'ภัทรชริญา|วรทองหลาง':      '17318984966636pic.jpg',
+    'ศิริพักษ์|พานิช':           '17318985533767pic.jpg',
+    'ฉัตรสุดา|ยายพิมพ์':        '16731579166776pic.jpg',
+    'กมลรัตน์|สิงห์กุล':        '16718619873105pic.jpg',
+    'พาขวัญ|สุมหิรัญ':          '16719655977923pic.jpg',
+    'เอกลักษณ์|วรรธนาจิรานนท์': '16718619743553pic.jpg',
+    // วิทยาศาสตร์
+    'ปาริชาติ|เนตรทองหลาง':     '16719656719043pic.jpg',
+    'สมศรี|ตวยกระโทก':          '16719604011647pic.jpg',
+    'ศรีนวล|เช่นพิมาย':         '16719604143461pic.jpg',
+    'ชลิดา|เขียวปาน':           '16719656801037pic.jpg',
+    'จิรนันท์|พรหมลิ':          '16719472741528pic.jpg',
+    'นุชจรี|ชวนขุนทด':          '16719604231348pic.jpg',
+    'สุกัญญา|สุนทร':            '16714412363835pic.jpg',
+    'วินัย|หนุนกระโทก':         '16719468752153pic.jpg',
+    'สุดากาญจน์|รัตนสุข':       '17167091047720pic.jpg',
+    'เทอดศักดิ์|โพธิ์ขาว':      '17721644026208pic.jpg',
+    'อัจฉรา|เผ่าจินดา':         '16714293250361pic.jpg',
+    'ธนาธิป|พันธุ์โหมด':        '16719604588851pic.jpg',
+    'นพรุจ|แก่นกระโทก':         '16719604724295pic.jpg',
+    'นัทธมน|เฝ้ากระโทก':        '16719605109071pic.jpg',
+    'ณัฐนนท์|สายพิมพ์พงษ์':     '17318332295648pic.jpg',
+    'ณัฐธิดา|จินากูล':           '17228278381963pic.jpg',
+    'ไพศาล|พู่เจริญ':            '17318334124021pic.jpg',
+    'รัตนาภรณ์|สุทธิสิน':       '17392604712458pic.jpg',
+    // ภาษาต่างประเทศ
+    'ชณัญกาญจน์|สนธิพันธ์':     '16714509674324pic.jpg',
+    'ณัฐเสฐ|โคตรบรรเทา':        '16716042302839pic.jpg',
+    'นิภาพร|คุ้มกลาง':          '16719572447961pic.jpg',
+    'จันนิกา|ถองกระโทก':        '16719658466530pic.jpg',
+    'ฑิพาพรรณ|นุชมี':           '16714489014225pic.jpg',
+    'นัชนันท์|ปลื้มญาติ':        '16714506543893pic.jpg',
+    'วิกานดา|คงคางาม':           '16718622359829pic.jpg',
+    'ศิริลักษณ์|เขียวสาคู':      '16714413088147pic.jpg',
+    'อัศวิณีย์|ศาลารักษ์':       '16714495464956pic.jpg',
+    'อัคเรศ|ศรัณย์ธรรมกุล':     '16719660790448pic.jpg',
+    'นุชสรา|บ่าพิมาย':           '16719659070319pic.jpg',
+    'ชนวีร์|ขันติวงษ์':          '16719658677025pic.jpg',
+    'กิรดา|คำตา':               '16731580056874pic.jpg',
+    'ธัญญารัตน์|ชมไชยรัตน์':    '16931107026540pic.jpg',
+    'ญาสุมินทร์|บ่อพิมาย':       '17318337300630pic.jpg',
+    'ธัญชนก|จันทะดวง':          '17318336422517pic.jpg',
+    // ศิลปะ
+    'ประยุทธ|ช่างเกวียน':        '16718621202309pic.jpg',
+    'ณัฐดนัย|เงาเกาะ':           '16719607296332pic.jpg',
+    'ปางคณา|ชำนิประโคน':        '16719607088832pic.jpg',
+    'ชโยดม|ประภาสโนบล':         '16719661995674pic.jpg',
+    'อำนาจ|จันที':               '16719662068867pic.jpg',
+    // การงานอาชีพ
+    'อุทัย|วงณรา':               '16719573070655pic.jpg',
+    'ประสิทธิ์|ภูมิทน':          '16719573153362pic.jpg',
+    'มนัส|วรสีหะ':               '16719573330710pic.jpg',
+    'สุคนธ์ทิพย์|เล็งกลาง':     '16731581314344pic.jpg',
+    'รุจิรา|เทพสาร':             '16719661840724pic.jpg',
+    'ปุญญิสา|ปุณณรัตนกุล':      '16731581825679pic.jpg',
+    // สุขศึกษา
+    'จิตรกร|เด่นกลาง':           '16718752464715pic.jpg',
+    'ประภา|บุญนิธิ':             '16719603211174pic.jpg',
+    'กริษณุ|ลิ้มศิริอังกูร':     '16719662201427pic.jpg',
+    'ณัฐนันท์|งามลาภ':           '16719662478540pic.jpg',
+    'ผกามาศ|ลิ้มศิริอังกูร':     '16719662375533pic.jpg',
+    // แนะแนว
+    'สรัญญา|ยางนอก':             '16716154663815pic.jpg',
+    'ปิยะนันท์|เหมือนเหลา':      '16719606692728pic.jpg',
+    'กัญญาวีร์|ประสพผล':         '16719662609094pic.jpg',
+    'พรสุดา|ห่วงจริง':           '16719606775075pic.jpg',
+  };
+
+  const sheet = sh(CONFIG.SHEETS.TEACHERS);
+  if (!sheet) return err('ไม่พบ Sheet Teachers');
+  const data = sheet.getDataRange().getValues();
+  const folders = DriveApp.getFoldersByName('รูปครู');
+  const folder = folders.hasNext() ? folders.next() : DriveApp.createFolder('รูปครู');
+
+  // รวบรวมรายการที่ต้องดาวน์โหลด
+  const toFetch = []; // { sheetRow, firstName, lastName, photoFile, url }
+  let skipped = 0, noMatch = 0;
+
+  for (let i = 1; i < data.length; i++) {
+    const r = data[i];
+    const firstName = String(r[3] || '').trim();
+    const lastName  = String(r[4] || '').trim();
+    const existing  = String(r[7] || '').trim();
+    if (!firstName) continue;
+    if (existing)   { skipped++; continue; }
+    const key = firstName + '|' + lastName;
+    const photoFile = webMap[key];
+    if (!photoFile) { noMatch++; continue; }
+    toFetch.push({ sheetRow: i + 1, firstName, lastName, photoFile });
+  }
+
+  if (toFetch.length === 0) {
+    return ok(`ไม่มีครูที่ต้องจับคู่ · ข้าม ${skipped} คน (มีรูปแล้ว) · ไม่พบข้อมูล ${noMatch} คน`, { matched: 0, skipped, noMatch, errors: 0, results: [] });
+  }
+
+  // ดาวน์โหลดพร้อมกันทั้งหมด
+  const requests = toFetch.map(function(t) {
+    return { url: WEB_BASE + t.photoFile, muteHttpExceptions: true };
+  });
+  const responses = UrlFetchApp.fetchAll(requests);
+
+  let matched = 0, errors = 0;
+  const results = [];
+  const sheetUpdates = []; // { row, url }
+
+  for (let j = 0; j < toFetch.length; j++) {
+    const t = toFetch[j];
+    const resp = responses[j];
+    try {
+      if (resp.getResponseCode() !== 200) {
+        errors++;
+        results.push({ name: t.firstName, err: 'HTTP ' + resp.getResponseCode() });
+        continue;
+      }
+      const ext = t.photoFile.match(/\.[^.]+$/)[0];
+      const fname = t.firstName + '_' + t.lastName + ext;
+      const blob = resp.getBlob().setName(fname);
+      const existing_ = folder.getFilesByName(fname);
+      while (existing_.hasNext()) existing_.next().setTrashed(true);
+      const file = folder.createFile(blob);
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      const url = 'https://drive.google.com/thumbnail?id=' + file.getId() + '&sz=w200';
+      sheetUpdates.push({ row: t.sheetRow, url });
+      matched++;
+      results.push({ name: t.firstName + ' ' + t.lastName, url });
+    } catch(e) {
+      errors++;
+      results.push({ name: t.firstName, err: e.message });
+    }
+  }
+
+  // เขียนชีตครั้งเดียว
+  for (let k = 0; k < sheetUpdates.length; k++) {
+    sheet.getRange(sheetUpdates[k].row, 8).setValue(sheetUpdates[k].url);
+  }
+
+  log_(u.email, 'จับคู่รูปครูอัตโนมัติ', `matched:${matched} skipped:${skipped} noMatch:${noMatch} errors:${errors}`);
+  return ok(`จับคู่สำเร็จ ${matched} คน · ข้าม ${skipped} คน (มีรูปแล้ว) · ไม่พบข้อมูล ${noMatch} คน · ผิดพลาด ${errors} คน`, { matched, skipped, noMatch, errors, results });
 }
 
 function uploadTeacherPhoto(row, base64Data, filename, mimeType) {
@@ -2677,4 +2891,546 @@ function matchSerialsWithSystem(serials) {
   } catch(e) {
     return { ok: false, error: e.message };
   }
+}
+
+// ── LINE Messaging API Webhook ────────────────────────────────────────────────
+
+function doPost(e) {
+  try {
+    var body = JSON.parse(e.postData.contents);
+    var events = body.events || [];
+    for (var i = 0; i < events.length; i++) {
+      var ev = events[i];
+      var userId = (ev.source || {}).userId || '';
+      if (ev.type === 'follow') {
+        lineReplyWelcome_(ev.replyToken);
+      } else if (ev.type === 'message' && ev.message && ev.message.type === 'text') {
+        lineHandleMessage_(ev.replyToken, userId, ev.message.text);
+      }
+    }
+  } catch (err) {
+    log_('system', 'LINE webhook error', err.message);
+  }
+  return ContentService.createTextOutput(JSON.stringify({ ok: true }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function lineReplyWelcome_(replyToken) {
+  var props = PropertiesService.getScriptProperties();
+  var token = String(props.getProperty('LINE_CHANNEL_ACCESS_TOKEN') || '').trim();
+  if (!token) return;
+
+  var gasUrl = 'https://script.google.com/macros/s/AKfycby079h5QsFuJtoOWk9E2-jJK1uhxnjlpw1Jrg-HthTxa5CeN15CRPyZCVxvHRYYdstmUQ/exec?authuser=0';
+  var installUrl = 'https://wisanu15.github.io/IPAD_JV/';
+  var manualUrl  = gasUrl + '&section=manual';
+
+  var flex = {
+    type: 'flex',
+    altText: 'ยินดีต้อนรับสู่ระบบ iPad JV',
+    contents: {
+      type: 'bubble',
+      size: 'giga',
+      header: {
+        type: 'box',
+        layout: 'vertical',
+        backgroundColor: '#4F7EF7',
+        paddingAll: '20px',
+        contents: [
+          {
+            type: 'text',
+            text: '📱 ระบบบริหารจัดการไอแพด',
+            color: '#FFFFFF',
+            size: 'xl',
+            weight: 'bold',
+            wrap: true
+          },
+          {
+            type: 'text',
+            text: 'โรงเรียนจักราชวิทยา',
+            color: '#FFFFFFCC',
+            size: 'sm',
+            margin: 'xs'
+          }
+        ]
+      },
+      body: {
+        type: 'box',
+        layout: 'vertical',
+        paddingAll: '20px',
+        spacing: 'md',
+        contents: [
+          {
+            type: 'text',
+            text: 'ยินดีต้อนรับ! 👋',
+            size: 'lg',
+            weight: 'bold',
+            color: '#0F172A'
+          },
+          {
+            type: 'text',
+            text: 'ระบบนี้ใช้สำหรับบริหารจัดการไอแพดของโรงเรียน สามารถใช้งานได้ดังนี้',
+            size: 'sm',
+            color: '#475569',
+            wrap: true
+          },
+          {
+            type: 'separator',
+            margin: 'md'
+          },
+          {
+            type: 'box',
+            layout: 'vertical',
+            spacing: 'sm',
+            margin: 'md',
+            contents: [
+              lineFeatureRow_('🔎', 'ตรวจสถานะ', 'ดูว่าไอแพดของตัวเองอยู่ที่ไหน'),
+              lineFeatureRow_('🔔', 'แจ้งปัญหา', 'แจ้งเมื่อไอแพดหาย เสีย หรือมีปัญหา'),
+              lineFeatureRow_('🔄', 'ยืม / คืน', 'บันทึกการยืม-คืนไอแพด'),
+              lineFeatureRow_('📲', 'ขอแอพ', 'ยื่นคำร้องขอติดตั้งแอพพลิเคชัน'),
+              lineFeatureRow_('📥', 'ติดตั้งแอป', 'ติดตั้งไว้ที่หน้าจอหลักเพื่อใช้งานง่าย')
+            ]
+          }
+        ]
+      },
+      footer: {
+        type: 'box',
+        layout: 'vertical',
+        spacing: 'sm',
+        paddingAll: '16px',
+        contents: [
+          {
+            type: 'button',
+            style: 'primary',
+            color: '#4F7EF7',
+            height: 'sm',
+            action: { type: 'uri', label: '📘 เปิดคู่มือการใช้งาน', uri: manualUrl }
+          },
+          {
+            type: 'button',
+            style: 'secondary',
+            height: 'sm',
+            action: { type: 'uri', label: '📥 ติดตั้งแอป (Add to Home Screen)', uri: installUrl }
+          }
+        ]
+      }
+    }
+  };
+
+  try {
+    UrlFetchApp.fetch('https://api.line.me/v2/bot/message/reply', {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { Authorization: 'Bearer ' + token },
+      payload: JSON.stringify({ replyToken: replyToken, messages: [flex] }),
+      muteHttpExceptions: true
+    });
+  } catch (err) {
+    log_('system', 'LINE reply welcome error', err.message);
+  }
+}
+
+function cleanOldSessionTokens() {
+  var props = PropertiesService.getScriptProperties();
+  var all = props.getProperties();
+  var deleted = [];
+  Object.keys(all).forEach(function(k) {
+    if (k.startsWith('_remember_') || k.startsWith('_dev_')) {
+      props.deleteProperty(k);
+      deleted.push(k);
+    }
+  });
+  Logger.log('Deleted ' + deleted.length + ' tokens: ' + deleted.join(', '));
+  return 'Deleted: ' + deleted.length;
+}
+
+function lineFeatureRow_(emoji, title, desc) {
+  return {
+    type: 'box',
+    layout: 'horizontal',
+    spacing: 'md',
+    contents: [
+      { type: 'text', text: emoji, size: 'md', flex: 0 },
+      {
+        type: 'box',
+        layout: 'vertical',
+        flex: 1,
+        contents: [
+          { type: 'text', text: title, size: 'sm', weight: 'bold', color: '#0F172A' },
+          { type: 'text', text: desc,  size: 'xs', color: '#64748B', wrap: true }
+        ]
+      }
+    ]
+  };
+}
+
+// ── น้องแพด AI Chat ───────────────────────────────────────────────────────────
+
+var LINE_GAS_BASE_ = 'https://script.google.com/macros/s/AKfycby079h5QsFuJtoOWk9E2-jJK1uhxnjlpw1Jrg-HthTxa5CeN15CRPyZCVxvHRYYdstmUQ/exec?authuser=0';
+var LINE_INSTALL_URL_ = 'https://wisanu15.github.io/IPAD_JV/';
+
+function lineReply_(token, replyToken, messages) {
+  try {
+    UrlFetchApp.fetch('https://api.line.me/v2/bot/message/reply', {
+      method: 'post', contentType: 'application/json',
+      headers: { Authorization: 'Bearer ' + token },
+      payload: JSON.stringify({ replyToken: replyToken, messages: messages.slice(0, 5) }),
+      muteHttpExceptions: true
+    });
+  } catch (e) { log_('system', 'LINE reply error', e.message); }
+}
+
+function fetchStudentRecord_(query) {
+  try {
+    var code = String(query || '').trim();
+    if (!code) return null;
+    // Use the existing lookupStudentByCode (searches Students sheet + iPad data)
+    var r = lookupStudentByCode(code);
+    if (r && r.found) {
+      return {
+        prefix: r.student.prefix, firstName: r.student.firstName,
+        lastName: r.student.lastName, grade: r.student.grade, room: r.student.room,
+        serial: r.ipad ? r.ipad.serial : '(ยังไม่ได้รับมอบหมาย)',
+        status: r.ipad ? r.ipad.status : '-'
+      };
+    }
+    // Fallback: search by name / serial using searchStudentsForIssue
+    var hits = searchStudentsForIssue(code);
+    if (hits && hits.length > 0) {
+      var s = hits[0];
+      return {
+        prefix: s.prefix, firstName: s.firstName, lastName: s.lastName,
+        grade: s.grade, room: s.room,
+        serial: s.serial || '(ยังไม่ได้รับมอบหมาย)', status: '-'
+      };
+    }
+    return null;
+  } catch (e) { return null; }
+}
+
+
+function geminiChat_(text) {
+  try {
+    var props = PropertiesService.getScriptProperties();
+    var groqKey   = String(props.getProperty('GROQ_API_KEY')   || '').trim();
+    var geminiKey = String(props.getProperty('GEMINI_API_KEY') || '').trim();
+    if (!groqKey && !geminiKey) return null;
+
+    var sysPrompt =
+      'คุณคือ "น้องแพด" ผู้ช่วย AI ระบบบริหารจัดการไอแพด โรงเรียนจักราชวิทยา\n' +
+      'บุคลิก: เป็นกันเอง ใจดี ตอบสั้น ภาษาไทยวัยรุ่น ใส่อิโมจิพอเหมาะ\n' +
+      'ตอบเป็น JSON เท่านั้น:\n' +
+      '{"intent":"<intent>","reply":"<ข้อความตอบไทย>","studentCode":"<รหัส/ชื่อที่ถาม หรือ null>"}\n\n' +
+      'intent: chat|lookup|status|issue|borrow|return|appreq|manual|install|admin|other\n' +
+      'lookup = ถามข้อมูลนักเรียน/serial → ใส่รหัสหรือชื่อใน studentCode\n' +
+      'ตอบ 1-2 ประโยค';
+
+    var parsed = null;
+
+    if (groqKey) {
+      var gr = UrlFetchApp.fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+        headers: { Authorization: 'Bearer ' + groqKey },
+        payload: JSON.stringify({
+          model: 'llama-3.1-8b-instant',
+          messages: [{ role: 'system', content: sysPrompt }, { role: 'user', content: text }],
+          response_format: { type: 'json_object' },
+          max_tokens: 300, temperature: 0.4
+        })
+      });
+      if (gr.getResponseCode() === 200) {
+        var gd = JSON.parse(gr.getContentText());
+        parsed = JSON.parse(((gd.choices || [])[0] || {}).message.content || '{}');
+      } else {
+        log_('system', 'Groq HTTP ' + gr.getResponseCode(), gr.getContentText().substring(0, 200));
+      }
+    }
+
+    if (!parsed && geminiKey) {
+      var gm = UrlFetchApp.fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + geminiKey,
+        {
+          method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+          payload: JSON.stringify({
+            contents: [{ parts: [{ text: sysPrompt + '\n\nข้อความผู้ใช้: ' + text }] }],
+            generationConfig: { responseMimeType: 'application/json', maxOutputTokens: 300, temperature: 0.4 }
+          })
+        }
+      );
+      if (gm.getResponseCode() === 200) {
+        var md = JSON.parse(gm.getContentText());
+        var mparts = (((md.candidates || [])[0] || {}).content || {}).parts || [];
+        parsed = JSON.parse((mparts[0] || {}).text || '{}');
+      } else {
+        log_('system', 'Gemini HTTP ' + gm.getResponseCode(), gm.getContentText().substring(0, 200));
+      }
+    }
+
+    return parsed;
+  } catch (e) {
+    log_('system', 'AI exception', e.message);
+    return null;
+  }
+}
+
+function lineHandleMessage_(replyToken, userId, text) {
+  var props = PropertiesService.getScriptProperties();
+  var token = String(props.getProperty('LINE_CHANNEL_ACCESS_TOKEN') || '').trim();
+  if (!token) return;
+
+  var modeKey = '_linemode_' + userId;
+  var mode = props.getProperty(modeKey) || 'ai';
+
+  // User wants AI back
+  if (/^(น้องแพด|\/ai|bot|ai)$/i.test(text.trim())) {
+    props.deleteProperty(modeKey);
+    lineReply_(token, replyToken, [{
+      type: 'text',
+      text: 'กลับมาแล้วครับ! 😊 น้องแพด AI พร้อมช่วยอีกครั้งแล้ว\n\n🤖 น้องแพด'
+    }]);
+    return;
+  }
+
+  // Human mode — AI stays silent, let admin handle
+  if (mode === 'human') return;
+
+  // Keyword matching first — saves Gemini quota
+  var t = text.trim().toLowerCase();
+  var fastIntent = null;
+  if (/แจ้งปัญหา|ไอแพด.*หาย|หาย.*ไอแพด|ไอแพด.*เสีย|เสีย.*ไอแพด|ชำรุด|มีรอย/.test(t)) fastIntent = 'issue';
+  else if (/^ยืม|ยืม.*ไอแพด|ไอแพด.*ยืม/.test(t))                                       fastIntent = 'borrow';
+  else if (/^คืน|คืน.*ไอแพด|ไอแพด.*คืน/.test(t))                                       fastIntent = 'return';
+  else if (/ขอแอพ|ขอ.*แอพ|ขอ.*app/i.test(t))                                            fastIntent = 'appreq';
+  else if (/คู่มือ|วิธีใช้งาน/.test(t))                                                 fastIntent = 'manual';
+  else if (/ติดตั้งแอป|add to home|pwa/.test(t))                                        fastIntent = 'install';
+  else if (/คุยกับแอดมิน|ขอแอดมิน|ติดต่อแอดมิน/.test(t))                              fastIntent = 'admin';
+
+  var intent = fastIntent || 'other';
+  var aiReply = '';
+  var ai = null;
+
+  // Only call Gemini when keyword matching can't decide
+  if (!fastIntent) {
+    ai = geminiChat_(text);
+    intent = (ai && ai.intent) || 'other';
+    aiReply = (ai && ai.reply) || '';
+  }
+
+  var msgs = [];
+
+  if (intent === 'lookup') {
+    // Get search query from Gemini, fallback to extracting digits/text from original message
+    var q = (ai && ai.studentCode && String(ai.studentCode) !== 'null') ? String(ai.studentCode).trim() : '';
+    if (!q) {
+      var numMatch = text.match(/\d{3,}/);
+      if (numMatch) q = numMatch[0];
+    }
+    if (!q) q = text.replace(/รหัส|นักเรียน|คือใคร|ไอแพด|serial|ชั้น|ห้อง|ของใคร|อยู่ที่ไหน/g, '').trim();
+
+    if (q) {
+      var found = fetchStudentRecord_(q);
+      if (found) {
+        msgs.push({ type: 'text',
+          text: '📋 ผลค้นหา "' + q + '"\n' +
+                '👤 ' + found.prefix + found.firstName + ' ' + found.lastName + '\n' +
+                '📚 ชั้น ' + found.grade + '/' + found.room + '\n' +
+                '📱 Serial: ' + found.serial + '\n' +
+                '✅ สถานะ: ' + found.status });
+      } else {
+        msgs.push({ type: 'text', text: 'ขอโทษนะครับ 😅 ไม่พบข้อมูล "' + q + '" ในระบบเลยครับ' });
+      }
+    } else {
+      msgs.push({ type: 'text', text: 'บอกรหัสนักเรียนหรือชื่อที่ต้องการค้นหามาด้วยนะครับ 😊' });
+    }
+
+  } else if (intent === 'admin') {
+    props.setProperty(modeKey, 'human');
+    lineReply_(token, replyToken, [{
+      type: 'text',
+      text: 'ได้เลยครับ! 👨‍💼 ส่งต่อให้แอดมินแล้ว\nรอสักครู่นะครับ แอดมินจะมาตอบเอง\n\n(พิมพ์ "น้องแพด" เมื่อต้องการกลับมาคุยกับ AI อีกครั้ง)'
+    }]);
+    return;
+
+  } else if (intent === 'chat' || intent === 'other') {
+    msgs.push({ type: 'text', text: aiReply || 'สวัสดีครับ 😊 กดเมนูด้านล่างเพื่อใช้งานระบบได้เลยนะครับ' });
+
+  } else if (intent === 'status') {
+    if (aiReply) msgs.push({ type: 'text', text: aiReply });
+    if (!studentData) {
+      msgs.push(lineQuickFlex_('🔎 ตรวจสถานะไอแพด',
+        'ดูสถานะไอแพดของตัวเอง ว่าอยู่ที่ไหน ใครถือครองอยู่', '#4F7EF7',
+        [{ label: '🔎 ตรวจสถานะ', uri: LINE_GAS_BASE_ + '&section=status' }]));
+    }
+
+  } else if (intent === 'issue') {
+    if (aiReply) msgs.push({ type: 'text', text: aiReply });
+    msgs.push(lineQuickFlex_('🔔 แจ้งปัญหาไอแพด',
+      'Admin จะได้รับแจ้งทันทีครับ', '#F59E0B',
+      [{ label: '🔔 แจ้งปัญหา', uri: LINE_GAS_BASE_ + '&section=issue' }]));
+
+  } else if (intent === 'borrow') {
+    if (aiReply) msgs.push({ type: 'text', text: aiReply });
+    msgs.push(lineQuickFlex_('📱 ยืมไอแพด', 'บันทึกการยืมไอแพด', '#8B5CF6',
+      [{ label: '📱 ยืมไอแพด', uri: LINE_GAS_BASE_ + '&section=register' }]));
+
+  } else if (intent === 'return') {
+    if (aiReply) msgs.push({ type: 'text', text: aiReply });
+    msgs.push(lineQuickFlex_('🔄 คืนไอแพด', 'บันทึกการคืนไอแพด', '#8B5CF6',
+      [{ label: '🔄 คืนไอแพด', uri: LINE_GAS_BASE_ + '&section=return' }]));
+
+  } else if (intent === 'appreq') {
+    if (aiReply) msgs.push({ type: 'text', text: aiReply });
+    msgs.push(lineQuickFlex_('📲 ขอแอพพลิเคชัน', 'ยื่นคำร้องขอให้ Admin ติดตั้งแอพ', '#06B6D4',
+      [{ label: '📲 ขอแอพ', uri: LINE_GAS_BASE_ + '&section=appreq' }]));
+
+  } else if (intent === 'manual') {
+    if (aiReply) msgs.push({ type: 'text', text: aiReply });
+    msgs.push(lineMenuFlex_(LINE_GAS_BASE_, LINE_INSTALL_URL_));
+
+  } else if (intent === 'install') {
+    if (aiReply) msgs.push({ type: 'text', text: aiReply });
+    msgs.push(lineQuickFlex_('📥 ติดตั้งแอป', 'เพิ่ม iPad JV ที่หน้าจอหลัก', '#EF4444',
+      [{ label: '📥 ติดตั้งแอป', uri: LINE_INSTALL_URL_ },
+       { label: '📘 คู่มือ', uri: LINE_GAS_BASE_ + '&section=manual' }]));
+
+  } else {
+    if (aiReply) msgs.push({ type: 'text', text: aiReply });
+    else msgs.push(lineDefaultFlex_(LINE_GAS_BASE_, LINE_INSTALL_URL_));
+  }
+
+  if (msgs.length === 0) return;
+
+  // Append AI indicator to the last text message
+  var last = msgs[msgs.length - 1];
+  if (last.type === 'text') last.text += '\n\n🤖 น้องแพด';
+
+  lineReply_(token, replyToken, msgs);
+}
+
+function lineQuickFlex_(title, desc, color, buttons) {
+  var btns = buttons.map(function(b) {
+    return {
+      type: 'button', style: 'primary', color: color, height: 'sm',
+      action: { type: 'uri', label: b.label, uri: b.uri }
+    };
+  });
+  return {
+    type: 'flex', altText: title,
+    contents: {
+      type: 'bubble',
+      header: {
+        type: 'box', layout: 'vertical', backgroundColor: color, paddingAll: '16px',
+        contents: [{ type: 'text', text: title, color: '#FFFFFF', size: 'lg', weight: 'bold', wrap: true }]
+      },
+      body: {
+        type: 'box', layout: 'vertical', paddingAll: '16px',
+        contents: [{ type: 'text', text: desc, size: 'sm', color: '#475569', wrap: true }]
+      },
+      footer: {
+        type: 'box', layout: 'vertical', spacing: 'sm', paddingAll: '12px',
+        contents: btns
+      }
+    }
+  };
+}
+
+function lineMenuFlex_(gasBase, installUrl) {
+  return {
+    type: 'flex', altText: 'เมนูระบบ iPad JV',
+    contents: {
+      type: 'bubble', size: 'giga',
+      header: {
+        type: 'box', layout: 'vertical', backgroundColor: '#4F7EF7', paddingAll: '16px',
+        contents: [
+          { type: 'text', text: '📱 ระบบบริหารจัดการไอแพด', color: '#FFFFFF', size: 'lg', weight: 'bold', wrap: true },
+          { type: 'text', text: 'เลือกเมนูที่ต้องการได้เลย', color: '#FFFFFFCC', size: 'xs', margin: 'xs' }
+        ]
+      },
+      body: {
+        type: 'box', layout: 'vertical', spacing: 'sm', paddingAll: '12px',
+        contents: [
+          lineMenuBtn_('🔎 ตรวจสถานะ',  'ดูข้อมูลไอแพด',      '#4F7EF7', gasBase + '&section=status'),
+          lineMenuBtn_('🔔 แจ้งปัญหา',   'ไอแพดหาย/เสีย',      '#F59E0B', gasBase + '&section=issue'),
+          lineMenuBtn_('🔄 ยืม / คืน',   'บันทึกยืม-คืนไอแพด', '#8B5CF6', gasBase + '&section=register'),
+          lineMenuBtn_('📲 ขอแอพ',       'ขอติดตั้งแอพพลิเคชัน','#06B6D4', gasBase + '&section=appreq'),
+          lineMenuBtn_('📘 คู่มือ',       'วิธีใช้งานระบบ',      '#10B981', gasBase + '&section=manual'),
+          lineMenuBtn_('📥 ติดตั้งแอป',  'Add to Home Screen',  '#EF4444', installUrl)
+        ]
+      }
+    }
+  };
+}
+
+function lineMenuBtn_(label, desc, color, uri) {
+  return {
+    type: 'box', layout: 'horizontal', spacing: 'md',
+    backgroundColor: color + '18', borderWidth: '1px', borderColor: color + '44',
+    cornerRadius: '10px', paddingAll: '12px',
+    action: { type: 'uri', uri: uri },
+    contents: [
+      { type: 'box', layout: 'vertical', flex: 0, justifyContent: 'center',
+        contents: [{ type: 'text', text: label.split(' ')[0], size: 'xl' }] },
+      { type: 'box', layout: 'vertical', flex: 1, spacing: 'xs',
+        contents: [
+          { type: 'text', text: label.replace(/^.\s/, ''), size: 'sm', weight: 'bold', color: '#0F172A' },
+          { type: 'text', text: desc, size: 'xs', color: '#64748B' }
+        ]
+      },
+      { type: 'text', text: '›', size: 'xl', color: color, flex: 0, gravity: 'center' }
+    ]
+  };
+}
+
+function lineDefaultFlex_(gasBase, installUrl) {
+  return {
+    type: 'flex', altText: 'กรุณาใช้ปุ่มเมนูด้านล่างเพื่อเข้าสู่ระบบ',
+    contents: {
+      type: 'bubble',
+      header: {
+        type: 'box', layout: 'vertical', backgroundColor: '#4F7EF7', paddingAll: '16px',
+        contents: [
+          { type: 'text', text: '📱 ระบบบริหารจัดการไอแพด', color: '#FFFFFF', size: 'md', weight: 'bold', wrap: true }
+        ]
+      },
+      body: {
+        type: 'box', layout: 'vertical', spacing: 'md', paddingAll: '18px',
+        contents: [
+          {
+            type: 'box', layout: 'horizontal', spacing: 'sm', backgroundColor: '#EFF6FF',
+            cornerRadius: '10px', paddingAll: '12px',
+            contents: [
+              { type: 'text', text: '👇', size: 'xl', flex: 0 },
+              { type: 'text', text: 'กรุณากด ปุ่มเมนูด้านล่าง เพื่อใช้งานระบบได้เลย ไม่ต้องพิมพ์', size: 'sm', color: '#1D4ED8', wrap: true, weight: 'bold' }
+            ]
+          },
+          {
+            type: 'box', layout: 'vertical', spacing: 'xs',
+            contents: [
+              { type: 'text', text: 'เมนูที่ใช้บ่อย:', size: 'xs', color: '#94A3B8', weight: 'bold' },
+              { type: 'text', text: '🔎 ตรวจสถานะ  •  🔔 แจ้งปัญหา  •  🔄 ยืม/คืน', size: 'xs', color: '#475569', wrap: true },
+              { type: 'text', text: '📲 ขอแอพ  •  📘 คู่มือ  •  📥 ติดตั้งแอป', size: 'xs', color: '#475569', wrap: true }
+            ]
+          },
+          {
+            type: 'box', layout: 'horizontal', spacing: 'sm', backgroundColor: '#FEF9EC',
+            cornerRadius: '8px', paddingAll: '10px', margin: 'md',
+            contents: [
+              { type: 'text', text: '💬', size: 'md', flex: 0 },
+              { type: 'text', text: 'ถ้าเมนูใช้ไม่ได้หรือต้องการความช่วยเหลือ ค่อยพิมพ์คุยกับแอดมินได้เลย', size: 'xs', color: '#92400E', wrap: true }
+            ]
+          }
+        ]
+      },
+      footer: {
+        type: 'box', layout: 'vertical', spacing: 'sm', paddingAll: '12px',
+        contents: [
+          { type: 'button', style: 'primary', color: '#4F7EF7', height: 'sm',
+            action: { type: 'uri', label: '📱 เปิดระบบ', uri: gasBase } },
+          { type: 'button', style: 'secondary', height: 'sm',
+            action: { type: 'uri', label: '📘 ดูคู่มือการใช้งาน', uri: gasBase + '&section=manual' } },
+          { type: 'button', style: 'secondary', height: 'sm',
+            action: { type: 'message', label: '👨‍💼 คุยกับแอดมิน', text: 'ขอคุยกับแอดมินครับ' } }
+        ]
+      }
+    }
+  };
 }
