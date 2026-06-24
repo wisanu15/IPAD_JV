@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ipad-jv-wrapper-v36';
+const CACHE_NAME = 'ipad-jv-wrapper-v37-fast-open';
 const SHELL_ASSETS = [
   './',
   './index.html',
@@ -35,12 +35,30 @@ self.addEventListener('fetch', event => {
 
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match('./index.html'))
+      caches.match('./index.html').then(cached => {
+        const fresh = fetch(event.request)
+          .then(response => {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
+            return response;
+          })
+          .catch(() => cached);
+        return cached || fresh;
+      })
     );
     return;
   }
 
   event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request))
+    caches.match(event.request).then(cached => {
+      const fresh = fetch(event.request)
+        .then(response => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() => cached);
+      return cached || fresh;
+    })
   );
 });

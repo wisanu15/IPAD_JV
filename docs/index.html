@@ -10,6 +10,9 @@
   <meta name="apple-mobile-web-app-title" content="iPad JV">
   <meta name="format-detection" content="telephone=no">
   <title>iPad JV</title>
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="preconnect" href="https://script.googleusercontent.com">
+  <link rel="preconnect" href="https://cdn.onesignal.com">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
@@ -328,7 +331,6 @@
   </div>
 
   <script src="./config.js"></script>
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
     (function () {
       var deferredInstallPrompt = null;
@@ -486,19 +488,24 @@
 
       function initOneSignal() {
         if (!oneSignalAppId || !('Notification' in window) || !('serviceWorker' in navigator)) return;
-        window.OneSignalDeferred = window.OneSignalDeferred || [];
-        window.OneSignalDeferred.push(function (OneSignal) {
-          return OneSignal.init({
-            appId: oneSignalAppId,
-            serviceWorkerPath: '/IPAD_JV/push/onesignal/OneSignalSDKWorker.js',
-            serviceWorkerParam: { scope: '/IPAD_JV/push/onesignal/' }
-          }).then(function () {
-            oneSignalReady = true;
-            updateNotifyButton();
-          }).catch(function (err) {
-            oneSignalReady = false;
-            notifyToast('OneSignal init ล้มเหลว: ' + (err && err.message ? err.message : 'ไม่ทราบสาเหตุ'));
+        loadOneSignalSdk_().then(function () {
+          window.OneSignalDeferred = window.OneSignalDeferred || [];
+          window.OneSignalDeferred.push(function (OneSignal) {
+            return OneSignal.init({
+              appId: oneSignalAppId,
+              serviceWorkerPath: '/IPAD_JV/push/onesignal/OneSignalSDKWorker.js',
+              serviceWorkerParam: { scope: '/IPAD_JV/push/onesignal/' }
+            }).then(function () {
+              oneSignalReady = true;
+              updateNotifyButton();
+            }).catch(function (err) {
+              oneSignalReady = false;
+              notifyToast('OneSignal init ล้มเหลว: ' + (err && err.message ? err.message : 'ไม่ทราบสาเหตุ'));
+            });
           });
+        }).catch(function (err) {
+          oneSignalReady = false;
+          notifyToast(err && err.message ? err.message : 'โหลด OneSignal ไม่สำเร็จ');
         });
       }
 
@@ -542,6 +549,45 @@
       }
 
       var notifyFab = document.getElementById('notifyFab');
+      var oneSignalScriptLoading = false;
+      var oneSignalScriptLoaded = !!window.OneSignal;
+      function loadOneSignalSdk_() {
+        if (oneSignalScriptLoaded || window.OneSignal) {
+          oneSignalScriptLoaded = true;
+          return Promise.resolve();
+        }
+        if (oneSignalScriptLoading) {
+          return new Promise(function(resolve, reject) {
+            var waited = 0;
+            var tid = setInterval(function() {
+              waited += 100;
+              if (window.OneSignal) {
+                clearInterval(tid);
+                oneSignalScriptLoaded = true;
+                resolve();
+              } else if (waited >= 12000) {
+                clearInterval(tid);
+                reject(new Error('OneSignal SDK timeout'));
+              }
+            }, 100);
+          });
+        }
+        oneSignalScriptLoading = true;
+        return new Promise(function(resolve, reject) {
+          var s = document.createElement('script');
+          s.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
+          s.async = true;
+          s.onload = function() {
+            oneSignalScriptLoaded = true;
+            resolve();
+          };
+          s.onerror = function() {
+            reject(new Error('โหลด OneSignal SDK ไม่สำเร็จ'));
+          };
+          document.head.appendChild(s);
+        });
+      }
+
       if (notifyFab) notifyFab.addEventListener('click', enableAdminNotifications);
       // initOneSignal() is called only after admin login (IPAD_JV_ADMIN_READY)
       // to prevent OneSignal from prompting non-admin users
